@@ -50,18 +50,18 @@ header h1 { font-size: 15px; font-weight: 700; letter-spacing: .2px; }
 #addBtn:hover { background: var(--accent); }
 
 /* tabs */
-.tabs { display: flex; gap: 4px; padding: 10px 12px 0; overflow-x: auto; }
-.tabs::-webkit-scrollbar { display: none; }
+.tabs { display: flex; gap: 4px; padding: 10px 12px 0; }
 .tab {
-  flex: none; border: none; background: transparent; color: var(--muted);
-  font-size: 12px; font-weight: 600; padding: 7px 10px; border-radius: 8px;
+  flex: 1 1 0; min-width: 0; border: none; background: transparent; color: var(--muted);
+  font-size: 12px; font-weight: 600; padding: 8px 5px; border-radius: 8px;
   cursor: pointer; white-space: nowrap; transition: .15s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
 }
 .tab:hover { color: var(--text); }
 .tab.active { background: var(--panel-2); color: #fff; }
 .tab span {
-  display: inline-block; min-width: 16px; margin-left: 3px; padding: 0 4px;
-  font-size: 10px; background: var(--line); border-radius: 20px; color: var(--text);
+  flex: none; min-width: 16px; padding: 0 4px; font-size: 10px; line-height: 16px;
+  background: var(--line); border-radius: 20px; color: var(--text);
 }
 .tab.active span { background: var(--accent); }
 
