@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OtakuList — Never lose your anime watchlist again</title>
+  <meta name="description" content="A Chrome extension that auto-detects the anime you're watching and saves your watchlist locally — so your list survives even when a site gets blocked." />
+  <link rel="icon" href="assets/icon128.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- atmospheric layers -->
+  <div class="bg-glows" aria-hidden="true">
+    <span class="glow glow-1"></span>
+    <span class="glow glow-2"></span>
+    <span class="glow glow-3"></span>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- nav -->
+  <header class="nav" id="nav">
+    <a class="brand" href="#top">
+      <img src="assets/icon128.png" alt="" class="brand-logo" />
+      <span>OtakuList</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a href="#install" class="btn btn-primary btn-sm">Add to Chrome</a>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <span class="eyebrow"><span class="dot"></span> Chrome extension · 100% free</span>
+        <h1 class="hero-title">
+          Your anime list,<br />
+          <span class="grad">sealed</span> forever.
+        </h1>
+        <p class="hero-sub">
+          OtakuList quietly detects the anime you're watching and saves your
+          watchlist <strong>inside your browser</strong>. Site gets blocked?
+          Doesn't matter — your list never leaves with it.
+        </p>
+        <div class="hero-cta">
+          <a href="#install" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 6l6 4-6 4V8z"/></svg>
+            Add to Chrome
+          </a>
+          <a href="#how" class="btn btn-ghost">See how it works →</a>
+        </div>
+        <div class="hero-trust">
+          <div class="stars">★★★★★</div>
+          <span>No account · No tracking · Data stays on your device</span>
+        </div>
+      </div>
+
+      <!-- hero visual: live popup mockup + floating detect toast -->
+      <div class="hero-visual reveal" data-delay="200">
+        <div class="orb" aria-hidden="true"></div>
+
+        <div class="popup-mock">
+          <div class="pm-head">
+            <span class="pm-logo"><img src="assets/character.png" alt="" /></span>
+            <div class="pm-brand">
+              <strong>OtakuList</strong>
+              <small>Your anime watchlist, kept safe</small>
+            </div>
+            <span class="pm-plus">+</span>
+          </div>
+          <div class="pm-tabs">
+            <span class="active">Watching <b>3</b></span>
+            <span>Plan <b>7</b></span>
+            <span>Completed <b>12</b></span>
+            <span>On Hold <b>1</b></span>
+          </div>
+          <div class="pm-list">
+            <div class="pm-card">
+              <div class="pm-cover">JJK</div>
+              <div class="pm-body">
+                <div class="pm-title">Jujutsu Kaisen</div>
+                <div class="pm-site">aniwatch · s2</div>
+                <div class="pm-prog"><span>−</span><em>Ep <b>12</b> / 23</em><span>+</span></div>
+              </div>
+            </div>
+            <div class="pm-card">
+              <div class="pm-cover">OP</div>
+              <div class="pm-body">
+                <div class="pm-title">One Piece</div>
+                <div class="pm-site">gogoanime</div>
+                <div class="pm-prog"><span>−</span><em>Ep <b>1088</b></em><span>+</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- floating detection toast -->
+        <div class="detect-toast float">
+          <span class="dt-logo"><img src="assets/character.png" alt="" /></span>
+          <div>
+            <strong>OtakuList</strong>
+            <p>Updated to Episode <b>13</b></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM STRIP -->
+    <section class="strip reveal">
+      <div class="strip-item"><b>Site blocked?</b> Your list is untouched.</div>
+      <div class="sep"></div>
+      <div class="strip-item"><b>New domain?</b> Pick up right where you left off.</div>
+      <div class="sep"></div>
+      <div class="strip-item"><b>Zero setup.</b> Just watch — it tracks itself.</div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section" id="features">
+      <div class="section-head reveal">
+        <span class="kicker">Features</span>
+        <h2>Everything a binge-watcher needs.</h2>
+        <p>Built for people who watch across a dozen sketchy mirror sites and still want one clean, permanent list.</p>
+      </div>
+
+      <div class="bento">
+        <article class="feat feat-lg reveal">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/><path d="M11 8v6M8 11h6"/></svg>
+          </div>
+          <h3>It detects the anime for you</h3>
+          <p>Open an episode and OtakuList reads the title, episode number and cover art automatically — a one-tap card slides in to save it. No copy-pasting titles.</p>
+          <div class="feat-demo">
+            <span class="chip">▶ Watching</span>
+            <span class="chip ghost">+ Plan to watch</span>
+          </div>
+        </article>
+
+        <article class="feat reveal" data-delay="80">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+          </div>
+          <h3>Local &amp; private</h3>
+          <p>Everything lives in your browser. No servers, no login, nothing leaves your device.</p>
+        </article>
+
+        <article class="feat reveal" data-delay="160">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <h3>Survives blocks</h3>
+          <p>Your watchlist isn't tied to any site. When one dies, your progress is still right here.</p>
+        </article>
+
+        <article class="feat reveal" data-delay="80">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+          </div>
+          <h3>Episode tracking</h3>
+          <p>It bumps your episode count as you go — silently, so it never interrupts the binge.</p>
+        </article>
+
+        <article class="feat feat-tall reveal" data-delay="160">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 6 3 3H7l3-3-1-6z"/><path d="M12 13v7"/></svg>
+          </div>
+          <h3>Pin it &amp; glance</h3>
+          <p>A live badge on your toolbar counts what you're currently watching. One click reopens your whole list — anytime, on any tab.</p>
+          <div class="feat-badge">
+            <span class="tb-icon"><img src="assets/icon128.png" alt="" /><b>3</b></span>
+            <em>3 watching</em>
+          </div>
+        </article>
+
+        <article class="feat feat-wide reveal" data-delay="200">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>
+          </div>
+          <h3>Sorted into clean lists</h3>
+          <p>Watching, Plan to Watch, Completed and On Hold — switch tabs, search, and manage everything from one tidy popup.</p>
+          <div class="feat-tabs">
+            <span class="active">Watching</span><span>Plan</span><span>Completed</span><span>On Hold</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how">
+      <div class="section-head reveal">
+        <span class="kicker">How it works</span>
+        <h2>Three steps. Then never think about it again.</h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <span class="step-no">01</span>
+          <h3>Watch like normal</h3>
+          <p>Open any anime episode on any site. OtakuList notices you're on a watch page.</p>
+        </div>
+        <div class="step reveal" data-delay="120">
+          <span class="step-no">02</span>
+          <h3>Confirm once</h3>
+          <p>A card appears with the detected title and episode. Tap <em>Watching</em> or <em>Plan to watch</em>.</p>
+        </div>
+        <div class="step reveal" data-delay="240">
+          <span class="step-no">03</span>
+          <h3>It tracks itself</h3>
+          <p>Next episodes update automatically. Your list is always current — and always yours.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTALL -->
+    <section class="section install" id="install">
+      <div class="install-card reveal">
+        <div class="install-copy">
+          <span class="kicker">Install in 30 seconds</span>
+          <h2>Get OtakuList</h2>
+          <ol class="install-steps">
+            <li><span>1</span> Download the extension folder.</li>
+            <li><span>2</span> Open <code>chrome://extensions</code> and turn on <b>Developer mode</b>.</li>
+            <li><span>3</span> Click <b>Load unpacked</b> and select the folder.</li>
+            <li><span>4</span> Pin OtakuList — start watching. 🎉</li>
+          </ol>
+          <a href="#top" class="btn btn-primary">Add to Chrome</a>
+          <p class="install-note">Free &amp; open. Works on Chrome, Edge, Brave &amp; other Chromium browsers.</p>
+        </div>
+        <div class="install-art" aria-hidden="true">
+          <img src="assets/character.png" alt="" class="install-gojo float" />
+          <div class="orb small"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <div class="section-head reveal">
+        <span class="kicker">FAQ</span>
+        <h2>Questions, answered.</h2>
+      </div>
+      <div class="faq">
+        <details class="reveal">
+          <summary>Does it work on any anime site?<span class="q-i">+</span></summary>
+          <p>It works on most streaming sites by reading the page's title, episode and cover from the URL and metadata. Every site is built differently, so detection is a smart guess — and the save card always lets you fix the title. Anything it misses, you can add manually in one tap.</p>
+        </details>
+        <details class="reveal">
+          <summary>Where is my data stored? Is it private?<span class="q-i">+</span></summary>
+          <p>100% on your own device, using your browser's local storage. There's no account, no server, and nothing is ever uploaded or tracked. Only you can see your list.</p>
+        </details>
+        <details class="reveal">
+          <summary>What happens when a site gets blocked?<span class="q-i">+</span></summary>
+          <p>Nothing — that's the whole point. Your watchlist lives in the extension, not the site. When a mirror dies or gets blocked, open the popup and every anime, status and episode count is still there.</p>
+        </details>
+        <details class="reveal">
+          <summary>Will it interrupt me while I'm watching?<span class="q-i">+</span></summary>
+          <p>Only once per new anime. After you've added something to <em>Watching</em>, new episodes update silently with a tiny toast — no pop-ups blocking your screen mid-binge.</p>
+        </details>
+        <details class="reveal">
+          <summary>Does it show up on Google or normal sites?<span class="q-i">+</span></summary>
+          <p>No. It ignores search engines and general sites, and only activates on real anime watch or detail pages — so searching "anime" on Google won't trigger anything.</p>
+        </details>
+        <details class="reveal">
+          <summary>Is it really free?<span class="q-i">+</span></summary>
+          <p>Yes. No subscription, no ads, no premium tier. Just a tool made for anime fans.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="final reveal">
+      <div class="orb big" aria-hidden="true"></div>
+      <h2>Stop losing your watchlist.</h2>
+      <p>Install once. Watch anywhere. Keep your list forever.</p>
+      <a href="#install" class="btn btn-primary btn-lg">Add OtakuList to Chrome</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="foot-brand">
+      <img src="assets/icon128.png" alt="" />
+      <span>OtakuList</span>
+    </div>
+    <p>Made for anime fans. Your list, kept safe locally.</p>
+    <p class="foot-fine">Not affiliated with any anime studio or streaming site. Character art for personal use.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

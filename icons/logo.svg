@@ -1,0 +1,15 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#g)"/>
+  <!-- bookmark (saved watchlist) -->
+  <path d="M41 26 H87 V95 L64 78 L41 95 Z" fill="#ffffff"/>
+  <!-- play triangle (watching) -->
+  <path d="M56 44 V69 L78 56 Z" fill="#7c3aed"/>
+  <!-- sparkle -->
+  <path d="M98.6 18.6 L96 25.6 L89 28.2 L96 30.7 L98.6 37.8 L101.1 30.7 L108.2 28.2 L101.1 25.6 Z" fill="#ffffff" opacity="0.95"/>
+</svg>

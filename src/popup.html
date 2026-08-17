@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="logo"><img src="../icons/character.png" alt="OtakuList"></span>
+      <div>
+        <h1>OtakuList</h1>
+        <p id="subtitle">Your anime watchlist, kept safe</p>
+      </div>
+    </div>
+    <button id="addBtn" title="Add anime manually">＋</button>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-status="watching">Watching <span></span></button>
+    <button class="tab" data-status="plan">Plan <span></span></button>
+    <button class="tab" data-status="completed">Completed <span></span></button>
+    <button class="tab" data-status="onhold">On Hold <span></span></button>
+  </div>
+
+  <input id="search" class="search" type="search" placeholder="Search your list…">
+
+  <!-- manual add form (hidden by default) -->
+  <form id="addForm" class="add-form" hidden>
+    <input id="f-title" type="text" placeholder="Anime title" required>
+    <div class="add-row">
+      <select id="f-status">
+        <option value="watching">Watching</option>
+        <option value="plan">Plan to Watch</option>
+        <option value="completed">Completed</option>
+        <option value="onhold">On Hold</option>
+      </select>
+      <input id="f-ep" type="number" min="0" placeholder="Ep">
+      <input id="f-total" type="number" min="0" placeholder="Total">
+    </div>
+    <div class="add-actions">
+      <button type="button" id="cancelAdd" class="ghost">Cancel</button>
+      <button type="submit" class="primary">Add</button>
+    </div>
+  </form>
+
+  <div id="list" class="list"></div>
+
+  <div id="empty" class="empty" hidden>
+    <div class="empty-emoji">🍿</div>
+    <p>Nothing here yet.</p>
+    <small>Start watching an anime and OtakuList will offer to save it — or add one manually with ＋.</small>
+  </div>
+
+  <footer>
+    <span id="count">0 titles</span>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
