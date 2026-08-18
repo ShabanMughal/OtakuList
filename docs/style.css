@@ -144,6 +144,29 @@ img {
   transform: translateY(-2px);
 }
 
+.btn-github {
+  background: rgba(18, 12, 28, 0.82);
+  backdrop-filter: blur(8px);
+  border-color: rgba(167, 139, 250, 0.28);
+  color: #fff;
+}
+
+.btn-github svg {
+  color: #fff;
+}
+
+.btn-github:hover {
+  background: rgba(30, 20, 46, 0.92);
+  border-color: rgba(167, 139, 250, 0.6);
+  transform: translateY(-2px);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 /* ---------- nav ---------- */
 .nav {
   position: sticky;
@@ -1027,6 +1050,21 @@ img {
   position: relative;
 }
 
+.final-cta {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.final-note {
+  position: relative;
+  font-size: 14px !important;
+  margin: 20px 0 0 !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
 /* ---------- footer ---------- */
 .footer {
   border-top: 1px solid var(--panel-brd);
@@ -1147,5 +1185,11 @@ img {
 
   .section {
     padding: 60px 20px;
+  }
+
+  .nav-actions .btn-github {
+    font-size: 0;
+    gap: 0;
+    padding: 9px 11px;
   }
 }
