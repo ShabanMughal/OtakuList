@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+// read at build time from .env (PUBLIC_ vars) — injected into the page below
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+---
+
+<BaseLayout
+  title="Gacha Showcase — Show off the games you play"
+  description="Browse and build shareable showcases of the gacha games people play — Wuthering Waves, Honkai: Star Rail, Zenless Zone Zero, Genshin and more."
+  canonical="https://shabanmughal.github.io/OtakuList/showcase.html"
+  page="showcase"
+>
+  <main class="tool-main">
+    <div class="section-head">
+      <span class="kicker">Gacha showcase</span>
+      <h1 class="tool-title" id="gs-heading">Gacha Showcases</h1>
+      <p id="gs-sub">Browse the games people play — or log in to build and share your own profile.</p>
+    </div>
+
+    <div id="auth-msg" class="gs-auth-msg" hidden></div>
+    <div id="auth-noconfig" class="gs-auth-note" hidden>
+      ⚙️ Cloud accounts aren't configured yet — add your Supabase keys to <code>web/.env</code> to enable logins
+      &amp; public profiles.
+    </div>
+
+    <!-- profile-view banner -->
+    <div class="gs-sharedbar" id="gs-sharedbar" hidden>
+      <span id="gs-sharedtext">👀 Viewing a public showcase.</span>
+      <a href={`${base}showcase.html`} class="btn btn-github btn-sm">← All showcases</a>
+    </div>
+
+    <div class="tool-wrap">
+      <!-- editor (logged in only) -->
+      <section class="tool-step" id="gs-editor" hidden>
+        <div class="step-label"><span class="step-n">+</span> Your showcase
+          <a id="gs-yourlink" class="gs-yourlink" href="#" target="_blank" rel="noopener" hidden></a>
+        </div>
+
+        <form id="gs-form" class="gs-form">
+          <input id="gs-name" class="gs-in gs-wide" type="text" placeholder="Your display name (optional)" />
+
+          <div class="gs-grid">
+            <select id="gs-game" class="gs-in">
+              <option value="wuwa">Wuthering Waves</option>
+              <option value="hsr">Honkai: Star Rail</option>
+              <option value="zzz">Zenless Zone Zero</option>
+              <option value="genshin">Genshin Impact</option>
+              <option value="custom">Other…</option>
+            </select>
+            <input id="gs-custom" class="gs-in" type="text" placeholder="Custom game name" hidden />
+            <input id="gs-rank" class="gs-in" type="text" placeholder="Rank / level (e.g. 70)" />
+            <input id="gs-ign" class="gs-in" type="text" placeholder="In-game name" />
+            <input id="gs-uid" class="gs-in" type="text" placeholder="UID" />
+          </div>
+
+          <input id="gs-chars" class="gs-in gs-wide" type="text"
+            placeholder="Favorite characters (comma separated) — e.g. Jinhsi, Changli, Camellya" />
+          <input id="gs-note" class="gs-in gs-wide" type="text"
+            placeholder="Short note / tagline (optional) — e.g. day-one player" />
+
+          <div class="gs-form-actions">
+            <button type="button" id="gs-cancel" class="btn btn-github" hidden>Cancel</button>
+            <button type="submit" id="gs-add" class="btn btn-primary">＋ Add to showcase</button>
+          </div>
+        </form>
+      </section>
+
+      <div id="gs-cards" class="gs-cards"></div>
+      <div id="gs-empty" class="gs-empty" hidden></div>
+
+      <!-- logged-out prompt -->
+      <div id="gs-loginprompt" class="gs-loginprompt" hidden>
+        <b>Want your own showcase?</b>
+        <p>Log in or create an account to build a profile and share it with one link.</p>
+        <button class="btn btn-primary" id="prompt-login" type="button">Log in / Sign up</button>
+      </div>
+
+      <!-- public gallery -->
+      <section class="gallery-wrap" id="gallery-wrap" hidden>
+        <h2 class="gallery-title">Browse showcases</h2>
+        <div id="gallery" class="gallery"></div>
+        <div id="gallery-empty" class="gs-empty" hidden>No showcases yet — be the first to make one!</div>
+      </section>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="am-overlay" hidden>
+      <div class="am-card">
+        <button class="am-x" id="am-close" type="button" aria-label="Close">✕</button>
+        <h2 class="am-title" id="am-title">Welcome back!</h2>
+
+        <form id="auth-form" class="am-form">
+          <label class="am-label" for="am-email">Email address</label>
+          <input id="am-email" class="am-in" type="email" placeholder="name@email.com" autocomplete="email" required />
+
+          <div id="am-uwrap" hidden>
+            <label class="am-label" for="am-username">Username</label>
+            <input id="am-username" class="am-in" type="text" placeholder="yourname" maxlength="20" autocomplete="off" />
+            <div id="am-ustatus" class="gs-uname-status" hidden></div>
+          </div>
+
+          <label class="am-label" for="am-pass">Password</label>
+          <input id="am-pass" class="am-in" type="password" placeholder="Password" autocomplete="current-password" required />
+
+          <div class="am-row" id="am-loginrow">
+            <label class="am-remember"><input type="checkbox" id="am-remember" checked /> Remember me</label>
+            <button type="button" class="am-forgot" id="am-forgot">Forgot password?</button>
+          </div>
+
+          <div id="am-err" class="am-err" hidden></div>
+          <button type="submit" id="am-submit" class="am-submit">Login</button>
+        </form>
+
+        <p class="am-switch">
+          <span id="am-switch-text">Don't have an account?</span>
+          <button type="button" class="am-link" id="am-toggle">Register</button>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Fragment slot="scripts">
+    <script is:inline src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script is:inline define:vars={{ SUPABASE_URL, SUPABASE_ANON_KEY }}>
+      // create the client from build-time env values (falls back to local mode)
+      window.sb =
+        window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY
+          ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+          : null;
+    </script>
+    <script is:inline src={`${base}js/showcase.js`}></script>
+  </Fragment>
+</BaseLayout>
