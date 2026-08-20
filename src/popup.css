@@ -169,9 +169,16 @@ header h1 {
   background: var(--accent);
 }
 
-/* search */
-.search {
+/* search + sort toolbar */
+.toolbar {
+  display: flex;
+  gap: 8px;
   margin: 10px 12px 4px;
+}
+
+.search {
+  flex: 1;
+  min-width: 0;
   padding: 9px 12px;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -182,6 +189,22 @@ header h1 {
 }
 
 .search:focus {
+  border-color: var(--accent);
+}
+
+.sort {
+  flex: none;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 12px;
+  padding: 0 8px;
+  outline: none;
+  cursor: pointer;
+}
+
+.sort:focus {
   border-color: var(--accent);
 }
 
@@ -351,11 +374,86 @@ button.ghost {
   color: var(--accent-2);
 }
 
+/* rating */
+.rating {
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.rating .star {
+  border: none;
+  background: transparent;
+  color: var(--line);
+  font-size: 15px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  transition: color .12s, transform .12s;
+}
+
+.rating .star:hover {
+  transform: scale(1.15);
+}
+
+.rating .star.on {
+  color: #fbbf24;
+}
+
 .card .foot {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 8px;
+}
+
+/* resume + note icon buttons */
+.card .resume,
+.card .icon-btn {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  text-decoration: none;
+  transition: .15s;
+}
+
+.card .resume:hover,
+.card .icon-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.card .icon-btn.active {
+  color: #fbbf24;
+  border-color: #fbbf24;
+}
+
+/* note */
+.note-input {
+  margin-top: 8px;
+  width: 100%;
+  resize: vertical;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 9px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+
+.note-input:focus {
+  border-color: var(--accent);
 }
 
 .card select {
@@ -422,9 +520,76 @@ button.ghost {
 
 /* footer */
 footer {
-  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px 8px 16px;
   border-top: 1px solid var(--line);
   font-size: 11px;
   color: var(--muted);
   background: var(--panel);
+}
+
+.foot-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.foot-btn {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: .15s;
+}
+
+.foot-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* toast (undo / status) */
+.toast {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--text);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  z-index: 100;
+  animation: toast-in .18s ease;
+}
+
+.toast button {
+  flex: none;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

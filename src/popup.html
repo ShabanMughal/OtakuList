@@ -25,7 +25,15 @@
     <button class="tab" data-status="onhold">On Hold <span></span></button>
   </div>
 
-  <input id="search" class="search" type="search" placeholder="Search your list…">
+  <div class="toolbar">
+    <input id="search" class="search" type="search" placeholder="Search your list…">
+    <select id="sort" class="sort" title="Sort list">
+      <option value="recent">Recent</option>
+      <option value="title">A–Z</option>
+      <option value="added">Newest</option>
+      <option value="episode">Episode</option>
+    </select>
+  </div>
 
   <!-- manual add form (hidden by default) -->
   <form id="addForm" class="add-form" hidden>
@@ -56,6 +64,11 @@
 
   <footer>
     <span id="count">0 titles</span>
+    <div class="foot-actions">
+      <button id="exportBtn" class="foot-btn" title="Download a backup of your whole list">Export</button>
+      <button id="importBtn" class="foot-btn" title="Restore your list from a backup file">Import</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden>
+    </div>
   </footer>
 
   <script src="popup.js"></script>

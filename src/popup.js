@@ -10,6 +10,7 @@ const STATUSES = {
 let state = {};
 let activeTab = "watching";
 let query = "";
+let sortBy = "recent";
 
 const $ = (sel) => document.querySelector(sel);
 const listEl = $("#list");
@@ -24,6 +25,30 @@ function escapeHtml(s) {
   );
 }
 
+// ── sorting ─────────────────────────────────────────────────────────
+function sortItems(items) {
+  const arr = [...items];
+  switch (sortBy) {
+    case "title":
+      return arr.sort((a, b) => a.title.localeCompare(b.title));
+    case "added":
+      return arr.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+    case "episode":
+      return arr.sort((a, b) => (b.currentEpisode || 0) - (a.currentEpisode || 0));
+    default: // recent
+      return arr.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  }
+}
+
+// ── 5-star rating widget ────────────────────────────────────────────
+function starsHtml(rating) {
+  let s = "";
+  for (let i = 1; i <= 5; i++) {
+    s += `<button class="star ${i <= rating ? "on" : ""}" data-act="rate" data-val="${i}" title="${i} star${i > 1 ? "s" : ""}">★</button>`;
+  }
+  return `<div class="rating">${s}</div>`;
+}
+
 function render() {
   // tab counts
   document.querySelectorAll(".tab").forEach((t) => {
@@ -34,12 +59,14 @@ function render() {
   });
 
   const q = query.trim().toLowerCase();
-  const items = Object.values(state)
-    .filter((a) => a.status === activeTab)
-    .filter((a) => !q || a.title.toLowerCase().includes(q))
-    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  const items = sortItems(
+    Object.values(state)
+      .filter((a) => a.status === activeTab)
+      .filter((a) => !q || a.title.toLowerCase().includes(q))
+  );
 
-  $("#count").textContent = `${Object.keys(state).length} title${Object.keys(state).length === 1 ? "" : "s"} saved`;
+  const totalCount = Object.keys(state).length;
+  $("#count").textContent = `${totalCount} title${totalCount === 1 ? "" : "s"} saved`;
 
   if (!items.length) {
     listEl.innerHTML = "";
@@ -61,6 +88,11 @@ function render() {
       const options = Object.entries(STATUSES)
         .map(([v, label]) => `<option value="${v}" ${v === a.status ? "selected" : ""}>${label}</option>`)
         .join("");
+      const resumeBtn = a.url
+        ? `<a class="resume" href="${escapeHtml(a.url)}" target="_blank" rel="noopener" title="Resume watching where you left off">▶</a>`
+        : "";
+      const hasNote = a.note && a.note.trim();
+      const noteBlock = `<textarea class="note-input" data-act="noteedit" placeholder="Add a note…" rows="2" ${hasNote ? "" : "hidden"}>${escapeHtml(a.note || "")}</textarea>`;
       return `
       <div class="card" data-id="${escapeHtml(a.id)}">
         ${cover}
@@ -72,12 +104,16 @@ function render() {
             <div class="epnum">Ep <b>${cur}</b>${total}</div>
             <button data-act="inc" title="Next episode">＋</button>
           </div>
+          ${starsHtml(a.rating || 0)}
           <div class="foot">
             <select data-act="status">${options}</select>
+            ${resumeBtn}
+            <button class="icon-btn ${hasNote ? "active" : ""}" data-act="notetoggle" title="Add / edit note">✎</button>
             <button class="del" data-act="del" title="Remove">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6"/><path d="M10 11v6M14 11v6"/></svg>
             </button>
           </div>
+          ${noteBlock}
         </div>
       </div>`;
     })
@@ -98,9 +134,25 @@ listEl.addEventListener("click", async (e) => {
     const cur = item.currentEpisode ?? 0;
     item.currentEpisode = Math.max(0, cur + (act === "inc" ? 1 : -1));
     item.updatedAt = Date.now();
+  } else if (act === "rate") {
+    const val = parseInt(btn.dataset.val, 10);
+    // clicking the current rating again clears it
+    item.rating = item.rating === val ? 0 : val;
+    item.updatedAt = Date.now();
+  } else if (act === "notetoggle") {
+    const ta = card.querySelector(".note-input");
+    ta.hidden = !ta.hidden;
+    if (!ta.hidden) ta.focus();
+    return; // nothing to persist yet
+  } else if (act === "noteedit") {
+    return; // handled by the "change" listener below
   } else if (act === "del") {
-    if (!confirm(`Remove "${item.title}" from your list?`)) return;
+    const removed = { ...item };
     delete state[id];
+    await setList(state);
+    showUndo(removed);
+    render();
+    return;
   } else {
     // e.g. clicking the status <select> — leave it alone; the "change"
     // handler saves it. Re-rendering here would close the dropdown instantly.
@@ -111,14 +163,27 @@ listEl.addEventListener("click", async (e) => {
 });
 
 listEl.addEventListener("change", async (e) => {
-  const sel = e.target.closest('select[data-act="status"]');
-  if (!sel) return;
-  const id = e.target.closest(".card").dataset.id;
+  const card = e.target.closest(".card");
+  if (!card) return;
+  const id = card.dataset.id;
   if (!state[id]) return;
-  state[id].status = sel.value;
-  state[id].updatedAt = Date.now();
-  await setList(state);
-  render();
+
+  const sel = e.target.closest('select[data-act="status"]');
+  if (sel) {
+    state[id].status = sel.value;
+    state[id].updatedAt = Date.now();
+    await setList(state);
+    render();
+    return;
+  }
+
+  const note = e.target.closest('textarea[data-act="noteedit"]');
+  if (note) {
+    state[id].note = note.value.trim();
+    state[id].updatedAt = Date.now();
+    await setList(state);
+    // don't re-render — keep the textarea open and focused while editing
+  }
 });
 
 // tabs
@@ -135,7 +200,43 @@ $("#search").addEventListener("input", (e) => {
   render();
 });
 
-// manual add
+// sort
+$("#sort").addEventListener("change", (e) => {
+  sortBy = e.target.value;
+  render();
+});
+
+// ── undo toast ──────────────────────────────────────────────────────
+let toastTimer = null;
+function showUndo(item) {
+  clearToast();
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = `<span>Removed “${escapeHtml(item.title)}”</span><button type="button">Undo</button>`;
+  document.body.appendChild(t);
+  toastTimer = setTimeout(() => t.remove(), 6000);
+  t.querySelector("button").addEventListener("click", async () => {
+    clearTimeout(toastTimer);
+    state[item.id] = item;
+    await setList(state);
+    t.remove();
+    render();
+  });
+}
+function showToast(msg) {
+  clearToast();
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = `<span>${escapeHtml(msg)}</span>`;
+  document.body.appendChild(t);
+  toastTimer = setTimeout(() => t.remove(), 3000);
+}
+function clearToast() {
+  clearTimeout(toastTimer);
+  document.querySelectorAll(".toast").forEach((t) => t.remove());
+}
+
+// ── manual add ──────────────────────────────────────────────────────
 const addForm = $("#addForm");
 $("#addBtn").addEventListener("click", () => {
   addForm.hidden = !addForm.hidden;
@@ -156,6 +257,7 @@ addForm.addEventListener("submit", async (e) => {
     status: $("#f-status").value,
     currentEpisode: epVal === "" ? null : parseInt(epVal, 10),
     totalEpisodes: totVal === "" ? null : parseInt(totVal, 10),
+    rating: state[id]?.rating || 0,
     cover: state[id]?.cover || null,
     site: state[id]?.site || "manual entry",
     url: state[id]?.url || "",
@@ -168,6 +270,61 @@ addForm.addEventListener("submit", async (e) => {
   addForm.hidden = true;
   activeTab = state[id].status;
   render();
+});
+
+// ── export / import backup ──────────────────────────────────────────
+$("#exportBtn").addEventListener("click", () => {
+  if (!Object.keys(state).length) {
+    showToast("Your list is empty — nothing to export.");
+    return;
+  }
+  const payload = {
+    app: "OtakuList",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    list: state,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const stamp = new Date().toISOString().slice(0, 10);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `otakulist-backup-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast("Backup downloaded ✓");
+});
+
+const importFile = $("#importFile");
+$("#importBtn").addEventListener("click", () => importFile.click());
+importFile.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    // accept either our wrapped format {list: {...}} or a raw map
+    const incoming = parsed && parsed.list ? parsed.list : parsed;
+    if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) {
+      throw new Error("bad shape");
+    }
+    let count = 0;
+    for (const [id, item] of Object.entries(incoming)) {
+      if (!item || !item.title) continue;
+      state[id] = { ...item, id };
+      if (!STATUSES[state[id].status]) state[id].status = "onhold";
+      count++;
+    }
+    if (!count) throw new Error("no valid entries");
+    await setList(state);
+    render();
+    showToast(`Imported ${count} title${count === 1 ? "" : "s"} ✓`);
+  } catch (err) {
+    showToast("Couldn't import — not a valid OtakuList backup.");
+  }
+  importFile.value = "";
 });
 
 // live updates if the content script saves something while popup is open
