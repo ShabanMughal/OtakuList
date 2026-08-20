@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gacha Showcase — Show off the games you play</title>
+  <meta name="description"
+    content="Browse and build shareable showcases of the gacha games people play — Wuthering Waves, Honkai: Star Rail, Zenless Zone Zero, Genshin and more." />
+  <meta name="theme-color" content="#8b5cf6" />
+  <link rel="canonical" href="https://shabanmughal.github.io/OtakuList/showcase.html" />
+
+  <link rel="icon" href="assets/icon128.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="bg-glows" aria-hidden="true">
+    <span class="glow glow-1"></span>
+    <span class="glow glow-2"></span>
+    <span class="glow glow-3"></span>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- nav -->
+  <header class="nav" id="nav">
+    <a class="brand" href="index.html">
+      <img src="assets/icon128.png" alt="" class="brand-logo" />
+      <span>OtakuList</span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html#features">Features</a>
+      <a href="import.html">Import tool</a>
+      <a href="showcase.html">Showcase</a>
+      <a href="index.html#faq">FAQ</a>
+    </nav>
+    <div class="nav-actions">
+      <button id="nav-login" class="btn btn-primary btn-sm" type="button" hidden>Log in</button>
+      <span id="nav-account" class="nav-account" hidden>
+        <a id="nav-mylink" class="nav-username" href="#">@you</a>
+        <button id="nav-logout" class="btn btn-github btn-sm" type="button">Log out</button>
+      </span>
+    </div>
+  </header>
+
+  <main class="tool-main">
+    <div class="section-head">
+      <span class="kicker">Gacha showcase</span>
+      <h1 class="tool-title" id="gs-heading">Gacha Showcases</h1>
+      <p id="gs-sub">Browse the games people play — or log in to build and share your own profile.</p>
+    </div>
+
+    <div id="auth-msg" class="gs-auth-msg" hidden></div>
+    <div id="auth-noconfig" class="gs-auth-note" hidden>
+      ⚙️ Cloud accounts aren't configured yet — add your Supabase keys in <code>supabase-config.js</code> to enable
+      logins &amp; public profiles.
+    </div>
+
+    <!-- shared/profile-view banner -->
+    <div class="gs-sharedbar" id="gs-sharedbar" hidden>
+      <span id="gs-sharedtext">👀 Viewing a public showcase.</span>
+      <a href="showcase.html" class="btn btn-github btn-sm">← All showcases</a>
+    </div>
+
+    <div class="tool-wrap">
+      <!-- editor (logged in only) -->
+      <section class="tool-step" id="gs-editor" hidden>
+        <div class="step-label"><span class="step-n">+</span> Your showcase
+          <a id="gs-yourlink" class="gs-yourlink" href="#" target="_blank" rel="noopener" hidden></a>
+        </div>
+
+        <form id="gs-form" class="gs-form">
+          <input id="gs-name" class="gs-in gs-wide" type="text" placeholder="Your display name (optional)" />
+
+          <div class="gs-grid">
+            <select id="gs-game" class="gs-in">
+              <option value="wuwa">Wuthering Waves</option>
+              <option value="hsr">Honkai: Star Rail</option>
+              <option value="zzz">Zenless Zone Zero</option>
+              <option value="genshin">Genshin Impact</option>
+              <option value="custom">Other…</option>
+            </select>
+            <input id="gs-custom" class="gs-in" type="text" placeholder="Custom game name" hidden />
+            <input id="gs-rank" class="gs-in" type="text" placeholder="Rank / level (e.g. 70)" />
+            <input id="gs-ign" class="gs-in" type="text" placeholder="In-game name" />
+            <input id="gs-uid" class="gs-in" type="text" placeholder="UID" />
+          </div>
+
+          <input id="gs-chars" class="gs-in gs-wide" type="text"
+            placeholder="Favorite characters (comma separated) — e.g. Jinhsi, Changli, Camellya" />
+          <input id="gs-note" class="gs-in gs-wide" type="text"
+            placeholder="Short note / tagline (optional) — e.g. day-one player" />
+
+          <div class="gs-form-actions">
+            <button type="button" id="gs-cancel" class="btn btn-github" hidden>Cancel</button>
+            <button type="submit" id="gs-add" class="btn btn-primary">＋ Add to showcase</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- cards: your own (when editing) or a single profile (when viewing ?u=) -->
+      <div id="gs-cards" class="gs-cards"></div>
+      <div id="gs-empty" class="gs-empty" hidden></div>
+
+      <!-- logged-out prompt (home) -->
+      <div id="gs-loginprompt" class="gs-loginprompt" hidden>
+        <b>Want your own showcase?</b>
+        <p>Log in or create an account to build a profile and share it with one link.</p>
+        <button class="btn btn-primary" id="prompt-login" type="button">Log in / Sign up</button>
+      </div>
+
+      <!-- public gallery (home) -->
+      <section class="gallery-wrap" id="gallery-wrap" hidden>
+        <h2 class="gallery-title">Browse showcases</h2>
+        <div id="gallery" class="gallery"></div>
+        <div id="gallery-empty" class="gs-empty" hidden>No showcases yet — be the first to make one!</div>
+      </section>
+    </div>
+  </main>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="am-overlay" hidden>
+    <div class="am-card">
+      <button class="am-x" id="am-close" type="button" aria-label="Close">✕</button>
+      <h2 class="am-title" id="am-title">Welcome back!</h2>
+
+      <form id="auth-form" class="am-form">
+        <label class="am-label" for="am-email">Email address</label>
+        <input id="am-email" class="am-in" type="email" placeholder="name@email.com" autocomplete="email" required />
+
+        <div id="am-uwrap" hidden>
+          <label class="am-label" for="am-username">Username</label>
+          <input id="am-username" class="am-in" type="text" placeholder="yourname" maxlength="20"
+            autocomplete="off" />
+          <div id="am-ustatus" class="gs-uname-status" hidden></div>
+        </div>
+
+        <label class="am-label" for="am-pass">Password</label>
+        <input id="am-pass" class="am-in" type="password" placeholder="Password" autocomplete="current-password"
+          required />
+
+        <div class="am-row" id="am-loginrow">
+          <label class="am-remember"><input type="checkbox" id="am-remember" checked /> Remember me</label>
+          <button type="button" class="am-forgot" id="am-forgot">Forgot password?</button>
+        </div>
+
+        <div id="am-err" class="am-err" hidden></div>
+        <button type="submit" id="am-submit" class="am-submit">Login</button>
+      </form>
+
+      <p class="am-switch">
+        <span id="am-switch-text">Don't have an account?</span>
+        <button type="button" class="am-link" id="am-toggle">Register</button>
+      </p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="foot-brand">
+      <img src="assets/icon128.png" alt="" />
+      <span>OtakuList</span>
+    </div>
+    <p>Made for anime &amp; gacha fans. Your list, kept safe.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+  <script src="showcase.js"></script>
+</body>
+
+</html>

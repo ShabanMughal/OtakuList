@@ -1,0 +1,13 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# env (keeps keys out of the repo — they still ship in the client bundle)
+.env
+.env.local
+
+# logs
+npm-debug.log*
