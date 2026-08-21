@@ -1,4 +1,4 @@
-// OtakuList landing — scroll reveals, sticky nav state, single-open FAQ.
+// OtakuList landing, scroll reveals, sticky nav state, single-open FAQ.
 
 // Reveal on scroll (staggered via data-delay)
 const io = new IntersectionObserver(

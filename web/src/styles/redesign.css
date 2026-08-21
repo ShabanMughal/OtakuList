@@ -1,0 +1,146 @@
+/* OtakuList redesign — "modernist" dark theme (Archivo, purple accent). */
+:root {
+  --color-bg: #0b0a16;
+  --color-surface: #17142a;
+  --color-text: #f4f2f8;
+  --color-accent: #7d5cf5;
+  --color-accent-2: #6fa8dc;
+  --color-accent-600: #6b4be0;
+  --color-divider: rgba(255, 255, 255, 0.12);
+  --glass: rgba(255, 255, 255, 0.035);
+  --glass-line: rgba(255, 255, 255, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, .45);
+  --shadow-lg: 0 26px 60px rgba(0, 0, 0, .6);
+  --font-heading: "Archivo", system-ui, sans-serif;
+  --font-body: "Archivo", system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  line-height: 1.12;
+  margin: 0;
+}
+
+a { color: #a78bfa; text-decoration: none; }
+a:hover { color: #b9a8ff; }
+img { display: block; max-width: 100%; }
+::selection { background: rgba(125, 92, 245, .35); }
+summary::-webkit-details-marker { display: none; }
+
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes pulseRing { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@keyframes slidein { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Gojo "Hollow Purple" aura — a slow rotating blue↔red gradient that reads
+   as purple, breathing behind the popup model. */
+@keyframes gojoSpin { to { transform: rotate(360deg); } }
+@keyframes gojoBreathe { 0%, 100% { opacity: .6; transform: scale(1) rotate(0deg); } 50% { opacity: .9; transform: scale(1.06) rotate(180deg); } }
+
+.gojo-aura {
+  position: absolute;
+  inset: -90px;
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(90px);
+  opacity: .8;
+  background:
+    radial-gradient(60% 60% at 30% 25%, rgba(125, 92, 245, .55), transparent 70%),
+    radial-gradient(55% 55% at 75% 70%, rgba(109, 75, 224, .45), transparent 72%),
+    conic-gradient(from 200deg at 50% 50%,
+      #4a2fb0, #7d5cf5, #9b6bf0, #6b4be0, #4a2fb0);
+  animation: gojoSpin 26s linear infinite, gojoBreathe 9s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gojo-aura { animation: gojoBreathe 12s ease-in-out infinite; }
+}
+
+/* Ambient hero haze — soft purple corner glows behind the whole section. */
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(50% 55% at 8% 0%, rgba(125, 92, 245, .28), transparent 60%),
+    radial-gradient(45% 50% at 92% 78%, rgba(125, 92, 245, .22), transparent 62%);
+}
+
+/* Subtle single glow for lower sections — restrained, never washed-out.
+   Add class "sec" to a positioned section; place a <div class="sec-glow ..."> inside.
+   Position variants pin the glow to a corner/edge. */
+.sec { position: relative; overflow: hidden; }
+.sec > * { position: relative; z-index: 1; }
+.sec-glow {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  width: 620px;
+  height: 620px;
+  border-radius: 50%;
+  filter: blur(100px);
+  background: radial-gradient(closest-side, rgba(125, 92, 245, .16), transparent);
+}
+.sec-glow.gl-left  { left: -220px; top: 50%; transform: translateY(-50%); }
+.sec-glow.gl-right { right: -220px; top: 50%; transform: translateY(-50%); }
+.sec-glow.gl-top   { left: 50%; top: -300px; transform: translateX(-50%); }
+
+/* buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.2;
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--color-text);
+  background: transparent;
+  transition: background .2s, border-color .2s, transform .2s, color .2s;
+}
+
+.btn-primary { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+.btn-primary:hover { background: var(--color-accent-600); color: #fff; transform: translateY(-1px); }
+
+.btn-secondary { border-color: var(--color-divider); color: var(--color-text); }
+.btn-secondary:hover { background: rgba(255, 255, 255, .07); border-color: rgba(125, 92, 245, .6); }
+
+/* hover helpers (replace the design tool's style-hover attrs) */
+.rd-nav a { color: rgba(244, 242, 248, .68); transition: color .2s; }
+.rd-nav a:hover { color: #b9a8ff; }
+
+.rd-card { transition: box-shadow .3s, transform .3s, border-color .3s; }
+.rd-card:hover { transform: translateY(-3px); border-color: rgba(125, 92, 245, .4); }
+
+details summary { transition: color .2s; }
+details summary:hover { color: #b9a8ff; }
+
+/* FAQ accordion — single-open, animated open/close via JS-driven height. */
+.faq-body { overflow: hidden; height: 0; opacity: 0;
+  transition: height .35s cubic-bezier(.4, 0, .2, 1), opacity .3s ease; }
+.faq-plus { transition: transform .3s cubic-bezier(.4, 0, .2, 1); }
+.faq-item[open] .faq-plus { transform: rotate(45deg); }
+
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }

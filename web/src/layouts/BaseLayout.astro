@@ -10,6 +10,7 @@ const {
   ogDescription,
   ogImage,
   page = 'default',
+  chrome = true,
 } = Astro.props;
 
 // base always ends with a single trailing slash, e.g. "/OtakuList/"
@@ -58,6 +59,8 @@ const ogImageUrl = ogImage ? site + base + ogImage : undefined;
 </head>
 
 <body>
+  {chrome && (
+  <>
   <div class="bg-glows" aria-hidden="true">
     <span class="glow glow-1"></span>
     <span class="glow glow-2"></span>
@@ -105,9 +108,12 @@ const ogImageUrl = ogImage ? site + base + ogImage : undefined;
       )}
     </div>
   </header>
+  </>
+  )}
 
   <slot />
 
+  {chrome && (
   <!-- shared footer -->
   <footer class="footer">
     <div class="foot-brand">
@@ -117,8 +123,9 @@ const ogImageUrl = ogImage ? site + base + ogImage : undefined;
     <p>Made for anime &amp; gacha fans. Your list, kept safe.</p>
     <p class="foot-fine">Not affiliated with any anime studio or streaming site. Character art for personal use.</p>
   </footer>
+  )}
 
-  <script is:inline src={`${base}js/script.js`}></script>
+  {chrome && <script is:inline src={`${base}js/script.js`}></script>}
   <slot name="scripts" />
 </body>
 

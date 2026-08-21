@@ -1,42 +1,111 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
-// read at build time from .env (PUBLIC_ vars) — injected into the page below
+// read at build time from .env (PUBLIC_ vars), injected into the page below
 const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+const REPO = 'https://github.com/ShabanMughal/OtakuList';
+
+// modernist theme tokens, scoped to this page's wrapper
+const theme =
+  "--color-bg:#0b0a16;--color-surface:#17142a;--color-text:#f4f2f8;" +
+  "--color-accent:#7d5cf5;--color-accent-2:#6fa8dc;--color-accent-600:#6b4be0;" +
+  "--color-divider:rgba(255,255,255,.12);--glass-line:rgba(255,255,255,.08);" +
+  "--shadow-md:0 8px 24px rgba(0,0,0,.45);--shadow-lg:0 26px 60px rgba(0,0,0,.6);" +
+  "--font-heading:'Archivo',system-ui,sans-serif;--font-body:'Poppins',system-ui,sans-serif;" +
+  "--font-display:'Archivo',system-ui,sans-serif;" +
+  "min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)";
 ---
 
 <BaseLayout
-  title="Gacha Showcase — Show off the games you play"
-  description="Browse and build shareable showcases of the gacha games people play — Wuthering Waves, Honkai: Star Rail, Zenless Zone Zero, Genshin and more."
+  title="Gacha Profiles, show off the games you play"
+  description="Browse and build shareable showcases of the gacha games people play, Wuthering Waves, Honkai: Star Rail, Zenless Zone Zero, Genshin and more."
   canonical="https://shabanmughal.github.io/OtakuList/showcase.html"
   page="showcase"
+  chrome={false}
 >
-  <main class="tool-main">
-    <div class="section-head">
-      <span class="kicker">Gacha showcase</span>
-      <h1 class="tool-title" id="gs-heading">Gacha Showcases</h1>
-      <p id="gs-sub">Browse the games people play — or log in to build and share your own profile.</p>
-    </div>
+  <link
+    slot="head"
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap"
+    rel="stylesheet"
+  />
 
-    <div id="auth-msg" class="gs-auth-msg" hidden></div>
-    <div id="auth-noconfig" class="gs-auth-note" hidden>
-      ⚙️ Cloud accounts aren't configured yet — add your Supabase keys to <code>web/.env</code> to enable logins
-      &amp; public profiles.
-    </div>
-
-    <!-- profile-view banner -->
-    <div class="gs-sharedbar" id="gs-sharedbar" hidden>
-      <span id="gs-sharedtext">👀 Viewing a public showcase.</span>
-      <a href={`${base}showcase.html`} class="btn btn-github btn-sm">← All showcases</a>
-    </div>
-
-    <div class="tool-wrap">
-      <!-- editor (logged in only) -->
-      <section class="tool-step" id="gs-editor" hidden>
-        <div class="step-label"><span class="step-n">+</span> Your showcase
-          <a id="gs-yourlink" class="gs-yourlink" href="#" target="_blank" rel="noopener" hidden></a>
+  <div style={theme}>
+    <!-- ═══════════ header ═══════════ -->
+    <header style="position:sticky;top:0;z-index:60;background:rgba(11,10,22,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.075)">
+      <div style="max-width:1320px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;gap:26px;flex-wrap:wrap">
+        <a href={base} style="display:flex;align-items:center;gap:10px;color:var(--color-text)">
+          <span style="width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;background:#191531;border:1px solid rgba(255,255,255,.14)"><img src={`${base}assets/gojo.png`} alt="OtakuList" style="width:30px;height:30px;border-radius:50%;object-fit:cover;display:block" /></span>
+          <span style="font-family:var(--font-heading);font-weight:800;font-size:19px;letter-spacing:-.02em">OtakuList</span>
+        </a>
+        <nav style="display:flex;gap:22px;font-size:13.5px;font-weight:600;color:rgba(244,242,248,.68)">
+          <a href={`${base}#features`} style="color:inherit">Features</a>
+          <a href={`${base}#how`} style="color:inherit">How it works</a>
+          <a href={`${base}animelist.html`} style="color:inherit">Anime List</a>
+          <a href={`${base}showcase.html`} style="color:#b9a8ff;border-bottom:2px solid #7d5cf5;padding-bottom:2px">Gacha Profiles</a>
+        </nav>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <a href={REPO} target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-heading);font-weight:800;font-size:14px;padding:10px 18px;border-radius:999px;border:1px solid var(--color-divider);color:var(--color-text)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+            Star
+          </a>
+          <button id="nav-login" type="button" hidden style="font-family:var(--font-heading);font-weight:800;font-size:14px;padding:10px 20px;border-radius:999px;border:1px solid var(--color-accent);background:var(--color-accent);color:#fff;cursor:pointer">Log in</button>
+          <span id="nav-account" hidden style="display:flex;align-items:center;gap:12px">
+            <a id="nav-mylink" href="#" style="font-size:13.5px;font-weight:600;color:#b9a8ff">@you</a>
+            <button id="nav-logout" type="button" style="font-family:var(--font-heading);font-weight:800;font-size:14px;padding:10px 18px;border-radius:999px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);cursor:pointer">Log out</button>
+          </span>
         </div>
+      </div>
+    </header>
+
+    <div id="auth-msg" class="gs-auth-msg" hidden style="max-width:1320px;margin:14px auto 0;padding:0 28px"></div>
+    <div id="auth-noconfig" hidden style="max-width:1320px;margin:14px auto 0;padding:12px 18px;border:1px solid rgba(125,92,245,.35);background:rgba(125,92,245,.1);border-radius:14px;color:#cbb8ff;font-size:13.5px">
+      ⚙️ Cloud accounts aren't configured yet, add your Supabase keys to <code>web/.env</code> to enable logins &amp; public profiles.
+    </div>
+
+    <!-- ═══════════ EXPLORE VIEW ═══════════ -->
+    <div id="view-explore">
+      <section style="position:relative;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.075)">
+        <div style="position:relative;max-width:1320px;margin:0 auto;padding:60px 28px 46px">
+          <div style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#b9a8ff;margin-bottom:14px">Community</div>
+          <h1 style="font-family:var(--font-heading);font-weight:800;font-size:clamp(34px,4.4vw,54px);letter-spacing:-.035em;margin:0 0 14px;max-width:24ch">Gacha Profiles</h1>
+          <p style="margin:0 0 30px;font-size:17px;color:rgba(244,242,248,.62);max-width:56ch">Optional, public, and completely separate from your private watchlist. Show off the accounts you've built and see what everyone else is running.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+            <button id="hero-create" type="button" style="font-family:var(--font-heading);font-weight:800;font-size:15px;padding:13px 22px;border-radius:999px;border:none;background:#7d5cf5;color:#fff;cursor:pointer">Create your profile</button>
+            <span id="hero-stats" style="font-size:13px;color:rgba(244,242,248,.45)">Loading profiles…</span>
+          </div>
+        </div>
+      </section>
+
+      <div style="max-width:1320px;margin:0 auto;padding:32px 28px 80px">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.075);padding-bottom:16px;margin-bottom:28px">
+          <div id="gs-tabs" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+          <div style="position:relative">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(244,242,248,.45)" stroke-width="2" style="position:absolute;left:12px;top:12px"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+            <input id="gs-search" type="text" placeholder="Search players or characters…" style="width:260px;padding:10px 14px 10px 34px;height:40px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--color-divider);color:var(--color-text);font-family:var(--font-body);font-size:14px;outline:none" />
+          </div>
+        </div>
+
+        <div id="gallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px"></div>
+        <div id="gallery-empty" hidden style="border:1px dashed rgba(255,255,255,.16);border-radius:26px;padding:64px 28px;text-align:center">
+          <h3 style="font-family:var(--font-heading);font-weight:800;margin:0 0 8px;font-size:21px">No profiles yet</h3>
+          <p style="margin:0;font-size:14.5px;color:rgba(244,242,248,.55)">Be the first, log in and build your showcase.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PROFILE VIEW (JS-rendered) ═══════════ -->
+    <div id="view-profile" hidden></div>
+
+    <!-- ═══════════ EDITOR (logged in) ═══════════ -->
+    <div id="gs-editor" hidden style="max-width:1320px;margin:0 auto;padding:0 28px 60px">
+      <section style="background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:26px 26px 28px;backdrop-filter:blur(12px)">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+          <h2 style="font-family:var(--font-heading);font-weight:800;font-size:22px;letter-spacing:-.02em;margin:0">Your showcase</h2>
+          <a id="gs-yourlink" href="#" target="_blank" rel="noopener" hidden style="font-size:13px;font-weight:600;color:#b9a8ff">· your link ↗</a>
+          <button id="gs-editclose" type="button" style="margin-left:auto;font-family:var(--font-heading);font-weight:800;font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);cursor:pointer">Done</button>
+        </div>
+        <p style="margin:0 0 18px;font-size:13.5px;color:rgba(244,242,248,.55)">Add a game with its rank, UID and characters, then hit <b style="color:#b9a8ff">Add to showcase</b>. Repeat for every game you play, and use <b style="color:#b9a8ff">✎</b> on a card to add more characters later. Changes save automatically.</p>
 
         <form id="gs-form" class="gs-form">
           <input id="gs-name" class="gs-in gs-wide" type="text" placeholder="Your display name (optional)" />
@@ -55,51 +124,82 @@ const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             <input id="gs-uid" class="gs-in" type="text" placeholder="UID" />
           </div>
 
-          <input id="gs-chars" class="gs-in gs-wide" type="text"
-            placeholder="Favorite characters (comma separated) — e.g. Jinhsi, Changli, Camellya" />
+          <div class="gs-charpick gs-wide">
+            <div id="gs-charchips" class="gs-charchips"></div>
+            <div class="gs-charsearch">
+              <input id="gs-charinput" class="gs-in" type="text" autocomplete="off"
+                placeholder="Add favorite characters, type to search…" />
+              <div id="gs-charmenu" class="gs-charmenu" hidden></div>
+            </div>
+          </div>
+          <input id="gs-chars" type="hidden" />
+
           <input id="gs-note" class="gs-in gs-wide" type="text"
-            placeholder="Short note / tagline (optional) — e.g. day-one player" />
+            placeholder="Short note / tagline (optional), e.g. day-one player" />
 
           <div class="gs-form-actions">
             <button type="button" id="gs-cancel" class="btn btn-github" hidden>Cancel</button>
             <button type="submit" id="gs-add" class="btn btn-primary">＋ Add to showcase</button>
           </div>
         </form>
-      </section>
 
-      <div id="gs-cards" class="gs-cards"></div>
-      <div id="gs-empty" class="gs-empty" hidden></div>
+        <div id="gs-cards" class="gs-cards" style="margin-top:22px"></div>
+        <div id="gs-empty" class="gs-empty" hidden></div>
 
-      <!-- logged-out prompt -->
-      <div id="gs-loginprompt" class="gs-loginprompt" hidden>
-        <b>Want your own showcase?</b>
-        <p>Log in or create an account to build a profile and share it with one link.</p>
-        <button class="btn btn-primary" id="prompt-login" type="button">Log in / Sign up</button>
-      </div>
+        <div id="gs-cover" style="margin-top:24px;border-top:1px solid rgba(255,255,255,.075);padding-top:20px"></div>
 
-      <!-- public gallery -->
-      <section class="gallery-wrap" id="gallery-wrap" hidden>
-        <h2 class="gallery-title">Browse showcases</h2>
-        <div id="gallery" class="gallery"></div>
-        <div id="gallery-empty" class="gs-empty" hidden>No showcases yet — be the first to make one!</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.075)">
+          <button type="button" id="gs-save" class="btn btn-primary" style="font-size:15px;padding:13px 26px">Save showcase</button>
+          <span id="gs-savestatus" style="font-size:13px;color:rgba(244,242,248,.55)"></span>
+        </div>
       </section>
     </div>
 
-    <!-- AUTH MODAL -->
+    <!-- logged in but no username yet -->
+    <div style="max-width:640px;margin:0 auto;padding:0 28px 60px">
+      <div id="gs-setupname" class="gs-loginprompt" hidden>
+        <b>One last step, pick a username</b>
+        <p>It becomes your public link, so anyone can find your showcase.</p>
+        <form id="gs-setupform" class="gs-setup-form">
+          <input id="gs-setup-uname" class="gs-in" type="text" placeholder="yourname"
+            maxlength="20" autocomplete="off" />
+          <div id="gs-setup-status" class="gs-uname-status" hidden></div>
+          <button class="btn btn-primary" type="submit" id="gs-setup-save">Save username</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ═══════════ footer ═══════════ -->
+    <footer style="border-top:1px solid rgba(255,255,255,.075)">
+      <div style="max-width:1320px;margin:0 auto;padding:44px 28px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:center">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;background:#191531;border:1px solid rgba(255,255,255,.14)"><img src={`${base}assets/gojo.png`} alt="OtakuList" style="width:25px;height:25px;border-radius:50%;object-fit:cover;display:block" /></span>
+          <span style="font-family:var(--font-heading);font-weight:800;font-size:16px">OtakuList</span>
+          <span style="font-size:12.5px;color:rgba(244,242,248,.4);margin-left:8px">© 2026 · MIT licensed</span>
+        </div>
+        <div style="display:flex;gap:20px;font-size:13.5px">
+          <a href={base}>Landing</a>
+          <a href={`${base}animelist.html`}>My Anime List</a>
+          <a href={REPO} target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ═══════════ AUTH MODAL ═══════════ -->
     <div id="auth-modal" class="am-overlay" hidden>
       <div class="am-card">
         <button class="am-x" id="am-close" type="button" aria-label="Close">✕</button>
         <h2 class="am-title" id="am-title">Welcome back!</h2>
 
         <form id="auth-form" class="am-form">
-          <label class="am-label" for="am-email">Email address</label>
-          <input id="am-email" class="am-in" type="email" placeholder="name@email.com" autocomplete="email" required />
-
           <div id="am-uwrap" hidden>
             <label class="am-label" for="am-username">Username</label>
             <input id="am-username" class="am-in" type="text" placeholder="yourname" maxlength="20" autocomplete="off" />
             <div id="am-ustatus" class="gs-uname-status" hidden></div>
           </div>
+
+          <label class="am-label" for="am-email">Email address</label>
+          <input id="am-email" class="am-in" type="email" placeholder="name@email.com" autocomplete="email" required />
 
           <label class="am-label" for="am-pass">Password</label>
           <input id="am-pass" class="am-in" type="password" placeholder="Password" autocomplete="current-password" required />
@@ -119,12 +219,11 @@ const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
         </p>
       </div>
     </div>
-  </main>
+  </div>
 
   <Fragment slot="scripts">
     <script is:inline src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script is:inline define:vars={{ SUPABASE_URL, SUPABASE_ANON_KEY }}>
-      // create the client from build-time env values (falls back to local mode)
       window.sb =
         window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY
           ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)

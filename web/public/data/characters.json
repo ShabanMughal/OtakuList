@@ -1,0 +1,1430 @@
+{
+    "genshin": [
+        {
+            "name": "Aino",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Aino.png",
+            "r": 4
+        },
+        {
+            "name": "Albedo",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Albedo.png",
+            "r": 5
+        },
+        {
+            "name": "Alhaitham",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Alhatham.png",
+            "r": 5
+        },
+        {
+            "name": "Aloy",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Aloy.png",
+            "r": 5
+        },
+        {
+            "name": "Alyosha",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Alyosha.png",
+            "r": 4
+        },
+        {
+            "name": "Amber",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Ambor.png",
+            "r": 4
+        },
+        {
+            "name": "Arataki Itto",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Itto.png",
+            "r": 5
+        },
+        {
+            "name": "Arlecchino",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Arlecchino.png",
+            "r": 5
+        },
+        {
+            "name": "Baizhu",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Baizhuer.png",
+            "r": 5
+        },
+        {
+            "name": "Barbara",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Barbara.png",
+            "r": 4
+        },
+        {
+            "name": "Beidou",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Beidou.png",
+            "r": 4
+        },
+        {
+            "name": "Bennett",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Bennett.png",
+            "r": 4
+        },
+        {
+            "name": "Candace",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Candace.png",
+            "r": 4
+        },
+        {
+            "name": "Charlotte",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Charlotte.png",
+            "r": 4
+        },
+        {
+            "name": "Chasca",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Chasca.png",
+            "r": 5
+        },
+        {
+            "name": "Chevreuse",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Chevreuse.png",
+            "r": 4
+        },
+        {
+            "name": "Chiori",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Chiori.png",
+            "r": 5
+        },
+        {
+            "name": "Chongyun",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Chongyun.png",
+            "r": 4
+        },
+        {
+            "name": "Citlali",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Citlali.png",
+            "r": 5
+        },
+        {
+            "name": "Clorinde",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Clorinde.png",
+            "r": 5
+        },
+        {
+            "name": "Collei",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Collei.png",
+            "r": 4
+        },
+        {
+            "name": "Columbina",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Columbina.png",
+            "r": 5
+        },
+        {
+            "name": "Cyno",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Cyno.png",
+            "r": 5
+        },
+        {
+            "name": "Dahlia",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Dahlia.png",
+            "r": 4
+        },
+        {
+            "name": "Dehya",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Dehya.png",
+            "r": 5
+        },
+        {
+            "name": "Diluc",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Diluc.png",
+            "r": 5
+        },
+        {
+            "name": "Diona",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Diona.png",
+            "r": 4
+        },
+        {
+            "name": "Dori",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Dori.png",
+            "r": 4
+        },
+        {
+            "name": "Durin",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Durin.png",
+            "r": 5
+        },
+        {
+            "name": "Emilie",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Emilie.png",
+            "r": 5
+        },
+        {
+            "name": "Escoffier",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Escoffier.png",
+            "r": 5
+        },
+        {
+            "name": "Eula",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Eula.png",
+            "r": 5
+        },
+        {
+            "name": "Faruzan",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Faruzan.png",
+            "r": 4
+        },
+        {
+            "name": "Fischl",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Fischl.png",
+            "r": 4
+        },
+        {
+            "name": "Flins",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Flins.png",
+            "r": 5
+        },
+        {
+            "name": "Freminet",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Freminet.png",
+            "r": 4
+        },
+        {
+            "name": "Furina",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Furina.png",
+            "r": 5
+        },
+        {
+            "name": "Gaming",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Gaming.png",
+            "r": 4
+        },
+        {
+            "name": "Ganyu",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Ganyu.png",
+            "r": 5
+        },
+        {
+            "name": "Gorou",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Gorou.png",
+            "r": 4
+        },
+        {
+            "name": "Hu Tao",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Hutao.png",
+            "r": 5
+        },
+        {
+            "name": "Iansan",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Iansan.png",
+            "r": 4
+        },
+        {
+            "name": "Ifa",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Ifa.png",
+            "r": 4
+        },
+        {
+            "name": "Illuga",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Illuga.png",
+            "r": 4
+        },
+        {
+            "name": "Ineffa",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Ineffa.png",
+            "r": 5
+        },
+        {
+            "name": "Jahoda",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Jahoda.png",
+            "r": 4
+        },
+        {
+            "name": "Jean",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Qin.png",
+            "r": 5
+        },
+        {
+            "name": "Kachina",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Kachina.png",
+            "r": 4
+        },
+        {
+            "name": "Kaedehara Kazuha",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Kazuha.png",
+            "r": 5
+        },
+        {
+            "name": "Kaeya",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Kaeya.png",
+            "r": 4
+        },
+        {
+            "name": "Kamisato Ayaka",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Ayaka.png",
+            "r": 5
+        },
+        {
+            "name": "Kamisato Ayato",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Ayato.png",
+            "r": 5
+        },
+        {
+            "name": "Kaveh",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Kaveh.png",
+            "r": 4
+        },
+        {
+            "name": "Keqing",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Keqing.png",
+            "r": 5
+        },
+        {
+            "name": "Kinich",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Kinich.png",
+            "r": 5
+        },
+        {
+            "name": "Kirara",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Momoka.png",
+            "r": 4
+        },
+        {
+            "name": "Klee",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Klee.png",
+            "r": 5
+        },
+        {
+            "name": "Kujou Sara",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Sara.png",
+            "r": 4
+        },
+        {
+            "name": "Kuki Shinobu",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Shinobu.png",
+            "r": 4
+        },
+        {
+            "name": "Lan Yan",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Lanyan.png",
+            "r": 4
+        },
+        {
+            "name": "Lauma",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Lauma.png",
+            "r": 5
+        },
+        {
+            "name": "Layla",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Layla.png",
+            "r": 4
+        },
+        {
+            "name": "Linnea",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Linnea.png",
+            "r": 5
+        },
+        {
+            "name": "Lisa",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Lisa.png",
+            "r": 4
+        },
+        {
+            "name": "Lohen",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Lohen.png",
+            "r": 5
+        },
+        {
+            "name": "Lynette",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Linette.png",
+            "r": 4
+        },
+        {
+            "name": "Lyney",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Liney.png",
+            "r": 5
+        },
+        {
+            "name": "Manekin",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_MannequinBoy.png",
+            "r": 5
+        },
+        {
+            "name": "Manekina",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_MannequinGirl.png",
+            "r": 5
+        },
+        {
+            "name": "Mavuika",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Mavuika.png",
+            "r": 5
+        },
+        {
+            "name": "Mika",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Mika.png",
+            "r": 4
+        },
+        {
+            "name": "Mona",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Mona.png",
+            "r": 5
+        },
+        {
+            "name": "Mualani",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Mualani.png",
+            "r": 5
+        },
+        {
+            "name": "Nahida",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Nahida.png",
+            "r": 5
+        },
+        {
+            "name": "Navia",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Navia.png",
+            "r": 5
+        },
+        {
+            "name": "Nefer",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Nefer.png",
+            "r": 5
+        },
+        {
+            "name": "Neuvillette",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Neuvillette.png",
+            "r": 5
+        },
+        {
+            "name": "Nicole",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Nicole.png",
+            "r": 5
+        },
+        {
+            "name": "Nilou",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Nilou.png",
+            "r": 5
+        },
+        {
+            "name": "Ningguang",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Ningguang.png",
+            "r": 4
+        },
+        {
+            "name": "Noelle",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Noel.png",
+            "r": 4
+        },
+        {
+            "name": "Odette",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Odette.png",
+            "r": 5
+        },
+        {
+            "name": "Ororon",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Olorun.png",
+            "r": 4
+        },
+        {
+            "name": "Prune",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Prune.png",
+            "r": 4
+        },
+        {
+            "name": "Qiqi",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Qiqi.png",
+            "r": 5
+        },
+        {
+            "name": "Raiden Shogun",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Shougun.png",
+            "r": 5
+        },
+        {
+            "name": "Razor",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Razor.png",
+            "r": 4
+        },
+        {
+            "name": "Rosaria",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Rosaria.png",
+            "r": 4
+        },
+        {
+            "name": "Sandrone",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_MarionetteNew.png",
+            "r": 5
+        },
+        {
+            "name": "Sangonomiya Kokomi",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Kokomi.png",
+            "r": 5
+        },
+        {
+            "name": "Sayu",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Sayu.png",
+            "r": 4
+        },
+        {
+            "name": "Sethos",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Sethos.png",
+            "r": 4
+        },
+        {
+            "name": "Shenhe",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Shenhe.png",
+            "r": 5
+        },
+        {
+            "name": "Shikanoin Heizou",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Heizo.png",
+            "r": 4
+        },
+        {
+            "name": "Sigewinne",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Sigewinne.png",
+            "r": 5
+        },
+        {
+            "name": "Skirk",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_SkirkNew.png",
+            "r": 5
+        },
+        {
+            "name": "Sucrose",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Sucrose.png",
+            "r": 4
+        },
+        {
+            "name": "Tartaglia",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Tartaglia.png",
+            "r": 5
+        },
+        {
+            "name": "Thoma",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Tohma.png",
+            "r": 4
+        },
+        {
+            "name": "Tighnari",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Tighnari.png",
+            "r": 5
+        },
+        {
+            "name": "Varesa",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Varesa.png",
+            "r": 5
+        },
+        {
+            "name": "Varka",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Varka.png",
+            "r": 5
+        },
+        {
+            "name": "Venti",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Venti.png",
+            "r": 5
+        },
+        {
+            "name": "Wanderer",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Wanderer.png",
+            "r": 5
+        },
+        {
+            "name": "Wriothesley",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Wriothesley.png",
+            "r": 5
+        },
+        {
+            "name": "Xiangling",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Xiangling.png",
+            "r": 4
+        },
+        {
+            "name": "Xianyun",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Liuyun.png",
+            "r": 5
+        },
+        {
+            "name": "Xiao",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Xiao.png",
+            "r": 5
+        },
+        {
+            "name": "Xilonen",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Xilonen.png",
+            "r": 5
+        },
+        {
+            "name": "Xingqiu",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Xingqiu.png",
+            "r": 4
+        },
+        {
+            "name": "Xinyan",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Xinyan.png",
+            "r": 4
+        },
+        {
+            "name": "Yae Miko",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Yae.png",
+            "r": 5
+        },
+        {
+            "name": "Yanfei",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Feiyan.png",
+            "r": 4
+        },
+        {
+            "name": "Yaoyao",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Yaoyao.png",
+            "r": 4
+        },
+        {
+            "name": "Yelan",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Yelan.png",
+            "r": 5
+        },
+        {
+            "name": "Yoimiya",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Yoimiya.png",
+            "r": 5
+        },
+        {
+            "name": "Yumemizuki Mizuki",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Mizuki.png",
+            "r": 5
+        },
+        {
+            "name": "Yun Jin",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Yunjin.png",
+            "r": 4
+        },
+        {
+            "name": "Zhongli",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Zhongli.png",
+            "r": 5
+        },
+        {
+            "name": "Zibai",
+            "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Zibai.png",
+            "r": 5
+        }
+    ],
+    "hsr": [
+        {
+            "name": "Acheron",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1308.png",
+            "r": 5
+        },
+        {
+            "name": "Aglaea",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1402.png",
+            "r": 5
+        },
+        {
+            "name": "Anaxa",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1405.png",
+            "r": 5
+        },
+        {
+            "name": "Archer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1015.png",
+            "r": 5
+        },
+        {
+            "name": "Argenti",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1302.png",
+            "r": 5
+        },
+        {
+            "name": "Arlan",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1008.png",
+            "r": 4
+        },
+        {
+            "name": "Ashveil",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1504.png",
+            "r": 5
+        },
+        {
+            "name": "Asta",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1009.png",
+            "r": 4
+        },
+        {
+            "name": "Aventurine",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1304.png",
+            "r": 5
+        },
+        {
+            "name": "Bailu",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1211.png",
+            "r": 5
+        },
+        {
+            "name": "Black Swan",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1307.png",
+            "r": 5
+        },
+        {
+            "name": "Blade",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1205.png",
+            "r": 5
+        },
+        {
+            "name": "Boothill",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1315.png",
+            "r": 5
+        },
+        {
+            "name": "Bronya",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1101.png",
+            "r": 5
+        },
+        {
+            "name": "Castorice",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1407.png",
+            "r": 5
+        },
+        {
+            "name": "Cerydra",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1412.png",
+            "r": 5
+        },
+        {
+            "name": "Cipher",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1406.png",
+            "r": 5
+        },
+        {
+            "name": "Clara",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1107.png",
+            "r": 5
+        },
+        {
+            "name": "Cyrene",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1415.png",
+            "r": 5
+        },
+        {
+            "name": "Dan Heng",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1002.png",
+            "r": 4
+        },
+        {
+            "name": "Dan Heng • Imbibitor Lunae",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1213.png",
+            "r": 5
+        },
+        {
+            "name": "Dan Heng • Permansor Terrae",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1414.png",
+            "r": 5
+        },
+        {
+            "name": "Dr. Ratio",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1305.png",
+            "r": 5
+        },
+        {
+            "name": "Evanescia",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1505.png",
+            "r": 5
+        },
+        {
+            "name": "Evernight",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1413.png",
+            "r": 5
+        },
+        {
+            "name": "Feixiao",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1220.png",
+            "r": 5
+        },
+        {
+            "name": "Firefly",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1310.png",
+            "r": 5
+        },
+        {
+            "name": "Fu Xuan",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1208.png",
+            "r": 5
+        },
+        {
+            "name": "Fugue",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1225.png",
+            "r": 5
+        },
+        {
+            "name": "Gallagher",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1301.png",
+            "r": 4
+        },
+        {
+            "name": "Gepard",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1104.png",
+            "r": 5
+        },
+        {
+            "name": "Gilgamesh",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1509.png",
+            "r": 5
+        },
+        {
+            "name": "Guinaifen",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1210.png",
+            "r": 4
+        },
+        {
+            "name": "Hanya",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1215.png",
+            "r": 4
+        },
+        {
+            "name": "Herta",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1013.png",
+            "r": 4
+        },
+        {
+            "name": "Himeko",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1003.png",
+            "r": 5
+        },
+        {
+            "name": "Himeko • Nova",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1510.png",
+            "r": 5
+        },
+        {
+            "name": "Hook",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1109.png",
+            "r": 4
+        },
+        {
+            "name": "Huohuo",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1217.png",
+            "r": 5
+        },
+        {
+            "name": "Hyacine",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1409.png",
+            "r": 5
+        },
+        {
+            "name": "Hysilens",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1410.png",
+            "r": 5
+        },
+        {
+            "name": "Jade",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1314.png",
+            "r": 5
+        },
+        {
+            "name": "Jiaoqiu",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1218.png",
+            "r": 5
+        },
+        {
+            "name": "Jing Yuan",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1204.png",
+            "r": 5
+        },
+        {
+            "name": "Jingliu",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1212.png",
+            "r": 5
+        },
+        {
+            "name": "Kafka",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1005.png",
+            "r": 5
+        },
+        {
+            "name": "Lingsha",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1222.png",
+            "r": 5
+        },
+        {
+            "name": "Luka",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1111.png",
+            "r": 4
+        },
+        {
+            "name": "Luocha",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1203.png",
+            "r": 5
+        },
+        {
+            "name": "Lynx",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1110.png",
+            "r": 4
+        },
+        {
+            "name": "March 7th",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1001.png",
+            "r": 4
+        },
+        {
+            "name": "March 7th",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1224.png",
+            "r": 4
+        },
+        {
+            "name": "Misha",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1312.png",
+            "r": 4
+        },
+        {
+            "name": "Mortenax Blade",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1507.png",
+            "r": 5
+        },
+        {
+            "name": "Moze",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1223.png",
+            "r": 4
+        },
+        {
+            "name": "Mydei",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1404.png",
+            "r": 5
+        },
+        {
+            "name": "Natasha",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1105.png",
+            "r": 4
+        },
+        {
+            "name": "Pela",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1106.png",
+            "r": 4
+        },
+        {
+            "name": "Phainon",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1408.png",
+            "r": 5
+        },
+        {
+            "name": "Qingque",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1201.png",
+            "r": 4
+        },
+        {
+            "name": "Rappa",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1317.png",
+            "r": 5
+        },
+        {
+            "name": "Rin Tohsaka",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1508.png",
+            "r": 5
+        },
+        {
+            "name": "Robin",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1309.png",
+            "r": 5
+        },
+        {
+            "name": "Ruan Mei",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1303.png",
+            "r": 5
+        },
+        {
+            "name": "Saber",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1014.png",
+            "r": 5
+        },
+        {
+            "name": "Sampo",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1108.png",
+            "r": 4
+        },
+        {
+            "name": "Seele",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1102.png",
+            "r": 5
+        },
+        {
+            "name": "Serval",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1103.png",
+            "r": 4
+        },
+        {
+            "name": "Silver Wolf",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1006.png",
+            "r": 5
+        },
+        {
+            "name": "Silver Wolf LV.<unbreak>999</unbreak>",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1506.png",
+            "r": 5
+        },
+        {
+            "name": "Sparkle",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1306.png",
+            "r": 5
+        },
+        {
+            "name": "Sparxie",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1501.png",
+            "r": 5
+        },
+        {
+            "name": "Sunday",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1313.png",
+            "r": 5
+        },
+        {
+            "name": "Sushang",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1206.png",
+            "r": 4
+        },
+        {
+            "name": "The Dahlia",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1321.png",
+            "r": 5
+        },
+        {
+            "name": "The Herta",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1401.png",
+            "r": 5
+        },
+        {
+            "name": "Tingyun",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1202.png",
+            "r": 4
+        },
+        {
+            "name": "Topaz & Numby",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1112.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8001.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8002.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8003.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8004.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8005.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8006.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8007.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8008.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8009.png",
+            "r": 5
+        },
+        {
+            "name": "Trailblazer",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8010.png",
+            "r": 5
+        },
+        {
+            "name": "Tribbie",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1403.png",
+            "r": 5
+        },
+        {
+            "name": "Welt",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1004.png",
+            "r": 5
+        },
+        {
+            "name": "Xueyi",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1214.png",
+            "r": 4
+        },
+        {
+            "name": "Yanqing",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1209.png",
+            "r": 5
+        },
+        {
+            "name": "Yao Guang",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1502.png",
+            "r": 5
+        },
+        {
+            "name": "Yukong",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1207.png",
+            "r": 4
+        },
+        {
+            "name": "Yunli",
+            "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1221.png",
+            "r": 5
+        }
+    ],
+    "zzz": [
+        {
+            "name": "Anby",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle01.png",
+            "r": 4
+        },
+        {
+            "name": "Anton",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle15.png",
+            "r": 4
+        },
+        {
+            "name": "Ben",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle16.png",
+            "r": 4
+        },
+        {
+            "name": "Billy",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle10.png",
+            "r": 4
+        },
+        {
+            "name": "Corin",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle09.png",
+            "r": 4
+        },
+        {
+            "name": "Nekomata",
+            "img": "assets/chars/zzz/nekomata.png",
+            "r": 5
+        },
+        {
+            "name": "Nicole",
+            "img": "assets/chars/zzz/nicole.png",
+            "r": 5
+        },
+        {
+            "name": "Soldier 11",
+            "img": "assets/chars/zzz/soldier-11.png",
+            "r": 5
+        },
+        {
+            "name": "Grace",
+            "img": "assets/chars/zzz/grace.png",
+            "r": 5
+        },
+        {
+            "name": "Koleda",
+            "img": "assets/chars/zzz/koleda.png",
+            "r": 5
+        },
+        {
+            "name": "Rina",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle22.png",
+            "r": 5
+        },
+        {
+            "name": "Ellen",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle21.png",
+            "r": 5
+        },
+        {
+            "name": "Lycaon",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle18.png",
+            "r": 5
+        },
+        {
+            "name": "Soukaku",
+            "img": "assets/chars/zzz/soukaku.png",
+            "r": 5
+        },
+        {
+            "name": "Lucy",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle27.png",
+            "r": 4
+        },
+        {
+            "name": "Piper",
+            "img": "assets/chars/zzz/piper.png",
+            "r": 5
+        },
+        {
+            "name": "Zhu Yuan",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle23.png",
+            "r": 5
+        },
+        {
+            "name": "Qingyi",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle29.png",
+            "r": 5
+        },
+        {
+            "name": "Jane Doe",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle24.png",
+            "r": 5
+        },
+        {
+            "name": "Seth",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle30.png",
+            "r": 4
+        },
+        {
+            "name": "Caesar",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle25.png",
+            "r": 5
+        },
+        {
+            "name": "Burnice",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle32.png",
+            "r": 5
+        },
+        {
+            "name": "Yanagi",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle31.png",
+            "r": 5
+        },
+        {
+            "name": "Miyabi",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle11.png",
+            "r": 5
+        },
+        {
+            "name": "Harumasa",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle35.png",
+            "r": 5
+        },
+        {
+            "name": "Lighter",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle26.png",
+            "r": 5
+        },
+        {
+            "name": "Evelyn",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle37.png",
+            "r": 5
+        },
+        {
+            "name": "Astra Yao",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle36.png",
+            "r": 5
+        },
+        {
+            "name": "Pulchra",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle38.png",
+            "r": 4
+        },
+        {
+            "name": "Trigger",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle39.png",
+            "r": 5
+        },
+        {
+            "name": "Vivian",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle41.png",
+            "r": 5
+        },
+        {
+            "name": "Yixuan",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle44.png",
+            "r": 5
+        },
+        {
+            "name": "Ju Fufu",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle43.png",
+            "r": 5
+        },
+        {
+            "name": "Alice",
+            "img": "https://enka.network/ui/zzz/IconRoleCircle46.png",
+            "r": 5
+        }
+    ],
+    "wuwa": [
+        {
+            "name": "Rover",
+            "img": "assets/chars/wuwa/rover.png",
+            "r": 4
+        },
+        {
+            "name": "Aalto",
+            "img": "assets/chars/wuwa/aalto.png",
+            "r": 4
+        },
+        {
+            "name": "Baizhi",
+            "img": "assets/chars/wuwa/baizhi.png",
+            "r": 4
+        },
+        {
+            "name": "Chixia",
+            "img": "assets/chars/wuwa/chixia.png",
+            "r": 4
+        },
+        {
+            "name": "Danjin",
+            "img": "assets/chars/wuwa/danjin.png",
+            "r": 4
+        },
+        {
+            "name": "Encore",
+            "img": "assets/chars/wuwa/encore.png",
+            "r": 4
+        },
+        {
+            "name": "Jianxin",
+            "img": "assets/chars/wuwa/jianxin.png",
+            "r": 4
+        },
+        {
+            "name": "Lingyang",
+            "img": "assets/chars/wuwa/lingyang.png",
+            "r": 4
+        },
+        {
+            "name": "Mortefi",
+            "img": "assets/chars/wuwa/mortefi.png",
+            "r": 4
+        },
+        {
+            "name": "Sanhua",
+            "img": "assets/chars/wuwa/sanhua.png",
+            "r": 4
+        },
+        {
+            "name": "Taoqi",
+            "img": "assets/chars/wuwa/taoqi.png",
+            "r": 4
+        },
+        {
+            "name": "Verina",
+            "img": "assets/chars/wuwa/verina.png",
+            "r": 5
+        },
+        {
+            "name": "Yangyang",
+            "img": "assets/chars/wuwa/yangyang.png",
+            "r": 4
+        },
+        {
+            "name": "Yuanwu",
+            "img": "assets/chars/wuwa/yuanwu.png",
+            "r": 4
+        },
+        {
+            "name": "Calcharo",
+            "img": "assets/chars/wuwa/calcharo.png",
+            "r": 5
+        },
+        {
+            "name": "Jiyan",
+            "img": "assets/chars/wuwa/jiyan.png",
+            "r": 5
+        },
+        {
+            "name": "Lumi",
+            "img": "assets/chars/wuwa/lumi.png",
+            "r": 4
+        },
+        {
+            "name": "Yinlin",
+            "img": "assets/chars/wuwa/yinlin.png",
+            "r": 5
+        },
+        {
+            "name": "Jinhsi",
+            "img": "assets/chars/wuwa/jinhsi.png",
+            "r": 5
+        },
+        {
+            "name": "Changli",
+            "img": "assets/chars/wuwa/changli.png",
+            "r": 5
+        },
+        {
+            "name": "Zhezhi",
+            "img": "assets/chars/wuwa/zhezhi.png",
+            "r": 5
+        },
+        {
+            "name": "Xiangli Yao",
+            "img": "assets/chars/wuwa/xiangli-yao.png",
+            "r": 5
+        },
+        {
+            "name": "Shorekeeper",
+            "img": "assets/chars/wuwa/shorekeeper.png",
+            "r": 5
+        },
+        {
+            "name": "Camellya",
+            "img": "assets/chars/wuwa/camellya.png",
+            "r": 5
+        },
+        {
+            "name": "Carlotta",
+            "img": "assets/chars/wuwa/carlotta.png",
+            "r": 5
+        },
+        {
+            "name": "Roccia",
+            "img": "assets/chars/wuwa/roccia.png",
+            "r": 5
+        },
+        {
+            "name": "Phoebe",
+            "img": "assets/chars/wuwa/phoebe.png",
+            "r": 5
+        },
+        {
+            "name": "Brant",
+            "img": "assets/chars/wuwa/brant.png",
+            "r": 5
+        },
+        {
+            "name": "Cantarella",
+            "img": "assets/chars/wuwa/cantarella.png",
+            "r": 5
+        },
+        {
+            "name": "Zani",
+            "img": "assets/chars/wuwa/zani.png",
+            "r": 5
+        },
+        {
+            "name": "Ciaccona",
+            "img": "assets/chars/wuwa/ciaccona.png",
+            "r": 5
+        },
+        {
+            "name": "Cartethyia",
+            "img": "assets/chars/wuwa/cartethyia.png",
+            "r": 5
+        },
+        {
+            "name": "Lupa",
+            "img": "assets/chars/wuwa/lupa.png",
+            "r": 5
+        },
+        {
+            "name": "Phrolova",
+            "img": "assets/chars/wuwa/phrolova.png",
+            "r": 5
+        },
+        {
+            "name": "Augusta",
+            "img": "assets/chars/wuwa/augusta.png",
+            "r": 5
+        }
+    ]
+}
