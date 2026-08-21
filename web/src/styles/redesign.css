@@ -134,6 +134,27 @@ summary::-webkit-details-marker { display: none; }
 .rd-card { transition: box-shadow .3s, transform .3s, border-color .3s; }
 .rd-card:hover { transform: translateY(-3px); border-color: rgba(125, 92, 245, .4); }
 
+/* bento grid (Features) — asymmetric tiles that pack densely */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 194px;
+  gap: 18px;
+}
+.bento > * { min-width: 0; height: 100%; display: flex; flex-direction: column; }
+.b-2x2 { grid-column: span 2; grid-row: span 2; }
+.b-2x1 { grid-column: span 2; }
+
+@media (max-width: 900px) {
+  .bento { grid-template-columns: repeat(2, 1fr); }
+  .b-2x2 { grid-column: span 2; grid-row: span 1; }
+  .b-2x1 { grid-column: span 2; }
+}
+@media (max-width: 560px) {
+  .bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
+  .bento > * { grid-column: auto !important; grid-row: auto !important; }
+}
+
 details summary { transition: color .2s; }
 details summary:hover { color: #b9a8ff; }
 

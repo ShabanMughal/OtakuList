@@ -1,0 +1,152 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const REPO = 'https://github.com/ShabanMughal/OtakuList';
+
+const theme =
+  "--color-bg:#0b0a16;--color-surface:#17142a;--color-text:#f4f2f8;" +
+  "--color-accent:#7d5cf5;--color-accent-2:#6fa8dc;--color-accent-600:#6b4be0;" +
+  "--color-divider:rgba(255,255,255,.12);--glass-line:rgba(255,255,255,.08);" +
+  "--shadow-md:0 8px 24px rgba(0,0,0,.45);--shadow-lg:0 26px 60px rgba(0,0,0,.6);" +
+  "--font-heading:'Archivo',system-ui,sans-serif;--font-body:'Poppins',system-ui,sans-serif;" +
+  "--font-display:'Archivo',system-ui,sans-serif;" +
+  "min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)";
+---
+
+<BaseLayout
+  title="Anime List, your watchlist in the browser"
+  description="A web version of your OtakuList anime watchlist — track episodes, ratings and status. Stored in your browser and syncable with the extension via Export/Import."
+  canonical="https://shabanmughal.github.io/OtakuList/animelist.html"
+  page="animelist"
+  chrome={false}
+>
+  <link
+    slot="head"
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <div style={theme}>
+    <!-- header -->
+    <header class="sticky top-0 z-[60] border-b border-white/[.075] backdrop-blur-lg" style="background:rgba(11,10,22,.85)">
+      <div class="mx-auto flex max-w-[1320px] flex-wrap items-center gap-[26px] px-7 py-3">
+        <a href={base} class="flex items-center gap-2.5 text-[#f4f2f8]">
+          <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-full border border-white/[.14] bg-[#191531]"><img src={`${base}assets/gojo.png`} alt="OtakuList" class="block h-[30px] w-[30px] rounded-full object-cover" /></span>
+          <span class="font-heading text-[19px] font-extrabold tracking-[-.02em]">OtakuList</span>
+        </a>
+        <nav class="flex gap-[22px] text-[13.5px] font-semibold text-[#f4f2f8]/[.68]">
+          <a href={`${base}#features`} class="text-inherit hover:text-iris-2">Features</a>
+          <a href={`${base}#how`} class="text-inherit hover:text-iris-2">How it works</a>
+          <a href={`${base}animelist.html`} class="border-b-2 border-iris pb-0.5 text-iris-2">Create list</a>
+          <a href={`${base}import.html`} class="text-inherit hover:text-iris-2">Import</a>
+          <a href={`${base}showcase.html`} class="text-inherit hover:text-iris-2">Gacha Profiles</a>
+        </nav>
+        <div class="ml-auto flex items-center gap-2.5">
+          <button id="al-export" type="button" class="cursor-pointer rounded-full border border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">Export</button>
+          <button id="al-import" type="button" class="cursor-pointer rounded-full border border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">Import</button>
+          <input id="al-importfile" type="file" accept="application/json,.json" hidden />
+          <button id="al-add" type="button" class="cursor-pointer rounded-full border-none bg-iris px-5 py-2.5 font-heading text-sm font-extrabold text-white">＋ Add anime</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- hero -->
+    <section class="border-b border-white/[.075]">
+      <div class="mx-auto max-w-[1320px] px-7 pb-[30px] pt-11">
+        <div class="mb-3 text-[11.5px] uppercase tracking-[.16em] text-iris-2">Your list</div>
+        <h1 class="m-0 mb-2.5 font-heading text-[clamp(30px,4vw,48px)] font-extrabold tracking-[-.035em]">Anime List</h1>
+        <p class="m-0 max-w-[64ch] text-base text-[#f4f2f8]/[.62]">Track every show, episode, rating and status right here in your browser. It stays on your device, and you can move it to and from the extension any time with <b class="text-iris-2">Export / Import</b>.</p>
+      </div>
+    </section>
+
+    <!-- extension sync banner (shown only when the extension is detected) -->
+    <div id="al-extbar" hidden class="mx-auto mt-[18px] max-w-[1320px] px-7">
+      <div class="flex flex-wrap items-center gap-3.5 rounded-2xl border border-iris/[.35] bg-iris/10 px-[18px] py-3.5">
+        <span class="text-xl">🧩</span>
+        <span class="text-sm text-[#e7e2ff]"><b id="al-extcount">0</b> titles found in your OtakuList extension.</span>
+        <button id="al-extload" type="button" class="ml-auto cursor-pointer rounded-full border-none bg-iris px-[18px] py-[9px] font-heading text-[13px] font-extrabold text-white">Load into this page</button>
+      </div>
+    </div>
+
+    <!-- toolbar -->
+    <div class="mx-auto max-w-[1320px] px-7 pt-[22px]">
+      <div class="al-toolbar">
+        <div id="al-tabs" class="al-tabs">
+          <button class="al-tab on" data-status="watching" type="button">Watching <span class="n">0</span></button>
+          <button class="al-tab" data-status="plan" type="button">Plan <span class="n">0</span></button>
+          <button class="al-tab" data-status="completed" type="button">Completed <span class="n">0</span></button>
+          <button class="al-tab" data-status="onhold" type="button">On Hold <span class="n">0</span></button>
+        </div>
+        <div class="al-tools">
+          <div class="al-searchwrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(244,242,248,.45)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+            <input id="al-search" type="text" placeholder="Search titles…" />
+          </div>
+          <select id="al-sort" class="al-select">
+            <option value="updated">Recently updated</option>
+            <option value="added">Recently added</option>
+            <option value="title">Title A–Z</option>
+            <option value="episode">Most episodes</option>
+          </select>
+          <div id="al-view" class="al-view">
+            <button class="al-vbtn on" data-view="grid" type="button" title="Grid view" aria-label="Grid view">▦</button>
+            <button class="al-vbtn" data-view="list" type="button" title="List view" aria-label="List view">≣</button>
+          </div>
+        </div>
+      </div>
+      <div id="al-count" class="mx-0.5 mt-3.5 text-[12.5px] text-[#f4f2f8]/[.45]">0 titles saved</div>
+    </div>
+
+    <!-- cards -->
+    <div class="mx-auto max-w-[1320px] px-7 pb-20 pt-5">
+      <div id="al-grid" class="al-grid"></div>
+      <div id="al-empty" class="al-empty" hidden></div>
+    </div>
+
+    <Footer />
+
+    <!-- add modal -->
+    <div id="al-modal" class="am-overlay" hidden>
+      <div class="am-card">
+        <button class="am-x" id="al-modal-close" type="button" aria-label="Close">✕</button>
+        <h2 class="am-title">Add anime</h2>
+        <form id="al-form" class="am-form">
+          <label class="am-label" for="al-f-title">Title</label>
+          <input id="al-f-title" class="am-in" type="text" placeholder="e.g. Jujutsu Kaisen" required />
+
+          <label class="am-label" for="al-f-status">Status</label>
+          <select id="al-f-status" class="am-in">
+            <option value="watching">Watching</option>
+            <option value="plan">Plan to Watch</option>
+            <option value="completed">Completed</option>
+            <option value="onhold">On Hold</option>
+          </select>
+
+          <div class="flex gap-3">
+            <div class="flex-1">
+              <label class="am-label" for="al-f-ep">Current episode</label>
+              <input id="al-f-ep" class="am-in" type="number" min="0" placeholder="0" />
+            </div>
+            <div class="flex-1">
+              <label class="am-label" for="al-f-total">Total episodes</label>
+              <input id="al-f-total" class="am-in" type="number" min="0" placeholder="?" />
+            </div>
+          </div>
+
+          <label class="am-label" for="al-f-cover">Cover image URL (optional)</label>
+          <input id="al-f-cover" class="am-in" type="url" placeholder="https://…" />
+
+          <label class="am-label" for="al-f-site">Where you watch (optional)</label>
+          <input id="al-f-site" class="am-in" type="text" placeholder="e.g. aniwatch.to" />
+
+          <button type="submit" class="am-submit">Add to list</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <Fragment slot="scripts">
+    <script is:inline src={`${base}js/animelist.js`}></script>
+  </Fragment>
+</BaseLayout>

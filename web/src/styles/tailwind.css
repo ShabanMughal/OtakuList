@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Preflight is disabled (so it doesn't fight global.css), but we still need the
+   button reset it normally provides — otherwise a bare <button> shows the
+   browser's native light-grey fill.
+   NOTE: use the low-specificity `button` element selector only. Astro flattens
+   Tailwind's @layer, so an attribute selector like [type=button] (0,1,0) would
+   tie with utility classes like .bg-iris and win by source order. `button`
+   (0,0,1) always loses to any bg-* utility, which is exactly what we want. */
+button {
+  background-color: transparent;
+  background-image: none;
+}

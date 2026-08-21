@@ -333,4 +333,32 @@
   }, 2000);
 
   scheduleDetect(); // first pass on load
+
+  // ── website bridge ─────────────────────────────────────────────────────
+  // Lets the OtakuList web app (Create list page) read the list saved by this
+  // extension. Gated strictly to the official site + localhost so no other page
+  // can ask the extension for your list.
+  (function otakulistBridge() {
+    const h = location.hostname;
+    const allowed = h === "shabanmughal.github.io" || h === "localhost" || h === "127.0.0.1";
+    if (!allowed) return;
+
+    async function sendList() {
+      const store = await chrome.storage.local.get(KEY);
+      window.postMessage({ source: "otakulist-ext", type: "list", list: store[KEY] || {} }, location.origin);
+    }
+
+    window.addEventListener("message", (e) => {
+      if (e.source !== window || e.origin !== location.origin) return;
+      const d = e.data;
+      if (d && d.source === "otakulist-web" && d.type === "request-list") sendList();
+    });
+
+    // announce we're here so the page can request immediately
+    window.postMessage({ source: "otakulist-ext", type: "hello" }, location.origin);
+    // reflect live edits (e.g. an episode auto-bumped while the tab is open)
+    chrome.storage.onChanged.addListener((ch, area) => {
+      if (area === "local" && ch[KEY]) sendList();
+    });
+  })();
 })();

@@ -21,10 +21,17 @@ export default {
         'accent-3': '#c084fc',
         glow: '#7c3aed',
         gold: '#f2c14e',
+        // modernist (redesign) palette
+        ink: '#0b0a16',
+        surface: '#17142a',
+        iris: '#7d5cf5',
+        'iris-2': '#b9a8ff',
+        sky: '#6fa8dc',
       },
       fontFamily: {
         display: ['Unbounded', 'sans-serif'],
         body: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        heading: ['Archivo', 'system-ui', 'sans-serif'],
       },
       maxWidth: {
         site: '1160px',

@@ -1,0 +1,46 @@
+---
+// Shared site footer — used on every page so they stay identical.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const REPO = 'https://github.com/ShabanMughal/OtakuList';
+---
+
+<footer class="border-t border-white/[.075]">
+  <div class="mx-auto grid max-w-[1240px] gap-9 px-7 pb-10 pt-14" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+    <div>
+      <div class="mb-3.5 flex items-center gap-2.5">
+        <span class="grid h-7 w-7 flex-none place-items-center rounded-full border border-white/[.14] bg-[#191531]"><img src={`${base}assets/gojo.png`} alt="OtakuList" class="block h-[25px] w-[25px] rounded-full object-cover" /></span>
+        <span class="font-heading text-[17px] font-extrabold text-[#f4f2f8]">OtakuList</span>
+      </div>
+      <p class="m-0 max-w-[30ch] text-[13.5px] text-[#f4f2f8]/50">A watchlist that belongs to your browser, not to a website.</p>
+    </div>
+    <div>
+      <div class="mb-3.5 text-[11px] uppercase tracking-[.14em] text-[#f4f2f8]/[.45]">Product</div>
+      <div class="flex flex-col gap-[9px] text-sm text-[#f4f2f8]/[.7]">
+        <a class="hover:text-iris-2" href={`${base}#features`}>Features</a>
+        <a class="hover:text-iris-2" href={`${base}#how`}>How it works</a>
+        <a class="hover:text-iris-2" href={`${base}#install`}>Install</a>
+        <a class="hover:text-iris-2" href={`${base}#faq`}>FAQ</a>
+      </div>
+    </div>
+    <div>
+      <div class="mb-3.5 text-[11px] uppercase tracking-[.14em] text-[#f4f2f8]/[.45]">App</div>
+      <div class="flex flex-col gap-[9px] text-sm text-[#f4f2f8]/[.7]">
+        <a class="hover:text-iris-2" href={`${base}animelist.html`}>Create list</a>
+        <a class="hover:text-iris-2" href={`${base}import.html`}>Import tool</a>
+        <a class="hover:text-iris-2" href={`${base}showcase.html`}>Gacha Profiles</a>
+      </div>
+    </div>
+    <div>
+      <div class="mb-3.5 text-[11px] uppercase tracking-[.14em] text-[#f4f2f8]/[.45]">Open source</div>
+      <div class="flex flex-col gap-[9px] text-sm text-[#f4f2f8]/[.7]">
+        <a class="hover:text-iris-2" href={REPO} target="_blank" rel="noopener">GitHub repo</a>
+        <a class="hover:text-iris-2" href={`${REPO}/issues`} target="_blank" rel="noopener">Report an issue</a>
+        <a class="hover:text-iris-2" href={REPO} target="_blank" rel="noopener">MIT license</a>
+      </div>
+    </div>
+  </div>
+  <div class="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 border-t border-white/[.075] px-7 pb-10 pt-[18px] text-[12.5px] text-[#f4f2f8]/40">
+    <span>© 2026 OtakuList, no cookies, no accounts, no tracking.</span>
+    <span>OtakuList does not host or link to any video content.</span>
+  </div>
+</footer>
