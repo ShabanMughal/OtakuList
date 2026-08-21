@@ -1715,6 +1715,17 @@ img {
   z-index: 1;
 }
 
+/* game logo shown large on the card banner */
+.gs-cardlogo {
+  position: relative;
+  z-index: 1;
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .4);
+}
+
 .gs-card-actions {
   position: absolute;
   top: 8px;
@@ -1787,12 +1798,133 @@ img {
 }
 
 .gs-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
-  padding: 3px 10px;
+  padding: 3px 10px 3px 3px;
   border-radius: 20px;
   background: rgba(167, 139, 250, 0.14);
   border: 1px solid var(--panel-brd);
   color: var(--accent-2);
+}
+
+/* portrait / initials inside chips & picker */
+.gs-charimg,
+.gs-charini {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex: none;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* profile game-section logo fallback (when a logo image is missing) */
+.gs-gamebadge-fb {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, #3b0764, #7d5cf5);
+  font-family: var(--font-heading, sans-serif);
+  font-weight: 800;
+  font-size: 17px;
+  color: #fff;
+}
+
+/* ── character picker ── */
+.gs-charpick {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gs-charchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.gs-charchips:empty {
+  display: none;
+}
+
+.gs-charchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px 3px 3px;
+  border-radius: 20px;
+  background: rgba(167, 139, 250, 0.14);
+  border: 1px solid var(--panel-brd);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.gs-charx {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+}
+.gs-charx:hover {
+  color: #ff8095;
+}
+
+.gs-charsearch {
+  position: relative;
+}
+
+.gs-charmenu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #17132a;
+  border: 1px solid var(--panel-brd);
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  padding: 6px;
+}
+
+.gs-charopt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.gs-charopt:hover {
+  background: rgba(139, 92, 246, 0.16);
+}
+.gs-charadd {
+  color: var(--accent-2);
+}
+
+.gs-charempty {
+  padding: 10px 8px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .gs-note {
@@ -1925,6 +2057,24 @@ img {
   margin: 8px 0 18px;
 }
 
+.gs-setup-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.gs-setup-form .gs-in {
+  width: 100%;
+  text-align: center;
+}
+
+.gs-setup-form .btn {
+  width: 100%;
+}
+
 /* ── showcase: public gallery ── */
 .gallery-wrap {
   margin-top: 40px;
@@ -2007,8 +2157,8 @@ img {
   position: relative;
   width: 100%;
   max-width: 440px;
-  background: #24232c;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #17142a;
+  border: 1px solid rgba(125, 92, 245, 0.22);
   border-radius: 20px;
   padding: 36px 36px 26px;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
@@ -2076,7 +2226,7 @@ img {
 }
 
 .am-in:focus {
-  box-shadow: 0 0 0 3px rgba(242, 193, 80, 0.45);
+  box-shadow: 0 0 0 3px rgba(125, 92, 245, 0.45);
 }
 
 #am-uwrap .gs-uname-status {
@@ -2103,13 +2253,13 @@ img {
 .am-remember input {
   width: 16px;
   height: 16px;
-  accent-color: #f2c14e;
+  accent-color: #7d5cf5;
 }
 
 .am-forgot {
   background: none;
   border: none;
-  color: #f2c14e;
+  color: #b9a8ff;
   font: inherit;
   font-size: 14px;
   cursor: pointer;
@@ -2132,8 +2282,8 @@ img {
 
 .am-submit {
   width: 100%;
-  background: linear-gradient(135deg, #f7dd9a, #f2c14e);
-  color: #2a2005;
+  background: linear-gradient(135deg, #8b6df0, #7d5cf5);
+  color: #fff;
   font-weight: 700;
   font-size: 16px;
   border: none;
@@ -2145,7 +2295,7 @@ img {
 
 .am-submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(242, 193, 80, 0.35);
+  box-shadow: 0 12px 30px rgba(125, 92, 245, 0.4);
 }
 
 .am-submit:disabled {
@@ -2164,7 +2314,7 @@ img {
 .am-link {
   background: none;
   border: none;
-  color: #f2c14e;
+  color: #b9a8ff;
   font: inherit;
   font-weight: 600;
   cursor: pointer;

@@ -1,300 +1,394 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteLayout from '../layouts/SiteLayout.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const REPO = 'https://github.com/ShabanMughal/OtakuList';
 ---
 
-<BaseLayout
-  title="OtakuList — Anime Watchlist Tracker for Chrome, Edge & Brave"
-  description="OtakuList is a free browser extension that auto-detects the anime you're watching and saves your watchlist locally — so your list survives even when a site gets blocked. No account, 100% private."
+<SiteLayout
+  title="OtakuList, Anime Watchlist Tracker for Chrome, Edge & Brave"
+  description="OtakuList detects the anime and episode you're watching on any streaming site and saves it in your own browser, so your list survives even when a site gets blocked."
   canonical="https://shabanmughal.github.io/OtakuList/"
-  ogTitle="OtakuList — Anime Watchlist Tracker"
-  ogDescription="Auto-detects the anime you're watching and keeps your watchlist safe locally — even when a site gets blocked. Free & private."
+  ogTitle="OtakuList, Anime Watchlist Tracker"
+  ogDescription="Your watchlist survives when the site doesn't. Auto-detects anime + episode, stored locally. Free & open source."
   ogImage="assets/og-image.png"
 >
-  <Fragment slot="head">
-    <script type="application/ld+json" set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'OtakuList',
-      applicationCategory: 'BrowserApplication',
-      operatingSystem: 'Chrome, Edge, Brave, Chromium',
-      description: "A free browser extension that auto-detects the anime you're watching and saves your watchlist locally, so it survives even when a streaming site gets blocked.",
-      url: 'https://shabanmughal.github.io/OtakuList/',
-      image: 'https://shabanmughal.github.io/OtakuList/assets/icon128.png',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    })} />
-  </Fragment>
+  <div style="min-height:100vh;background:var(--color-bg);color:var(--color-text)">
 
-  <main id="top">
-    <!-- HERO -->
-    <section class="hero">
-      <div class="hero-copy reveal">
-        <span class="eyebrow"><span class="dot"></span> Chrome extension · 100% free</span>
-        <h1 class="hero-title">
-          Your anime list,<br />
-          <span class="grad">sealed</span> forever.
-        </h1>
-        <p class="hero-sub">
-          OtakuList quietly detects the anime you're watching and saves your
-          watchlist <strong>inside your browser</strong>. Site gets blocked?
-          Doesn't matter — your list never leaves with it.
-        </p>
-        <div class="hero-cta">
-          <a href="#install" class="btn btn-primary">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 6l6 4-6 4V8z" />
-            </svg>
-            Add to Chrome
-          </a>
-          <a href="#how" class="btn btn-ghost">See how it works →</a>
-        </div>
-        <div class="hero-trust">
-          <div class="stars">★★★★★</div>
-          <span>No account · No tracking · Data stays on your device</span>
-        </div>
-      </div>
-
-      <div class="hero-visual reveal" data-delay="200">
-        <div class="orb" aria-hidden="true"></div>
-
-        <div class="popup-mock">
-          <div class="pm-head">
-            <span class="pm-logo"><img src={`${base}assets/character.png`} alt="" /></span>
-            <div class="pm-brand">
-              <strong>OtakuList</strong>
-              <small>Your anime watchlist, kept safe</small>
-            </div>
-            <span class="pm-plus">+</span>
-          </div>
-          <div class="pm-tabs">
-            <span class="active">Watching <b>3</b></span>
-            <span>Plan <b>7</b></span>
-            <span>Completed <b>12</b></span>
-            <span>On Hold <b>1</b></span>
-          </div>
-          <div class="pm-list">
-            <div class="pm-card">
-              <div class="pm-cover">JJK</div>
-              <div class="pm-body">
-                <div class="pm-title">Jujutsu Kaisen</div>
-                <div class="pm-site">aniwatch · s2</div>
-                <div class="pm-prog"><span>−</span><em>Ep <b>12</b> / 23</em><span>+</span></div>
-              </div>
-            </div>
-            <div class="pm-card">
-              <div class="pm-cover">OP</div>
-              <div class="pm-body">
-                <div class="pm-title">One Piece</div>
-                <div class="pm-site">gogoanime</div>
-                <div class="pm-prog"><span>−</span><em>Ep <b>1088</b></em><span>+</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="detect-toast float">
-          <span class="dt-logo"><img src={`${base}assets/character.png`} alt="" /></span>
-          <div>
-            <strong>OtakuList</strong>
-            <p>Updated to Episode <b>13</b></p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PROBLEM STRIP -->
-    <section class="strip reveal">
-      <div class="strip-item"><b>Site blocked?</b> Your list is untouched.</div>
-      <div class="sep"></div>
-      <div class="strip-item"><b>New domain?</b> Pick up right where you left off.</div>
-      <div class="sep"></div>
-      <div class="strip-item"><b>Zero setup.</b> Just watch — it tracks itself.</div>
-    </section>
-
-    <!-- FEATURES -->
-    <section class="section" id="features">
-      <div class="section-head reveal">
-        <span class="kicker">Features</span>
-        <h2>Everything a binge-watcher needs.</h2>
-        <p>Built for people who watch across a dozen sketchy mirror sites and still want one clean, permanent list.</p>
-      </div>
-
-      <div class="bento">
-        <article class="feat feat-lg reveal">
-          <div class="feat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M21 21l-4-4" />
-              <path d="M11 8v6M8 11h6" />
-            </svg>
-          </div>
-          <h3>It detects the anime for you</h3>
-          <p>Open an episode and OtakuList reads the title, episode number and cover art automatically — a one-tap card slides in to save it. No copy-pasting titles.</p>
-          <div class="feat-demo">
-            <span class="chip">▶ Watching</span>
-            <span class="chip ghost">+ Plan to watch</span>
-          </div>
-        </article>
-
-        <article class="feat reveal" data-delay="80">
-          <div class="feat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="10" width="16" height="11" rx="2" />
-              <path d="M8 10V7a4 4 0 018 0v3" />
-            </svg>
-          </div>
-          <h3>Local &amp; private</h3>
-          <p>Everything lives in your browser. No servers, no login, nothing leaves your device.</p>
-        </article>
-
-        <article class="feat reveal" data-delay="160">
-          <div class="feat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v20M2 12h20" />
-              <circle cx="12" cy="12" r="9" />
-            </svg>
-          </div>
-          <h3>Survives blocks</h3>
-          <p>Your watchlist isn't tied to any site. When one dies, your progress is still right here.</p>
-        </article>
-
-        <article class="feat reveal" data-delay="80">
-          <div class="feat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 6h16M4 12h10M4 18h7" />
-            </svg>
-          </div>
-          <h3>Episode tracking</h3>
-          <p>It bumps your episode count as you go — silently, so it never interrupts the binge.</p>
-        </article>
-
-        <article class="feat feat-tall reveal" data-delay="160">
-          <div class="feat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 4h6l-1 6 3 3H7l3-3-1-6z" />
-              <path d="M12 13v7" />
-            </svg>
-          </div>
-          <h3>Pin it &amp; glance</h3>
-          <p>A live badge on your toolbar counts what you're currently watching. One click reopens your whole list — anytime, on any tab.</p>
-          <div class="feat-badge">
-            <span class="tb-icon"><img src={`${base}assets/icon128.png`} alt="" /><b>3</b></span>
-            <em>3 watching</em>
-          </div>
-        </article>
-
-        <article class="feat feat-wide reveal" data-delay="200">
-          <div class="feat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="16" rx="2" />
-              <path d="M3 9h18" />
-            </svg>
-          </div>
-          <h3>Sorted into clean lists</h3>
-          <p>Watching, Plan to Watch, Completed and On Hold — switch tabs, search, and manage everything from one tidy popup.</p>
-          <div class="feat-tabs">
-            <span class="active">Watching</span><span>Plan</span><span>Completed</span><span>On Hold</span>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- HOW IT WORKS -->
-    <section class="section" id="how">
-      <div class="section-head reveal">
-        <span class="kicker">How it works</span>
-        <h2>Three steps. Then never think about it again.</h2>
-      </div>
-      <div class="steps">
-        <div class="step reveal">
-          <span class="step-no">01</span>
-          <h3>Watch like normal</h3>
-          <p>Open any anime episode on any site. OtakuList notices you're on a watch page.</p>
-        </div>
-        <div class="step reveal" data-delay="120">
-          <span class="step-no">02</span>
-          <h3>Confirm once</h3>
-          <p>A card appears with the detected title and episode. Tap <em>Watching</em> or <em>Plan to watch</em>.</p>
-        </div>
-        <div class="step reveal" data-delay="240">
-          <span class="step-no">03</span>
-          <h3>It tracks itself</h3>
-          <p>Next episodes update automatically. Your list is always current — and always yours.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- INSTALL -->
-    <section class="section install" id="install">
-      <div class="install-card reveal">
-        <div class="install-copy">
-          <span class="kicker">Install in 30 seconds</span>
-          <h2>Get OtakuList</h2>
-          <ol class="install-steps">
-            <li><span>1</span> Download the extension folder.</li>
-            <li><span>2</span> Open <code>chrome://extensions</code> and turn on <b>Developer mode</b>.</li>
-            <li><span>3</span> Click <b>Load unpacked</b> and select the folder.</li>
-            <li><span>4</span> Pin OtakuList — start watching. 🎉</li>
-          </ol>
-          <a href="#top" class="btn btn-primary">Add to Chrome</a>
-          <p class="install-note">Free &amp; open. Works on Chrome, Edge, Brave &amp; other Chromium browsers.</p>
-        </div>
-        <div class="install-art" aria-hidden="true">
-          <img src={`${base}assets/character.png`} alt="" class="install-gojo float" />
-          <div class="orb small"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="section" id="faq">
-      <div class="section-head reveal">
-        <span class="kicker">FAQ</span>
-        <h2>Questions, answered.</h2>
-      </div>
-      <div class="faq">
-        <details class="reveal">
-          <summary>Does it work on any anime site?<span class="q-i">+</span></summary>
-          <p>It works on most streaming sites by reading the page's title, episode and cover from the URL and metadata. Every site is built differently, so detection is a smart guess — and the save card always lets you fix the title. Anything it misses, you can add manually in one tap.</p>
-        </details>
-        <details class="reveal">
-          <summary>Where is my data stored? Is it private?<span class="q-i">+</span></summary>
-          <p>100% on your own device, using your browser's local storage. There's no account, no server, and nothing is ever uploaded or tracked. Only you can see your list.</p>
-        </details>
-        <details class="reveal">
-          <summary>What happens when a site gets blocked?<span class="q-i">+</span></summary>
-          <p>Nothing — that's the whole point. Your watchlist lives in the extension, not the site. When a mirror dies or gets blocked, open the popup and every anime, status and episode count is still there.</p>
-        </details>
-        <details class="reveal">
-          <summary>Will it interrupt me while I'm watching?<span class="q-i">+</span></summary>
-          <p>Only once per new anime. After you've added something to <em>Watching</em>, new episodes update silently with a tiny toast — no pop-ups blocking your screen mid-binge.</p>
-        </details>
-        <details class="reveal">
-          <summary>Does it show up on Google or normal sites?<span class="q-i">+</span></summary>
-          <p>No. It ignores search engines and general sites, and only activates on real anime watch or detail pages — so searching "anime" on Google won't trigger anything.</p>
-        </details>
-        <details class="reveal">
-          <summary>Is it really free?<span class="q-i">+</span></summary>
-          <p>Yes. No subscription, no ads, no premium tier. Just a tool made for anime fans.</p>
-        </details>
-      </div>
-    </section>
-
-    <!-- FINAL CTA -->
-    <section class="final reveal">
-      <div class="orb big" aria-hidden="true"></div>
-      <h2>Stop losing your watchlist.</h2>
-      <p>Install once. Watch anywhere. Keep your list forever.</p>
-      <div class="final-cta">
-        <a href="#install" class="btn btn-primary btn-lg">Add OtakuList to Chrome</a>
-        <a href="https://github.com/ShabanMughal/OtakuList" target="_blank" rel="noopener" class="btn btn-github btn-lg">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
-            <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z" />
-          </svg>
-          Star on GitHub
+    <header style="position:sticky;top:0;z-index:60;background:rgba(11,10,22,.82);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.075)">
+      <div style="max-width:1240px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;gap:26px;flex-wrap:wrap">
+        <a href={base} style="display:flex;align-items:center;gap:10px;color:var(--color-text)">
+          <span style="width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;background:#191531;border:1px solid rgba(255,255,255,.14);"><img src={`${base}assets/gojo.png`} alt="OtakuList" style="width:30px;height:30px;border-radius:50%;object-fit:cover;display:block" /></span>
+          <span style="font-family:var(--font-heading);font-weight:800;font-size:19px;letter-spacing:-.02em">OtakuList</span>
         </a>
+        <nav class="rd-nav" style="display:flex;gap:22px;font-size:13.5px;font-weight:600">
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href={`${base}animelist.html`}>Anime List</a>
+          <a href={`${base}showcase.html`}>Gacha Profiles</a>
+        </nav>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <a href={REPO} target="_blank" rel="noopener" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23.96-.27 1.98-.4 3-.41 1.02 0 2.04.14 3 .41 2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.83.58C20.56 22.29 24 17.79 24 12.5 24 5.87 18.63.5 12 .5z"/></svg>
+            Star
+          </a>
+          <a href="#install" class="btn btn-primary" style="padding-inline:20px">Add to Chrome</a>
+        </div>
       </div>
-      <p class="final-note">Free &amp; open source — a ⭐ helps other anime fans find it.</p>
+    </header>
+
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.075)">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:80px 80px;mask-image:linear-gradient(to bottom,#000,transparent 85%);pointer-events:none"></div>
+      <div style="position:relative;max-width:1240px;margin:0 auto;padding:88px 28px 96px;display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:64px;align-items:center">
+        <div>
+          <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 14px;border-radius:999px;border:1px solid rgba(125,92,245,.45);background:rgba(125,92,245,.12);font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#b9a8ff;margin-bottom:26px">
+            <span style="width:6px;height:6px;background:#6fa8dc;animation:pulseRing 2s ease-in-out infinite"></span>
+            Free · Open source · No account
+          </div>
+          <h1 style="font-size:clamp(40px,5.4vw,68px);line-height:1.02;letter-spacing:-.035em;margin:0 0 22px;text-wrap:balance">
+            Your watchlist survives<br><span style="color:#b9a8ff">when the site doesn't.</span>
+          </h1>
+          <p style="font-size:18px;line-height:1.6;color:rgba(244,242,248,.66);max-width:52ch;margin:0 0 34px">
+            OtakuList detects the anime and episode you're watching on any streaming site and saves it in your own browser. Mirror gets blocked, domain gets seized, your list and history are still right there.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+            <a href="#install" class="btn btn-primary" style="font-size:15px;padding:14px 22px">Add to Chrome, it's free</a>
+            <a href={`${base}animelist.html`} class="btn btn-secondary" style="font-size:15px;padding:14px 20px">See the web app</a>
+          </div>
+          <div style="display:flex;gap:28px;margin-top:40px;padding-top:26px;border-top:1px solid rgba(255,255,255,.075);flex-wrap:wrap">
+            <div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px">0</div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:rgba(244,242,248,.5)">Servers used</div></div>
+            <div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px">38k+</div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:rgba(244,242,248,.5)">Episodes tracked</div></div>
+            <div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px">MIT</div><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:rgba(244,242,248,.5)">License</div></div>
+          </div>
+        </div>
+
+        <div style="position:relative;justify-self:center;width:100%;max-width:410px;animation:floaty 7s ease-in-out infinite">
+          <div class="gojo-aura" aria-hidden="true"></div>
+          <div style="position:relative;z-index:1;font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;background:#17141f;border:1px solid #3b3554;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg)">
+
+            <!-- header -->
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 12px;background:linear-gradient(135deg,#221d38,#17141f);border-bottom:1px solid #3b3554">
+              <span style="width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#8b5cf6,#6366f1)"><img src={`${base}assets/character.png`} alt="" style="width:30px;height:30px;object-fit:contain;display:block" /></span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;font-weight:700;letter-spacing:.2px">OtakuList</div>
+                <div style="font-size:11px;color:#b0a9cf">Your anime watchlist, kept safe</div>
+              </div>
+              <span style="width:32px;height:32px;flex:none;border-radius:9px;display:grid;place-items:center;background:#2a2540;color:#f4f2ff;font-size:18px;line-height:1">＋</span>
+            </div>
+
+            <!-- tabs -->
+            <div style="display:flex;gap:4px;padding:10px 12px 0">
+              <span style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;padding:8px 5px;border-radius:8px;background:#2a2540;color:#fff">Watching <b style="min-width:16px;padding:0 4px;font-size:10px;line-height:16px;background:#8b5cf6;border-radius:20px;color:#fff">9</b></span>
+              <span style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;padding:8px 5px;border-radius:8px;color:#b0a9cf">Plan <b style="min-width:16px;padding:0 4px;font-size:10px;line-height:16px;background:#3b3554;border-radius:20px;color:#f4f2ff">0</b></span>
+              <span style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;padding:8px 5px;border-radius:8px;color:#b0a9cf">Completed <b style="min-width:16px;padding:0 4px;font-size:10px;line-height:16px;background:#3b3554;border-radius:20px;color:#f4f2ff">1</b></span>
+              <span style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:600;padding:8px 5px;border-radius:8px;color:#b0a9cf">On Hold <b style="min-width:16px;padding:0 4px;font-size:10px;line-height:16px;background:#3b3554;border-radius:20px;color:#f4f2ff">0</b></span>
+            </div>
+
+            <!-- search + sort -->
+            <div style="display:flex;gap:8px;margin:10px 12px 4px">
+              <div style="flex:1;padding:9px 12px;border-radius:10px;border:1px solid #3b3554;background:#1e1b2e;font-size:13px;color:#7d769c">Search your list…</div>
+              <div style="display:flex;align-items:center;gap:6px;padding:0 12px;border-radius:10px;border:1px solid #3b3554;background:#1e1b2e;font-size:12px;color:#b0a9cf">Recent <span style="opacity:.6">▾</span></div>
+            </div>
+
+            <!-- cards -->
+            <div style="padding:8px 12px 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="padding:10px;background:#1e1b2e;border:1px solid #3b3554;border-radius:12px">
+                <div style="display:flex;gap:10px">
+                  <div style="width:46px;height:62px;flex:none;border-radius:8px;overflow:hidden;background:#2a2540"><img src={`${base}assets/cover-jjk.jpg`} alt="Jujutsu Kaisen" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-size:13px;font-weight:600;line-height:1.3">Jujutsu Kaisen</div>
+                    <div style="font-size:11px;color:#a78bfa;margin-top:2px">aniwatch.to</div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+                      <span style="width:24px;height:24px;border-radius:7px;border:1px solid #3b3554;background:#2a2540;display:grid;place-items:center;font-size:14px">−</span>
+                      <span style="font-size:12px">Ep <b style="color:#a78bfa">12</b> / 23</span>
+                      <span style="width:24px;height:24px;border-radius:7px;border:1px solid #3b3554;background:#2a2540;display:grid;place-items:center;font-size:14px">＋</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top:8px;font-size:15px;letter-spacing:1px;color:#fbbf24">★★★★★</div>
+                <div style="display:flex;gap:6px;margin-top:8px;align-items:center">
+                  <div style="flex:1;display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:7px;background:#2a2540;border:1px solid #3b3554;font-size:11px;color:#f4f2ff">Watching <span style="opacity:.5">▾</span></div>
+                  <span style="width:26px;height:26px;border-radius:7px;background:#2a2540;border:1px solid #3b3554;display:grid;place-items:center;color:#a78bfa;font-size:10px">▶</span>
+                  <span style="width:26px;height:26px;border-radius:7px;background:#2a2540;border:1px solid #3b3554;display:grid;place-items:center;color:#b0a9cf;font-size:12px">✎</span>
+                  <span style="width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#b0a9cf;font-size:12px">🗑</span>
+                </div>
+              </div>
+
+              <div style="padding:10px;background:#1e1b2e;border:1px solid #3b3554;border-radius:12px">
+                <div style="display:flex;gap:10px">
+                  <div style="width:46px;height:62px;flex:none;border-radius:8px;overflow:hidden;background:#2a2540"><img src={`${base}assets/cover-onepiece.jpg`} alt="One Piece" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-size:13px;font-weight:600;line-height:1.3">One Piece</div>
+                    <div style="font-size:11px;color:#a78bfa;margin-top:2px">gogoanime</div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+                      <span style="width:24px;height:24px;border-radius:7px;border:1px solid #3b3554;background:#2a2540;display:grid;place-items:center;font-size:14px">−</span>
+                      <span style="font-size:12px">Ep <b style="color:#a78bfa">1088</b></span>
+                      <span style="width:24px;height:24px;border-radius:7px;border:1px solid #3b3554;background:#2a2540;display:grid;place-items:center;font-size:14px">＋</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top:8px;font-size:15px;letter-spacing:1px"><span style="color:#fbbf24">★★★★</span><span style="color:#3b3554">★</span></div>
+                <div style="display:flex;gap:6px;margin-top:8px;align-items:center">
+                  <div style="flex:1;display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:7px;background:#2a2540;border:1px solid #3b3554;font-size:11px;color:#f4f2ff">Watching <span style="opacity:.5">▾</span></div>
+                  <span style="width:26px;height:26px;border-radius:7px;background:#2a2540;border:1px solid #3b3554;display:grid;place-items:center;color:#a78bfa;font-size:10px">▶</span>
+                  <span style="width:26px;height:26px;border-radius:7px;background:#2a2540;border:1px solid #3b3554;display:grid;place-items:center;color:#b0a9cf;font-size:12px">✎</span>
+                  <span style="width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#b0a9cf;font-size:12px">🗑</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- footer -->
+            <div style="padding:8px 16px;border-top:1px solid #3b3554;background:#1e1b2e;display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:11px;color:#b0a9cf">10 titles saved</span>
+              <div style="display:flex;gap:6px">
+                <span style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:7px;background:#8b5cf6;color:#fff">Export</span>
+                <span style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:7px;background:rgba(139,92,246,.18);border:1px solid #8b5cf6;color:#a78bfa">Import</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:absolute;z-index:2;right:-18px;bottom:-24px;display:flex;align-items:center;gap:10px;font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;background:#1e1b2e;color:#f4f2ff;border:1px solid #3b3554;border-radius:12px;padding:10px 14px 10px 10px;box-shadow:0 12px 32px rgba(0,0,0,.5);animation:slidein .8s ease-out both;animation-delay:.4s">
+            <span style="width:28px;height:28px;flex:none;border-radius:8px;display:grid;place-items:center;background:linear-gradient(135deg,#8b5cf6,#6366f1)"><img src={`${base}assets/character.png`} alt="" style="width:24px;height:24px;object-fit:contain;display:block" /></span>
+            <div style="font-size:12px;line-height:1.35">
+              <b style="color:#a78bfa;font-weight:700">OtakuList</b><br />Updated to Episode <b style="color:#a78bfa;font-weight:700">3</b>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
-  </main>
-</BaseLayout>
+
+    <section id="features" class="sec" style="border-bottom:1px solid rgba(255,255,255,.075)">
+      <div class="sec-glow gl-right" aria-hidden="true"></div>
+      <div style="max-width:1240px;margin:0 auto;padding:84px 28px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:28px;flex-wrap:wrap;margin-bottom:44px">
+          <div>
+            <div style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#b9a8ff;margin-bottom:14px">Features</div>
+            <h2 style="font-size:clamp(30px,3.4vw,44px);letter-spacing:-.03em;margin:0">Built for people who watch<br>where the anime actually is.</h2>
+          </div>
+          <p style="max-width:34ch;color:rgba(244,242,248,.6);margin:0;font-size:15px">No sign-up wall, no sync server, no telemetry. Just a tracker that keeps working when everything else disappears.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px">
+          <div class="rd-card" style="background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:30px 26px 32px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5cf5" stroke-width="2" stroke-linecap="round"><path d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <h3 style="font-size:19px;margin:16px 0 8px;letter-spacing:-.02em">Auto-detects anime + episode</h3>
+            <p style="margin:0;font-size:14.5px;color:rgba(244,242,248,.62)">Reads the page title and player state to figure out the show and the episode number. Works on the mirror you found yesterday.</p>
+          </div>
+          <div class="rd-card" style="background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:30px 26px 32px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5cf5" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+            <h3 style="font-size:19px;margin:16px 0 8px;letter-spacing:-.02em">Local and private</h3>
+            <p style="margin:0;font-size:14.5px;color:rgba(244,242,248,.62)">Everything lives in your browser's own storage. No account, no servers, nothing leaves the device, we couldn't read your list if we wanted to.</p>
+          </div>
+          <div class="rd-card" style="background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:30px 26px 32px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5cf5" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <h3 style="font-size:19px;margin:16px 0 8px;letter-spacing:-.02em">Survives site blocks</h3>
+            <p style="margin:0;font-size:14.5px;color:rgba(244,242,248,.62)">Your progress is tied to the show, not the domain. When a site dies, move to the next one and pick up at the exact episode.</p>
+          </div>
+          <div class="rd-card" style="background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:30px 26px 32px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5cf5" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+            <h3 style="font-size:19px;margin:16px 0 8px;letter-spacing:-.02em">Silent episode tracking</h3>
+            <p style="margin:0;font-size:14.5px;color:rgba(244,242,248,.62)">Confirm a show once. After that every new episode bumps the counter by itself, no popups mid-fight-scene.</p>
+          </div>
+          <div class="rd-card" style="background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:30px 26px 32px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5cf5" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M10.3 21a2 2 0 003.4 0"/></svg>
+            <h3 style="font-size:19px;margin:16px 0 8px;letter-spacing:-.02em">Toolbar badge count</h3>
+            <p style="margin:0;font-size:14.5px;color:rgba(244,242,248,.62)">A small number on the icon tells you how many shows are still in progress. One glance, no clicking.</p>
+          </div>
+          <div class="rd-card" style="background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:30px 26px 32px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5cf5" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            <h3 style="font-size:19px;margin:16px 0 8px;letter-spacing:-.02em">Sorted lists</h3>
+            <p style="margin:0;font-size:14.5px;color:rgba(244,242,248,.62)">Watching, Plan to Watch, Completed and On Hold, drop a show into a bucket and it stays organised for you.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" style="border-bottom:1px solid rgba(255,255,255,.075);background:linear-gradient(180deg,rgba(125,92,245,.06),transparent)">
+      <div style="max-width:1240px;margin:0 auto;padding:84px 28px">
+        <div style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#b9a8ff;margin-bottom:14px">How it works</div>
+        <h2 style="font-size:clamp(30px,3.4vw,44px);letter-spacing:-.03em;margin:0 0 46px;max-width:22ch">Three steps, and then you forget it exists.</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:34px">
+          <div style="background:rgba(125,92,245,.1);border:1px solid rgba(125,92,245,.3);border-radius:22px;padding:26px 26px 28px">
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:52px;line-height:1;color:rgba(139,109,240,.85);margin-bottom:14px">01</div>
+            <h3 style="font-size:21px;margin:0 0 10px;letter-spacing:-.02em">Watch normally</h3>
+            <p style="margin:0;font-size:15px;color:rgba(244,242,248,.62)">Open whatever site you use. OtakuList sits quiet in the background and notices a player is running.</p>
+          </div>
+          <div style="background:rgba(125,92,245,.1);border:1px solid rgba(125,92,245,.3);border-radius:22px;padding:26px 26px 28px">
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:52px;line-height:1;color:rgba(139,109,240,.85);margin-bottom:14px">02</div>
+            <h3 style="font-size:21px;margin:0 0 10px;letter-spacing:-.02em">Confirm once</h3>
+            <p style="margin:0;font-size:15px;color:rgba(244,242,248,.62)">A small card slides in from the corner with the title and episode. Say yes once and it's tracked, after that it quietly bumps the episode for you.</p>
+          </div>
+          <div style="background:rgba(125,92,245,.1);border:1px solid rgba(125,92,245,.3);border-radius:22px;padding:26px 26px 28px">
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:52px;line-height:1;color:rgba(139,109,240,.85);margin-bottom:14px">03</div>
+            <h3 style="font-size:21px;margin:0 0 10px;letter-spacing:-.02em">It tracks itself</h3>
+            <p style="margin:0;font-size:15px;color:rgba(244,242,248,.62)">Every episode after that updates silently. Come back weeks later and your place is waiting.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="install" class="sec" style="border-bottom:1px solid rgba(255,255,255,.075)">
+      <div class="sec-glow gl-left" aria-hidden="true"></div>
+      <div style="max-width:1240px;margin:0 auto;padding:84px 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:56px">
+        <div>
+          <div style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#b9a8ff;margin-bottom:14px">Install</div>
+          <h2 style="font-size:clamp(30px,3.4vw,44px);letter-spacing:-.03em;margin:0 0 18px">Four steps, about a minute.</h2>
+          <p style="color:rgba(244,242,248,.62);font-size:15px;max-width:44ch;margin:0 0 26px">Loading it unpacked keeps the extension entirely yours, no store review, no forced updates, and you can read every line of it first.</p>
+          <a href={REPO} target="_blank" rel="noopener" class="btn btn-primary" style="font-size:15px;padding:13px 20px">Download the folder (.zip)</a>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;gap:18px;padding:20px 0;border-top:1px solid rgba(255,255,255,.075)">
+            <span style="font-family:var(--font-heading);font-weight:800;font-size:14px;color:#7d5cf5;min-width:26px">01</span>
+            <div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-bottom:4px">Download &amp; unzip the folder</div><p style="margin:0;font-size:14px;color:rgba(244,242,248,.6)">Keep it somewhere permanent, Chrome loads it from that path.</p></div>
+          </div>
+          <div style="display:flex;gap:18px;padding:20px 0;border-top:1px solid rgba(255,255,255,.075)">
+            <span style="font-family:var(--font-heading);font-weight:800;font-size:14px;color:#7d5cf5;min-width:26px">02</span>
+            <div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-bottom:4px">Open <code style="font-size:13px;background:rgba(125,92,245,.15);border:1px solid rgba(125,92,245,.3);padding:2px 6px">chrome://extensions</code></div><p style="margin:0;font-size:14px;color:rgba(244,242,248,.6)">Paste it in the address bar and hit enter.</p></div>
+          </div>
+          <div style="display:flex;gap:18px;padding:20px 0;border-top:1px solid rgba(255,255,255,.075)">
+            <span style="font-family:var(--font-heading);font-weight:800;font-size:14px;color:#7d5cf5;min-width:26px">03</span>
+            <div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-bottom:4px">Turn on Developer mode</div><p style="margin:0;font-size:14px;color:rgba(244,242,248,.6)">Top-right toggle on that page.</p></div>
+          </div>
+          <div style="display:flex;gap:18px;padding:20px 0;border-top:1px solid rgba(255,255,255,.075);border-bottom:1px solid rgba(255,255,255,.075)">
+            <span style="font-family:var(--font-heading);font-weight:800;font-size:14px;color:#7d5cf5;min-width:26px">04</span>
+            <div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-bottom:4px">Click "Load unpacked" and pick the folder</div><p style="margin:0;font-size:14px;color:rgba(244,242,248,.6)">The O icon appears in your toolbar. That's it, go watch something.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="sec" style="border-bottom:1px solid rgba(255,255,255,.075)">
+      <div class="sec-glow gl-top" aria-hidden="true"></div>
+      <div style="max-width:900px;margin:0 auto;padding:84px 28px">
+        <div style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#b9a8ff;margin-bottom:14px">FAQ</div>
+        <h2 style="font-size:clamp(30px,3.4vw,44px);letter-spacing:-.03em;margin:0 0 40px">Questions people actually ask.</h2>
+        <div class="faq-list" style="border-top:1px solid rgba(255,255,255,.075)">
+          <details class="faq-item" open style="border-bottom:1px solid rgba(255,255,255,.075);padding:20px 4px">
+            <summary style="list-style:none;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:17.5px;display:flex;gap:16px;align-items:center"><span class="faq-plus" style="color:#b9a8ff;font-size:20px;line-height:1;flex:none">+</span>Does it work on any streaming site?</summary>
+            <div class="faq-body"><p style="margin:12px 0 0 32px;font-size:15px;color:rgba(244,242,248,.65)">On practically all of them. Detection reads the page title and the video player rather than a hardcoded list of domains, so new mirrors usually work the moment they go up. If one doesn't, you can still add the show by hand in the web app.</p></div>
+          </details>
+          <details class="faq-item" style="border-bottom:1px solid rgba(255,255,255,.075);padding:20px 4px">
+            <summary style="list-style:none;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:17.5px;display:flex;gap:16px;align-items:center"><span class="faq-plus" style="color:#b9a8ff;font-size:20px;line-height:1;flex:none">+</span>Where exactly is my data stored?</summary>
+            <div class="faq-body"><p style="margin:12px 0 0 32px;font-size:15px;color:rgba(244,242,248,.65)">In your browser's local extension storage, on your machine. There is no OtakuList account and no backend to sync to. You can export the whole list as JSON any time, and deleting the extension deletes the data.</p></div>
+          </details>
+          <details class="faq-item" style="border-bottom:1px solid rgba(255,255,255,.075);padding:20px 4px">
+            <summary style="list-style:none;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:17.5px;display:flex;gap:16px;align-items:center"><span class="faq-plus" style="color:#b9a8ff;font-size:20px;line-height:1;flex:none">+</span>What happens if a site gets blocked?</summary>
+            <div class="faq-body"><p style="margin:12px 0 0 32px;font-size:15px;color:rgba(244,242,248,.65)">Nothing happens to your list. Progress is stored against the show, not the site, so you open a different mirror and keep going from the episode you were on.</p></div>
+          </details>
+          <details class="faq-item" style="border-bottom:1px solid rgba(255,255,255,.075);padding:20px 4px">
+            <summary style="list-style:none;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:17.5px;display:flex;gap:16px;align-items:center"><span class="faq-plus" style="color:#b9a8ff;font-size:20px;line-height:1;flex:none">+</span>Will it interrupt me while watching?</summary>
+            <div class="faq-body"><p style="margin:12px 0 0 32px;font-size:15px;color:rgba(244,242,248,.65)">Once per show, with a small corner card you can dismiss. After you confirm a series, every later episode is recorded silently, no overlay, no sound, nothing on top of the player.</p></div>
+          </details>
+          <details class="faq-item" style="border-bottom:1px solid rgba(255,255,255,.075);padding:20px 4px">
+            <summary style="list-style:none;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:17.5px;display:flex;gap:16px;align-items:center"><span class="faq-plus" style="color:#b9a8ff;font-size:20px;line-height:1;flex:none">+</span>Is it really free?</summary>
+            <div class="faq-body"><p style="margin:12px 0 0 32px;font-size:15px;color:rgba(244,242,248,.65)">Free and open source under MIT. No paid tier, no ads, no data to sell. If you want to support it, star the repo or send a pull request.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" style="border-bottom:1px solid rgba(255,255,255,.075);background:linear-gradient(135deg,rgba(125,92,245,.22) 0%,rgba(99,102,241,.12) 45%,rgba(111,168,220,.08) 100%),radial-gradient(120% 140% at 100% 0%,rgba(216,100,160,.16),transparent 55%)">
+      <div class="sec-glow gl-left" aria-hidden="true"></div>
+      <div style="max-width:1240px;margin:0 auto;padding:84px 28px;display:flex;flex-wrap:wrap;gap:40px;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#b9a8ff;margin-bottom:14px">Get started</div>
+          <h2 style="font-size:clamp(30px,3.8vw,46px);letter-spacing:-.035em;margin:0 0 12px;max-width:22ch">Stop rebuilding your list<br>every six months.</h2>
+          <p style="margin:0;font-size:16px;color:rgba(244,242,248,.66);max-width:46ch">Free, private, and open source. Two clicks to install and it quietly keeps your place, for good.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;width:260px;max-width:100%">
+          <a href="#install" class="btn btn-primary" style="width:100%;font-size:16px;padding:15px 20px">Add to Chrome, it's free</a>
+          <a href={REPO} target="_blank" rel="noopener" class="btn btn-secondary" style="width:100%;font-size:15px;padding:15px 20px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23.96-.27 1.98-.4 3-.41 1.02 0 2.04.14 3 .41 2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.83.58C20.56 22.29 24 17.79 24 12.5 24 5.87 18.63.5 12 .5z"/></svg>
+            Star on GitHub
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="max-width:1240px;margin:0 auto;padding:56px 28px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:36px">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <span style="width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;background:#191531;border:1px solid rgba(255,255,255,.14);"><img src={`${base}assets/gojo.png`} alt="OtakuList" style="width:25px;height:25px;border-radius:50%;object-fit:cover;display:block" /></span>
+            <span style="font-family:var(--font-heading);font-weight:800;font-size:17px">OtakuList</span>
+          </div>
+          <p style="margin:0;font-size:13.5px;color:rgba(244,242,248,.5);max-width:30ch">A watchlist that belongs to your browser, not to a website.</p>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(244,242,248,.45);margin-bottom:14px">Product</div>
+          <div class="rd-nav" style="display:flex;flex-direction:column;gap:9px;font-size:14px">
+            <a href="#features">Features</a><a href="#how">How it works</a><a href="#install">Install</a><a href="#faq">FAQ</a>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(244,242,248,.45);margin-bottom:14px">App</div>
+          <div class="rd-nav" style="display:flex;flex-direction:column;gap:9px;font-size:14px">
+            <a href={`${base}animelist.html`}>My Anime List</a><a href={`${base}showcase.html`}>Gacha Profiles</a>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(244,242,248,.45);margin-bottom:14px">Open source</div>
+          <div class="rd-nav" style="display:flex;flex-direction:column;gap:9px;font-size:14px">
+            <a href={REPO} target="_blank" rel="noopener">GitHub repo</a><a href={`${REPO}/issues`} target="_blank" rel="noopener">Report an issue</a><a href={REPO} target="_blank" rel="noopener">MIT license</a>
+          </div>
+        </div>
+      </div>
+      <div style="max-width:1240px;margin:0 auto;padding:18px 28px 40px;border-top:1px solid rgba(255,255,255,.075);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:rgba(244,242,248,.4)">
+        <span>© 2026 OtakuList, no cookies, no accounts, no tracking.</span>
+        <span>OtakuList does not host or link to any video content.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script slot="scripts" is:inline>
+    (function () {
+      const items = Array.from(document.querySelectorAll('.faq-item'));
+
+      function setBody(item, open) {
+        const body = item.querySelector('.faq-body');
+        if (!body) return;
+        if (open) {
+          item.setAttribute('open', '');
+          body.style.height = body.scrollHeight + 'px';
+          body.style.opacity = '1';
+          const done = (e) => {
+            if (e.propertyName !== 'height') return;
+            body.style.height = 'auto';
+            body.removeEventListener('transitionend', done);
+          };
+          body.addEventListener('transitionend', done);
+        } else {
+          body.style.height = body.scrollHeight + 'px';
+          requestAnimationFrame(() => {
+            body.style.height = '0px';
+            body.style.opacity = '0';
+          });
+          const done = (e) => {
+            if (e.propertyName !== 'height') return;
+            item.removeAttribute('open');
+            body.removeEventListener('transitionend', done);
+          };
+          body.addEventListener('transitionend', done);
+        }
+      }
+
+      items.forEach((item) => {
+        // initialise: the one marked [open] starts expanded, others collapsed.
+        const body = item.querySelector('.faq-body');
+        if (item.hasAttribute('open')) {
+          body.style.height = 'auto';
+          body.style.opacity = '1';
+        }
+        const summary = item.querySelector('summary');
+        summary.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isOpen = item.hasAttribute('open');
+          items.forEach((other) => {
+            if (other !== item && other.hasAttribute('open')) setBody(other, false);
+          });
+          setBody(item, !isOpen);
+        });
+      });
+    })();
+  </script>
+</SiteLayout>

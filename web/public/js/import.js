@@ -1,4 +1,4 @@
-// OtakuList import tool — parse a rough pasted watchlist into a clean,
+// OtakuList import tool, parse a rough pasted watchlist into a clean,
 // importable file. Output matches the extension's Export/Import format.
 (function () {
   const STATUS_LABELS = {
@@ -18,7 +18,7 @@
   let rows = []; // [{ key, title, status, currentEpisode, totalEpisodes, rating }]
   let keySeq = 1;
 
-  // ── "Generate with ChatGPT" — prefill a prompt that outputs our format ──
+  // ── "Generate with ChatGPT", prefill a prompt that outputs our format ──
   const GPT_PROMPT = [
     "You are helping me build my anime watchlist for the OtakuList browser extension.",
     "",
@@ -31,11 +31,11 @@
     "",
     "Rules:",
     "- status must be exactly one of: watching, plan, completed, onhold",
-    "- totalEpisodes: the REAL episode count for that anime/season — look it up. Use null only if it truly has no fixed count (e.g. long-running ongoing series).",
+    "- totalEpisodes: the REAL episode count for that anime/season, look it up. Use null only if it truly has no fixed count (e.g. long-running ongoing series).",
     "- currentEpisode: the episode I told you; if I said 'completed', set it equal to totalEpisodes; otherwise null.",
     "- rating: a number 0–5 (convert an x/10 score to a 0–5 scale, rounded). Use 0 if I didn't rate it.",
     "- cover: a direct, working image URL ending in .jpg/.jpeg/.png/.webp, preferably from cdn.myanimelist.net. Use null if unsure.",
-    "- Output ONLY the JSON code block — no text before it.",
+    "- Output ONLY the JSON code block, no text before it.",
     "",
     "Example:",
     "```json",
@@ -119,7 +119,7 @@
     work = work.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, "");
     if (!work) return null;
 
-    // ── cover image URL (pull it out FIRST — a URL's own /numbers would
+    // ── cover image URL (pull it out FIRST, a URL's own /numbers would
     //    otherwise be mistaken for episode counts) ──
     let cover = null;
     const urlM = work.match(/https?:\/\/\S+/i);
@@ -184,17 +184,17 @@
         work = work.replace(em[0], " ");
       } else {
         // a bare number only if it trails after a delimiter:  "Naruto - 200"
-        const tail = work.match(/[|:\-–—]\s*(\d{1,4})\s*$/);
+        const tail = work.match(/[|:\-–, ]\s*(\d{1,4})\s*$/);
         if (tail) {
           currentEpisode = parseInt(tail[1], 10);
-          work = work.replace(/[|:\-–—]\s*\d{1,4}\s*$/, " ");
+          work = work.replace(/[|:\-–, ]\s*\d{1,4}\s*$/, " ");
         }
       }
     }
 
     // ── whatever's left is the title ──
     let title = work
-      .replace(/[|:–—]+/g, " ")
+      .replace(/[|:–, ]+/g, " ")
       .replace(/\s{2,}/g, " ")
       .replace(/^[\s,.\-|]+|[\s,.\-|]+$/g, "")
       .trim();
@@ -245,7 +245,7 @@
       .join("");
   }
   function ratingOptions(sel) {
-    let o = `<option value="0" ${sel ? "" : "selected"}>—</option>`;
+    let o = `<option value="0" ${sel ? "" : "selected"}>, </option>`;
     for (let i = 1; i <= 5; i++) {
       o += `<option value="${i}" ${i === sel ? "selected" : ""}>${"★".repeat(i)}</option>`;
     }
@@ -270,7 +270,7 @@
         <input class="pv-in pv-num" data-field="currentEpisode" type="number" min="0"
           value="${r.currentEpisode ?? ""}" placeholder="0" />
         <input class="pv-in pv-num" data-field="totalEpisodes" type="number" min="0"
-          value="${r.totalEpisodes ?? ""}" placeholder="—" />
+          value="${r.totalEpisodes ?? ""}" placeholder="?" />
         <select class="pv-in pv-rating" data-field="rating">${ratingOptions(r.rating)}</select>
         <button class="pv-del" data-del="${r.key}" title="Remove" type="button">✕</button>
       </div>`;

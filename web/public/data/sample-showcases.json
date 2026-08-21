@@ -1,0 +1,91 @@
+{
+  "profiles": [
+    {
+      "username": "ayaka_main",
+      "display_name": "Frost Enjoyer",
+      "games": [
+        {
+          "game": "genshin",
+          "customName": "",
+          "rank": "60",
+          "ign": "FrostBlade",
+          "uid": "700123456",
+          "chars": "Furina, Neuvillette, Nahida, Kaedehara Kazuha, Zhongli",
+          "note": "day-one Mondstadt player"
+        },
+        {
+          "game": "hsr",
+          "customName": "",
+          "rank": "70",
+          "ign": "StarGazer",
+          "uid": "800987654",
+          "chars": "Acheron, Kafka, Black Swan, Robin, Ruan Mei",
+          "note": "nihility supremacy"
+        }
+      ]
+    },
+    {
+      "username": "pom_pom",
+      "display_name": "Astral Express",
+      "games": [
+        {
+          "game": "hsr",
+          "customName": "",
+          "rank": "68",
+          "ign": "Trailblazer",
+          "uid": "801112223",
+          "chars": "Firefly, Jingliu, Bronya, Seele, Sparkle",
+          "note": ""
+        },
+        {
+          "game": "zzz",
+          "customName": "",
+          "rank": "55",
+          "ign": "Proxy",
+          "uid": "100223344",
+          "chars": "Miyabi, Ellen, Zhu Yuan, Qingyi",
+          "note": "Inter-Knot regular"
+        }
+      ]
+    },
+    {
+      "username": "rinascita",
+      "display_name": "Rover of Solaris",
+      "games": [
+        {
+          "game": "wuwa",
+          "customName": "",
+          "rank": "80",
+          "ign": "Echo",
+          "uid": "900445566",
+          "chars": "Jinhsi, Changli, Carlotta, Shorekeeper, Camellya",
+          "note": "resonance beyond"
+        },
+        {
+          "game": "genshin",
+          "customName": "",
+          "rank": "58",
+          "ign": "Aether",
+          "uid": "701556677",
+          "chars": "Hu Tao, Yelan, Xingqiu, Bennett",
+          "note": "vaporize main"
+        }
+      ]
+    },
+    {
+      "username": "custom_gamer",
+      "display_name": "Multi-game",
+      "games": [
+        {
+          "game": "custom",
+          "customName": "Reverse: 1999",
+          "rank": "45",
+          "ign": "Vertin",
+          "uid": "",
+          "chars": "Regulus, Lilya, 37",
+          "note": "timekeeper"
+        }
+      ]
+    }
+  ]
+}
