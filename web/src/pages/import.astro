@@ -1,15 +1,59 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const REPO = 'https://github.com/ShabanMughal/OtakuList';
 const OAI_PATH = "M115.612 0h280.775C459.974 0 512 52.026 512 115.612v278.415c0 63.587-52.026 115.613-115.613 115.613H115.612C52.026 509.64 0 457.614 0 394.027V115.612C0 52.026 52.026 0 115.612 0z";
 const OAI_KNOT = "M412.037 221.764a90.834 90.834 0 004.648-28.67 90.79 90.79 0 00-12.443-45.87c-16.37-28.496-46.738-46.089-79.605-46.089-6.466 0-12.943.683-19.264 2.04a90.765 90.765 0 00-67.881-30.515h-.576c-.059.002-.149.002-.216.002-39.807 0-75.108 25.686-87.346 63.554-25.626 5.239-47.748 21.31-60.682 44.03a91.873 91.873 0 00-12.407 46.077 91.833 91.833 0 0023.694 61.553 90.802 90.802 0 00-4.649 28.67 90.804 90.804 0 0012.442 45.87c16.369 28.504 46.74 46.087 79.61 46.087a91.81 91.81 0 0019.253-2.04 90.783 90.783 0 0067.887 30.516h.576l.234-.001c39.829 0 75.119-25.686 87.357-63.588 25.626-5.242 47.748-21.312 60.682-44.033a91.718 91.718 0 0012.383-46.035 91.83 91.83 0 00-23.693-61.553l-.004-.005zM275.102 413.161h-.094a68.146 68.146 0 01-43.611-15.8 56.936 56.936 0 002.155-1.221l72.54-41.901a11.799 11.799 0 005.962-10.251V241.651l30.661 17.704c.326.163.55.479.596.84v84.693c-.042 37.653-30.554 68.198-68.21 68.273h.001zm-146.689-62.649a68.128 68.128 0 01-9.152-34.085c0-3.904.341-7.817 1.005-11.663.539.323 1.48.897 2.155 1.285l72.54 41.901a11.832 11.832 0 0011.918-.002l88.563-51.137v35.408a1.1 1.1 0 01-.438.94l-73.33 42.339a68.43 68.43 0 01-34.11 9.12 68.359 68.359 0 01-59.15-34.11l-.001.004zm-19.083-158.36a68.044 68.044 0 0135.538-29.934c0 .625-.036 1.731-.036 2.5v83.801l-.001.07a11.79 11.79 0 005.954 10.242l88.564 51.13-30.661 17.704a1.096 1.096 0 01-1.034.093l-73.337-42.375a68.36 68.36 0 01-34.095-59.143 68.412 68.412 0 019.112-34.085l-.004-.003zm251.907 58.621l-88.563-51.137 30.661-17.697a1.097 1.097 0 011.034-.094l73.337 42.339c21.109 12.195 34.132 34.746 34.132 59.132 0 28.604-17.849 54.199-44.686 64.078v-86.308c.004-.032.004-.065.004-.096 0-4.219-2.261-8.119-5.919-10.217zm30.518-45.93c-.539-.331-1.48-.898-2.155-1.286l-72.54-41.901a11.842 11.842 0 00-5.958-1.611c-2.092 0-4.15.558-5.957 1.611l-88.564 51.137v-35.408l-.001-.061a1.1 1.1 0 01.44-.88l73.33-42.303a68.301 68.301 0 0134.108-9.129c37.704 0 68.281 30.577 68.281 68.281a68.69 68.69 0 01-.984 11.545v.005zm-191.843 63.109l-30.668-17.704a1.09 1.09 0 01-.596-.84v-84.692c.016-37.685 30.593-68.236 68.281-68.236a68.332 68.332 0 0143.689 15.804 63.09 63.09 0 00-2.155 1.222l-72.54 41.9a11.794 11.794 0 00-5.961 10.248v.068l-.05 102.23zm16.655-35.91l39.445-22.782 39.444 22.767v45.55l-39.444 22.767-39.445-22.767v-45.535z";
+
+const theme =
+  "--color-bg:#0b0a16;--color-surface:#17142a;--color-text:#f4f2f8;" +
+  "--color-accent:#7d5cf5;--color-accent-2:#6fa8dc;--color-accent-600:#6b4be0;" +
+  "--color-divider:rgba(255,255,255,.12);--glass-line:rgba(255,255,255,.08);" +
+  "--shadow-md:0 8px 24px rgba(0,0,0,.45);--shadow-lg:0 26px 60px rgba(0,0,0,.6);" +
+  "--font-heading:'Archivo',system-ui,sans-serif;--font-body:'Poppins',system-ui,sans-serif;" +
+  "--font-display:'Archivo',system-ui,sans-serif;" +
+  "min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)";
 ---
 
 <BaseLayout
   title="Import Tool, Turn your anime list into an OtakuList file"
   description="Paste your existing anime watchlist in any rough format. This tool cleans it up and gives you a file you can import straight into OtakuList."
   canonical="https://shabanmughal.github.io/OtakuList/import.html"
+  page="import"
+  chrome={false}
 >
+  <link
+    slot="head"
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <div style={theme}>
+    <!-- header -->
+    <header class="sticky top-0 z-[60] border-b border-white/[.075] backdrop-blur-lg" style="background:rgba(11,10,22,.85)">
+      <div class="mx-auto flex max-w-[1320px] flex-wrap items-center gap-[26px] px-7 py-3">
+        <a href={base} class="flex items-center gap-2.5 text-[#f4f2f8]">
+          <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-full border border-white/[.14] bg-[#191531]"><img src={`${base}assets/gojo.png`} alt="OtakuList" class="block h-[30px] w-[30px] rounded-full object-cover" /></span>
+          <span class="font-heading text-[19px] font-extrabold tracking-[-.02em]">OtakuList</span>
+        </a>
+        <nav class="flex gap-[22px] text-[13.5px] font-semibold text-[#f4f2f8]/[.68]">
+          <a href={`${base}#features`} class="text-inherit hover:text-iris-2">Features</a>
+          <a href={`${base}#how`} class="text-inherit hover:text-iris-2">How it works</a>
+          <a href={`${base}animelist.html`} class="text-inherit hover:text-iris-2">Create list</a>
+          <a href={`${base}import.html`} class="border-b-2 border-iris pb-0.5 text-iris-2">Import</a>
+          <a href={`${base}showcase.html`} class="text-inherit hover:text-iris-2">Gacha Profiles</a>
+        </nav>
+        <div class="ml-auto flex items-center gap-2.5">
+          <a href={REPO} target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-full border border-white/[.12] px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+            Star
+          </a>
+          <a href={`${base}#install`} class="rounded-full border-none bg-iris px-5 py-2.5 font-heading text-sm font-extrabold text-white">Add to Chrome</a>
+        </div>
+      </div>
+    </header>
+
   <main class="tool-main">
     <div class="section-head">
       <span class="kicker">Import tool</span>
@@ -98,6 +142,9 @@ Steins;Gate  finished  ★★★★★`}></textarea>
       </section>
     </div>
   </main>
+
+    <div class="mt-10"><Footer /></div>
+  </div>
 
   <Fragment slot="scripts">
     <script is:inline src={`${base}js/import.js`}></script>

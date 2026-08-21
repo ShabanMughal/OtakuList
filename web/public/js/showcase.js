@@ -840,7 +840,11 @@
         const gold = c.r >= 5;
         const col = gold ? "#fbbf24" : "#b9a8ff";
         const bd = gold ? "rgba(251,191,36,.55)" : "rgba(167,139,250,.4)";
-        return `<div style="position:relative;flex:1;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:linear-gradient(160deg,#2a2444,#171226);display:flex;align-items:center;justify-content:center;border:1px solid ${bd}">${charCover(c.game, c.name)}<span style="position:relative;font-family:var(--font-heading);font-weight:800;font-size:11px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6)">${esc(c.name.split(" ")[0])}</span><span style="position:absolute;bottom:2px;right:3px;font-size:9px;color:${col}">${gold ? "5★" : "4★"}</span></div>`;
+        const img = charImg(c.game, c.name);
+        const fill = img
+          ? `<img src="${esc(img)}" alt="${esc(c.name)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+          : `<span style="position:relative;font-family:var(--font-heading);font-weight:800;font-size:16px;color:#fff">${esc(initials(c.name))}</span>`;
+        return `<div style="position:relative;flex:1;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:linear-gradient(160deg,#2a2444,#171226);display:flex;align-items:center;justify-content:center;border:1px solid ${bd}" title="${esc(c.name)}">${fill}<span style="position:absolute;bottom:2px;right:3px;font-size:9px;color:${col}">${gold ? "5★" : "4★"}</span></div>`;
       })
       .join("");
     const tags = games
