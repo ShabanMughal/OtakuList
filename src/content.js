@@ -69,8 +69,56 @@
 
   function extractEpisode(str) {
     if (!str) return null;
-    const m = String(str).match(/(?:episode|episodio|ep|epi|\be)[\s._:-]*?(\d{1,4})\b/i);
+    let value = String(str);
+    try {
+      const url = new URL(value, location.href);
+      for (const name of ["ep", "episode", "epi", "episodio"]) {
+        const param = url.searchParams.get(name);
+        if (param && /^\d{1,4}$/.test(param)) return parseInt(param, 10);
+      }
+      value = `${url.pathname} ${url.search}`;
+    } catch {
+      // Not a valid URL, fall through to plain-text matching.
+    }
+
+    const m = value.match(/(?:episode|episodio|ep|epi|\be)[\s._:-]*=?\s*(\d{1,4})\b/i);
     return m ? parseInt(m[1], 10) : null;
+  }
+
+  function titleFromPath(pathname) {
+    const ignore = new Set([
+      "anime",
+      "episode",
+      "episodes",
+      "ep",
+      "stream",
+      "play",
+      "watch",
+      "series",
+      "title",
+      "video",
+      "player",
+      "embed",
+    ]);
+    const segment = String(pathname)
+      .split("/")
+      .filter(Boolean)
+      .reverse()
+      .find((part) => /[a-z]/i.test(part) && !/^\d+$/.test(part) && !ignore.has(part.toLowerCase()));
+    if (!segment) return "";
+    return segment
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  }
+
+  function isGenericTitle(title, domain) {
+    const t = String(title || "").trim().toLowerCase();
+    if (!t) return true;
+    if (t.length < 3) return true;
+    if (t === domain || t === `watch ${domain}`) return true;
+    return /^(anime|episode|episodes|watch|stream|player|video|home|miruro)$/i.test(t);
   }
 
   function cleanTitle(raw) {
@@ -91,12 +139,14 @@
   function getCandidate() {
     const url = location.href;
     const domain = location.hostname.replace(/^www\./, "");
+    const pathTitle = titleFromPath(location.pathname);
     const rawTitle =
       metaContent('meta[property="og:title"]') ||
       metaContent('meta[name="title"]') ||
       document.title ||
       "";
-    const title = cleanTitle(rawTitle);
+    const cleanedTitle = cleanTitle(rawTitle);
+    const title = isGenericTitle(cleanedTitle, domain) && pathTitle ? pathTitle : cleanedTitle;
     if (!title || title.length < 2) return null;
     const episode = extractEpisode(url) ?? extractEpisode(rawTitle);
     const cover = metaContent('meta[property="og:image"]') || null;
