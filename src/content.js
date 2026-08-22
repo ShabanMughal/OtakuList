@@ -28,6 +28,10 @@
   // Anime we've already prompted about this page-load, so we don't nag.
   const dismissed = new Set();
   let lastKey = "";
+  // Miruro is an SPA: its URL, title, and player can update at different times.
+  // Increment this whenever navigation starts so an older async detection cannot
+  // write progress after the user has moved to another show.
+  let navigationVersion = 0;
 
   // ---------- storage helpers ----------
   const getList = () =>
@@ -52,6 +56,7 @@
       totalEpisodes: existing?.totalEpisodes ?? null,
       cover: candidate.cover || existing?.cover || null,
       site: candidate.domain,
+      sourceId: candidate.sourceId || existing?.sourceId || null,
       url: candidate.url,
       note: existing?.note || "",
       addedAt: existing?.addedAt || now,
@@ -136,21 +141,38 @@
     return t;
   }
 
+  function miruroSourceId(pathname) {
+    const match = String(pathname).match(/^\/watch\/(?:[^/]+\/)?(\d+)(?:\/|$)/i);
+    return match ? match[1] : null;
+  }
+
+  function miruroEpisode(pathname) {
+    const segment = String(pathname).split("/").filter(Boolean).pop() || "";
+    const match = segment.match(/-(\d{1,4})$/);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
   function getCandidate() {
     const url = location.href;
     const domain = location.hostname.replace(/^www\./, "");
     const pathTitle = titleFromPath(location.pathname);
     const rawTitle =
+      (domain === "miruro.tv" ? document.title : null) ||
       metaContent('meta[property="og:title"]') ||
       metaContent('meta[name="title"]') ||
-      document.title ||
       "";
     const cleanedTitle = cleanTitle(rawTitle);
+    // Episode routes contain a provider slug rather than the anime title, so
+    // keep the page title for display and use Miruro's numeric id separately.
     const title = isGenericTitle(cleanedTitle, domain) && pathTitle ? pathTitle : cleanedTitle;
     if (!title || title.length < 2) return null;
-    const episode = extractEpisode(url) ?? extractEpisode(rawTitle);
+    const episode =
+      (domain === "miruro.tv" ? miruroEpisode(location.pathname) : null) ??
+      extractEpisode(url) ??
+      extractEpisode(document.querySelector(".ep-number")?.textContent) ??
+      extractEpisode(rawTitle);
     const cover = metaContent('meta[property="og:image"]') || null;
-    return { title, episode, cover, url, domain };
+    return { title, episode, cover, url, domain, sourceId: miruroSourceId(location.pathname) };
   }
 
   // Search engines / big general sites where an "anime" mention is incidental.
@@ -316,13 +338,42 @@
     if (!looksLikeWatchPage()) return;
     const candidate = getCandidate();
     if (!candidate) return;
+    const versionAtStart = navigationVersion;
+    const urlAtStart = candidate.url;
     const id = idFor(candidate.title);
-    const key = candidate.domain + "|" + id + "|" + (candidate.episode ?? "");
+    const key = candidate.domain + "|" + (candidate.sourceId || "") + "|" + id + "|" + (candidate.episode ?? "");
     if (key === lastKey || dismissed.has(key)) return;
     lastKey = key;
 
     const list = await getList();
-    const existing = list[id];
+
+    // Do not trust a candidate captured before an SPA transition. The old
+    // request may resolve after Miruro has already rendered a different anime.
+    // Re-read the candidate as well as checking the navigation version because
+    // some transitions update the DOM without changing history immediately.
+    const current = getCandidate();
+    if (
+      versionAtStart !== navigationVersion ||
+      location.href !== urlAtStart ||
+      !current ||
+      idFor(current.title) !== id ||
+      current.sourceId !== candidate.sourceId ||
+      current.episode !== candidate.episode
+    ) {
+      return;
+    }
+
+    const matchedId = candidate.sourceId
+      ? Object.keys(list).find((listId) => list[listId]?.sourceId === candidate.sourceId)
+      : null;
+    const recordId = matchedId || id;
+    const titleMatch = list[recordId];
+    // A legacy entry may have the same stale document-title key as the
+    // previous anime but no Miruro id. Never auto-update that entry; wait for
+    // the user-facing card to confirm the new title and attach the id.
+    const existing = candidate.sourceId && !matchedId
+      ? (titleMatch?.sourceId === candidate.sourceId ? titleMatch : null)
+      : titleMatch;
 
     // Already in "Watching" → advance the episode silently, no modal.
     if (existing && existing.status === "watching") {
@@ -330,6 +381,7 @@
         existing.currentEpisode = candidate.episode;
         existing.url = candidate.url;
         existing.site = candidate.domain;
+        if (candidate.sourceId) existing.sourceId = candidate.sourceId;
         if (candidate.cover && !existing.cover) existing.cover = candidate.cover;
         existing.updatedAt = Date.now();
         await chrome.storage.local.set({ [KEY]: list });
@@ -354,7 +406,11 @@
   const scheduleDetect = () => [0, 700, 1600, 3000].forEach((d) => setTimeout(detect, d));
 
   function onNav() {
+    navigationVersion += 1;
     lastKey = ""; // allow the modal to show again for the new episode
+    removeBanner();
+    const toast = document.getElementById(TOAST_ID);
+    if (toast) toast.remove();
     scheduleDetect();
   }
 
@@ -372,6 +428,17 @@
 
   // Continuous fallback: catches episode changes that emit no navigation event.
   // detect() bails cheaply (before touching storage) when nothing has changed.
+  // Poll the URL separately from the slower retry loop. Some SPA routers keep
+  // their own reference to history.pushState, so our history patch can miss a
+  // route change even though the address bar changes without a page reload.
+  setInterval(() => {
+    const sig = currentSig();
+    if (sig !== lastSig) {
+      lastSig = sig;
+      onNav();
+    }
+  }, 500);
+
   setInterval(() => {
     const sig = currentSig();
     if (sig !== lastSig) {
