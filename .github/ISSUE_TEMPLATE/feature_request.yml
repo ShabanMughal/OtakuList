@@ -1,0 +1,44 @@
+name: ✨ Feature request
+description: Suggest a new feature, a site to support, or an improvement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Tell us what you'd like and why.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - Extension — detection / watchlist
+        - Extension — support a new site
+        - Web app — Gacha Showcase
+        - New gacha game / characters
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What are you trying to do that's hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would you like to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered (optional)
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else? (optional)
+      description: Mockups, links, or examples.

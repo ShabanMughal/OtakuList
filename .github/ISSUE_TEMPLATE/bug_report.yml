@@ -1,0 +1,57 @@
+name: 🐛 Bug report
+description: Something isn't working — a wrong detection, cover, crash, or UI glitch.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill this in so we can reproduce it quickly.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - Extension — anime detection / watchlist
+        - Extension — wrong or missing cover art
+        - Extension — duplicate entry across sites
+        - Web app — Gacha Showcase
+        - Login / account (Google or email)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: site-url
+    attributes:
+      label: Site / sample URL
+      description: For detection or cover bugs, the streaming site + a sample episode URL helps a lot.
+      placeholder: https://example.tv/watch/some-anime-episode-12
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Open episode '...'
+        3. See '...'
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & version
+      placeholder: Chrome 128 / Edge / Brave
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots / console errors (optional)
+      description: Drag images here, or paste any errors from the DevTools console.
