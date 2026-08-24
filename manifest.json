@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Auto-detects the anime you're watching and saves your watchlist locally — so you never lose track even if a site gets blocked.",
   "permissions": ["storage"],
+  "host_permissions": ["https://graphql.anilist.co/"],
   "action": {
     "default_popup": "src/popup.html",
     "default_title": "OtakuList",

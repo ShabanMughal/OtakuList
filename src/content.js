@@ -43,27 +43,48 @@
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
+  // The same anime opened on a different site should map to the SAME entry, not
+  // a duplicate. Match on the strongest identity available, in order:
+  //   1. AniList id  — canonical across every site
+  //   2. sourceId    — site's own id (e.g. Miruro)
+  //   3. normalized title — last-resort textual match
+  function findExistingKey(list, candidate) {
+    const nk = normText(candidate.title);
+    for (const [k, a] of Object.entries(list)) {
+      if (!a) continue;
+      if (candidate.anilistId && a.anilistId && String(a.anilistId) === String(candidate.anilistId))
+        return k;
+      if (candidate.sourceId && a.sourceId && String(a.sourceId) === String(candidate.sourceId))
+        return k;
+      if (nk && a.title && normText(a.title) === nk) return k;
+    }
+    return null;
+  }
+
   async function saveAnime(candidate, status) {
     const list = await getList();
-    const id = idFor(candidate.title);
+    const key = findExistingKey(list, candidate) || idFor(candidate.title);
     const now = Date.now();
-    const existing = list[id];
-    list[id] = {
-      id,
-      title: candidate.title,
+    const existing = list[key];
+    list[key] = {
+      id: key,
+      // Keep the title already stored (may be user-edited); only a brand-new
+      // entry takes the title as detected on this site.
+      title: existing?.title || candidate.title,
       status,
       currentEpisode: candidate.episode ?? existing?.currentEpisode ?? null,
       totalEpisodes: existing?.totalEpisodes ?? null,
       cover: candidate.cover || existing?.cover || null,
       site: candidate.domain,
       sourceId: candidate.sourceId || existing?.sourceId || null,
+      anilistId: candidate.anilistId || existing?.anilistId || null,
       url: candidate.url,
       note: existing?.note || "",
       addedAt: existing?.addedAt || now,
       updatedAt: now,
     };
     await chrome.storage.local.set({ [KEY]: list });
-    return list[id];
+    return list[key];
   }
 
   // ---------- detection ----------
@@ -141,6 +162,123 @@
     return t;
   }
 
+  // og:image on many sites is a fixed site banner/logo rather than the anime's
+  // own poster. Reject those by name so we fall back to the 🎬 placeholder
+  // instead of saving a misleading site cover.
+  function looksLikeSiteImage(src) {
+    if (!src) return true;
+    const s = src.toLowerCase();
+    return /(logo|favicon|banner|header|brand|default|placeholder|no[-_]?(image|cover|poster|thumb)|og[-_]?image|site[-_]?(cover|image)|apple[-_]?touch)/.test(
+      s
+    );
+  }
+
+  const isHttp = (src) => !!src && /^https?:\/\//.test(src);
+
+  // URLs from anime cover CDNs (AniList / MAL / Kitsu) or explicit cover/poster
+  // paths. A strong positive signal that works even when the image is lazy-
+  // loaded or off-screen and its pixel dimensions aren't readable yet.
+  function looksLikeCoverUrl(src) {
+    if (!isHttp(src) || looksLikeSiteImage(src)) return false;
+    return /(anilistcdn\/media\/anime\/cover|myanimelist\.net\/images\/anime|kitsu\.[a-z]+\/.*posters|\/(covers?|posters?)\/)/i.test(
+      src
+    );
+  }
+
+  const normText = (s) =>
+    String(s || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+
+  // Pages list many look-alike posters (sidebar recommendations, related
+  // seasons), so "first match" grabs the wrong one. Instead score every image
+  // and pick the best. The strongest signal for the MAIN poster is that its
+  // alt/title matches the anime we detected; cover-CDN urls, poster containers,
+  // and portrait shape reinforce it.
+  function getCover(title) {
+    const want = normText(title);
+    const wantWords = new Set(want.split(" ").filter((w) => w.length > 2));
+    const inPoster = new Set(
+      Array.from(
+        document.querySelectorAll(
+          ".anisc-poster img, .film-poster img, .anime-poster img, .poster img, .cover img, img.poster, img.cover, img[itemprop='image']"
+        )
+      )
+    );
+
+    let best = null;
+    let bestScore = 0;
+    for (const img of Array.from(document.images || [])) {
+      const src = img.currentSrc || img.src || img.getAttribute("data-src");
+      if (!isHttp(src) || looksLikeSiteImage(src)) continue;
+      const w = img.naturalWidth || img.width || 0;
+      const h = img.naturalHeight || img.height || 0;
+      const ratio = w && h ? h / w : 0;
+      const portrait = ratio >= 1.2 && ratio <= 1.9 && w >= 80 && h >= 120;
+      const coverUrl = looksLikeCoverUrl(src);
+      // Skip images that show none of the poster hallmarks.
+      if (!portrait && !coverUrl && !inPoster.has(img)) continue;
+
+      let score = 1;
+      const alt = normText(img.alt || img.title || img.getAttribute("aria-label"));
+      if (want && alt) {
+        if (alt === want || alt.includes(want) || want.includes(alt)) score += 8000;
+        else {
+          // partial word overlap for truncated/renamed titles
+          const hits = [...wantWords].filter((word) => alt.includes(word)).length;
+          if (hits) score += 1500 * (hits / wantWords.size);
+        }
+      }
+      if (coverUrl) score += 1000;
+      if (inPoster.has(img)) score += 500;
+      if (portrait) score += 300;
+      score += Math.min(w * h, 300000) / 1000; // size, capped so it can't dominate
+      if (score > bestScore) {
+        bestScore = score;
+        best = src;
+      }
+    }
+    if (best) return best;
+
+    const meta =
+      metaContent('meta[property="og:image"]') ||
+      metaContent('meta[name="twitter:image"]');
+    if (isHttp(meta) && !looksLikeSiteImage(meta)) return meta;
+    return null;
+  }
+
+  // Miruro runs on several mirror TLDs (miruro.tv, miruro.to, …).
+  const isMiruro = (domain) => /(^|\.)miruro\./.test(domain);
+
+  // Ask the background worker to resolve an anime on AniList — by id (Miruro,
+  // whose URLs carry the AniList media id) or by title search (every other
+  // site). Returns {id, romaji, english, cover} or null on any failure.
+  function resolveAnime(payload) {
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage({ type: "anilistResolve", ...payload }, (res) => {
+          if (chrome.runtime.lastError) return resolve(null);
+          resolve(res?.result || null);
+        });
+      } catch {
+        resolve(null);
+      }
+    });
+  }
+
+  // Guard against a bad title-search hit: require real word overlap between the
+  // detected title and AniList's romaji/english before adopting its id/cover.
+  function titleMatchesResolved(title, resolved) {
+    const want = new Set(normText(title).split(" ").filter((w) => w.length > 2));
+    if (!want.size) return false;
+    const got = normText([resolved.romaji, resolved.english].filter(Boolean).join(" "));
+    if (!got) return false;
+    let hits = 0;
+    for (const w of want) if (got.includes(w)) hits++;
+    return hits / want.size >= 0.5;
+  }
+
   function miruroSourceId(pathname) {
     const match = String(pathname).match(/^\/watch\/(?:[^/]+\/)?(\d+)(?:\/|$)/i);
     return match ? match[1] : null;
@@ -157,7 +295,7 @@
     const domain = location.hostname.replace(/^www\./, "");
     const pathTitle = titleFromPath(location.pathname);
     const rawTitle =
-      (domain === "miruro.tv" ? document.title : null) ||
+      (isMiruro(domain) ? document.title : null) ||
       metaContent('meta[property="og:title"]') ||
       metaContent('meta[name="title"]') ||
       "";
@@ -167,11 +305,11 @@
     const title = isGenericTitle(cleanedTitle, domain) && pathTitle ? pathTitle : cleanedTitle;
     if (!title || title.length < 2) return null;
     const episode =
-      (domain === "miruro.tv" ? miruroEpisode(location.pathname) : null) ??
+      (isMiruro(domain) ? miruroEpisode(location.pathname) : null) ??
       extractEpisode(url) ??
       extractEpisode(document.querySelector(".ep-number")?.textContent) ??
       extractEpisode(rawTitle);
-    const cover = metaContent('meta[property="og:image"]') || null;
+    const cover = getCover(title);
     return { title, episode, cover, url, domain, sourceId: miruroSourceId(location.pathname) };
   }
 
@@ -300,6 +438,31 @@
       finish("✓ Saved to Plan to Watch");
     };
 
+    // The poster often loads a beat after the card (SPA info panels, lazy imgs).
+    // If we opened without a cover, keep re-checking briefly and swap it in.
+    if (!candidate.cover) {
+      const top = root.querySelector(".top");
+      let tries = 0;
+      const timer = setInterval(() => {
+        if (!host.isConnected || tries++ >= 8) return clearInterval(timer);
+        const found = getCover(candidate.title);
+        if (!found) return;
+        candidate.cover = found;
+        const img = document.createElement("img");
+        img.className = "cover";
+        img.src = found;
+        img.onerror = () =>
+          img.replaceWith(
+            Object.assign(document.createElement("div"), {
+              className: "cover",
+              textContent: "🎬",
+            })
+          );
+        top.querySelector(".cover").replaceWith(img);
+        clearInterval(timer);
+      }, 700);
+    }
+
     document.documentElement.appendChild(host);
   }
 
@@ -363,17 +526,28 @@
       return;
     }
 
-    const matchedId = candidate.sourceId
-      ? Object.keys(list).find((listId) => list[listId]?.sourceId === candidate.sourceId)
-      : null;
-    const recordId = matchedId || id;
-    const titleMatch = list[recordId];
-    // A legacy entry may have the same stale document-title key as the
-    // previous anime but no Miruro id. Never auto-update that entry; wait for
-    // the user-facing card to confirm the new title and attach the id.
-    const existing = candidate.sourceId && !matchedId
-      ? (titleMatch?.sourceId === candidate.sourceId ? titleMatch : null)
-      : titleMatch;
+    // Resolve a canonical AniList identity so the same anime is deduped across
+    // sites and gets a reliable poster. Trust the id on Miruro (it's in the
+    // URL); elsewhere search by title and require it to actually match.
+    const resolved = await resolveAnime(
+      isMiruro(candidate.domain) && candidate.sourceId
+        ? { id: candidate.sourceId }
+        : { title: candidate.title }
+    );
+    // A slow lookup could resolve after the user moved on; re-verify context.
+    if (versionAtStart !== navigationVersion || location.href !== urlAtStart) return;
+    if (resolved && resolved.id) {
+      const trusted =
+        (isMiruro(candidate.domain) && candidate.sourceId) ||
+        titleMatchesResolved(candidate.title, resolved);
+      if (trusted) {
+        candidate.anilistId = String(resolved.id);
+        if (resolved.cover) candidate.cover = resolved.cover;
+      }
+    }
+
+    const existingKey = findExistingKey(list, candidate);
+    const existing = existingKey ? list[existingKey] : null;
 
     // Already in "Watching" → advance the episode silently, no modal.
     if (existing && existing.status === "watching") {
@@ -382,7 +556,11 @@
         existing.url = candidate.url;
         existing.site = candidate.domain;
         if (candidate.sourceId) existing.sourceId = candidate.sourceId;
-        if (candidate.cover && !existing.cover) existing.cover = candidate.cover;
+        if (candidate.anilistId) existing.anilistId = candidate.anilistId;
+        // Fill a missing cover, or replace an old one with a confident AniList
+        // poster (fixes entries saved before cover detection improved).
+        if (candidate.cover && (!existing.cover || looksLikeCoverUrl(candidate.cover)))
+          existing.cover = candidate.cover;
         existing.updatedAt = Date.now();
         await chrome.storage.local.set({ [KEY]: list });
         showToast(`Updated to Episode <b>${candidate.episode}</b>`);
