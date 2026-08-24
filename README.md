@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Chrome%20%7C%20Edge%20%7C%20Brave-8b5cf6" alt="platform" />
   <img src="https://img.shields.io/badge/manifest-v3-8b5cf6" alt="manifest v3" />
   <img src="https://img.shields.io/badge/price-free-8b5cf6" alt="free" />
-  <img src="https://img.shields.io/badge/data-100%25%20local-8b5cf6" alt="local" />
+  <img src="https://img.shields.io/badge/watchlist-100%25%20local-8b5cf6" alt="local" />
 </p>
 
 ---
@@ -27,23 +27,32 @@ The problem it solves: pirate/mirror sites get blocked or disappear all the time
 when they do, you lose track of *what you were watching* and *what's next*. OtakuList
 keeps that list with you — not on the site — so it never disappears with the site.
 
-- 🔒 **100% local & private** — no account, no server, nothing is ever uploaded.
+- 🔒 **Local & private watchlist** — your list stays in your browser, never uploaded.
 - 🤖 **Auto-detects** the anime, episode, and cover art as you watch.
-- ♻️ **Survives blocks** — your list is tied to *you*, not any website.
+- 🖼️ **Real cover art** — posters pulled from [AniList](https://anilist.co), not the site's random banner.
+- 🔗 **One entry per anime** — the same show on a different site updates your existing entry instead of duplicating it.
 - ⚡ **Zero effort** — episodes update themselves while you binge.
+
+There's also an **optional companion web app** — the [Gacha Showcase](#-gacha-showcase-companion-web-app) —
+for building a public profile of your gacha-game accounts. It's completely separate from
+your private watchlist. [Jump to it ↓](#-gacha-showcase-companion-web-app)
 
 ---
 
 ## ✨ Features
 
+### 🧩 The extension (anime watchlist)
+
 | | |
 |---|---|
 | 🎯 **Auto-detection** | Open an episode and a card slides in with the detected title + episode — one tap to save. |
+| 🖼️ **AniList cover art** | Fetches the anime's real poster from AniList's public API, so covers are correct even when a site has none. |
+| 🔗 **Cross-site dedup** | Recognizes the same anime across different sites (via its canonical AniList id) and keeps a single entry. |
 | 🗂️ **Clean lists** | Sorted into **Watching · Plan to Watch · Completed · On Hold** with a search box. |
 | 🔢 **Episode tracking** | Bumps your episode count automatically as you move through a series — silently. |
 | 📌 **Toolbar badge** | A live count of how many anime you're currently watching. |
 | ✍️ **Manual add** | Missed by detection? Add any title, status, and episode by hand. |
-| 🎨 **Clean UI** | Poppins font, dark theme, no clutter. |
+| 🌐 **Web sync bridge** | The official OtakuList site can read your local list (for the *Create list* / *Import* pages) — gated to the official domain + localhost. |
 
 ---
 
@@ -82,16 +91,52 @@ Click the toolbar icon to open the dashboard:
 
 ---
 
+## 🎴 Gacha Showcase (companion web app)
+
+A separate, **optional** website for showing off your gacha-game accounts — completely
+independent of your private anime watchlist.
+
+- 🕹️ **Public profiles** for **Genshin Impact · Honkai: Star Rail · Zenless Zone Zero · Wuthering Waves** — pick your characters, add ranks/UIDs.
+- 🔑 **Sign in with Google** (or email/password) — powered by [Supabase](https://supabase.com).
+- 🖼️ **Profile picture** pulled automatically from your Google account.
+- 🔗 **Your own public link** — pick a username and share `?u=yourname`.
+- ❤️ **Likes** and **featured characters** on each profile.
+- 🌐 Reads your extension's watchlist (via the web sync bridge) on the *Create list* / *Import* pages.
+
+Built with **Astro + Tailwind CSS + Supabase**.
+
+### Run it locally
+
+```bash
+cd web
+npm install
+cp .env.example .env     # add your Supabase URL + anon key
+npm run dev              # http://localhost:4321
+```
+
+- Database schema + row-level-security lives in [`supabase/`](supabase/) — see
+  [`supabase/README.md`](supabase/README.md) for the migrations to run.
+- To enable **Sign in with Google**, add a Google OAuth client and paste its
+  Client ID/Secret into your Supabase project (Authentication → Providers → Google),
+  then allow your site URLs under Authentication → URL Configuration.
+
+---
+
 ## ⚠️ Good to know
 
 - **Detection is a smart guess.** Every site is built differently, so OtakuList reads
-  the page's title, URL, and `og:` metadata. It catches most sites, and the save card
-  always lets you correct the title. Anything it misses, add manually with **＋**.
+  the page's title, URL, and `og:` metadata (and looks the anime up on AniList). It
+  catches most sites, and the save card always lets you correct the title. Anything it
+  misses, add manually with **＋**.
 - **It stays out of the way.** It ignores search engines and general sites — only real
   anime *watch* and *detail* pages trigger it. Searching "anime" on Google won't pop
   anything up.
-- **Data is local only.** Your list lives in this browser profile. Uninstalling the
-  extension or wiping the browser clears it.
+- **Your watchlist is local.** It lives in this browser profile; uninstalling the
+  extension or wiping the browser clears it. Cover art / identity lookups query
+  AniList's **public** API using only the *current* anime's title or id — your list is
+  never uploaded.
+- **The Showcase is opt-in and separate.** It's the only part that uses an account, and
+  it never touches your private watchlist.
 
 ---
 
@@ -101,12 +146,16 @@ Click the toolbar icon to open the dashboard:
 extention/
 ├── manifest.json          Extension config (Manifest V3)
 ├── src/
-│   ├── background.js       Toolbar badge = # currently watching
-│   ├── content.js          Auto-detection + in-page save card & toast
+│   ├── background.js       Toolbar badge + AniList cover/identity resolver
+│   ├── content.js          Auto-detection, cover/dedup, in-page save card & toast
 │   └── popup.html/css/js    The dashboard UI
 ├── icons/                  App icons + logo
 ├── fonts/                  Poppins (bundled locally)
-└── landing/                Marketing landing page (standalone website)
+├── web/                    Companion web app (Astro + Tailwind + Supabase)
+│   ├── src/pages/          Landing, Create list, Import, Gacha Showcase
+│   └── public/             Static JS/data (character rosters, etc.)
+├── supabase/               DB schema + RLS for Showcase accounts
+└── docs/                   Published static site (GitHub Pages)
 ```
 
 ---

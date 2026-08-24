@@ -22,10 +22,11 @@
   let mode = "home"; // "home" | "profile"
   let user = null;
   let username = null;
-  let profile = { name: "", games: [], featured: [] };
+  let profile = { name: "", games: [], featured: [], avatar: "" };
   let seq = 1;
   let editingId = null;
   let wantEdit = false; // set from a "#edit" deep-link → auto-open the editor once signed in
+  let setupDismissed = false; // user closed the "pick username" modal; reopen via Finish setup
 
   // ── character roster (name → portrait + rarity, per game) ─────────────
   let ROSTER = {}; // { game: [{name,img,r}] }
@@ -47,6 +48,20 @@
   const charImg = (game, name) => (charInfo(game, name) || {}).img || "";
   const charRank = (game, name) => (charInfo(game, name) || {}).r || 5;
   const initials = (name) => (String(name).trim()[0] || "?").toUpperCase();
+
+  // Profile picture from OAuth metadata (Google returns `avatar_url`/`picture`).
+  const oauthAvatar = (u) => {
+    const m = (u && u.user_metadata) || {};
+    return m.avatar_url || m.picture || "";
+  };
+  // Round avatar: the real picture if we have one, else an initials medallion.
+  // On a broken image url it falls back to the same initials medallion.
+  function avatarCircle(url, inits, bg, size, fs, border) {
+    const ring = `width:${size}px;height:${size}px;flex:none;border-radius:50%;border:${border}px solid rgba(11,10,22,.9);`;
+    const fallStyle = `${ring}background:${bg};display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:${fs}px;color:#fff`;
+    if (!url) return `<div style="${fallStyle}">${inits}</div>`;
+    return `<img src="${esc(url)}" alt="${inits}" referrerpolicy="no-referrer" loading="lazy" style="${ring}object-fit:cover;background:${bg}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{style:'${fallStyle}',textContent:'${inits}'}))">`;
+  }
   function charThumb(game, name) {
     const img = charImg(game, name);
     return img
@@ -271,7 +286,7 @@
     // home / explore
     $("view-profile").hidden = true;
     $("view-explore").hidden = false;
-    $("gs-setupname").hidden = !needsName;
+    $("gs-setupname").hidden = !(needsName && !setupDismissed);
     $("gs-editor").hidden = !(loggedIn && editorOpen);
     $("hero-create").textContent = loggedIn ? "Edit your showcase" : user ? "Finish setup" : "Create your profile";
     if (loggedIn) {
@@ -286,8 +301,8 @@
   $("hero-create").addEventListener("click", () => {
     if (!user) return openAuth("login");
     if (!username) {
+      setupDismissed = false;
       $("gs-setupname").hidden = false;
-      $("gs-setupname").scrollIntoView({ behavior: "smooth", block: "center" });
       $("gs-setup-uname").focus();
       return;
     }
@@ -295,6 +310,16 @@
     renderView();
     $("gs-editor").scrollIntoView({ behavior: "smooth", block: "start" });
   });
+  // Close the username modal (they can reopen it via "Finish setup").
+  const dismissSetup = () => {
+    setupDismissed = true;
+    $("gs-setupname").hidden = true;
+  };
+  $("gs-setup-close").addEventListener("click", dismissSetup);
+  $("gs-setupname").addEventListener("click", (e) => {
+    if (e.target === $("gs-setupname")) dismissSetup(); // click on backdrop
+  });
+
   $("gs-editclose").addEventListener("click", () => {
     editorOpen = false;
     renderView();
@@ -363,6 +388,14 @@
       const label = username ? "@" + username : user.email;
       $("nav-mylink").textContent = label;
       $("nav-mylink").href = username ? publicUrl(username) : "#";
+      const av = $("nav-avatar");
+      const url = profile.avatar || oauthAvatar(user);
+      if (url) {
+        av.src = url;
+        av.hidden = false;
+      } else {
+        av.hidden = true;
+      }
     }
   }
 
@@ -699,6 +732,16 @@
     }
   });
 
+  // Continue with Google → OAuth redirect; the session is picked up on return.
+  $("am-google").addEventListener("click", async () => {
+    authErr("");
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: location.origin + location.pathname },
+    });
+    if (error) authErr(error.message);
+  });
+
   $("nav-logout").addEventListener("click", async () => {
     await sb.auth.signOut();
   });
@@ -739,15 +782,18 @@
         .from("profiles").select("username").eq("username", v).maybeSingle();
       if (taken) return setupStatus("✗ Taken, try another", "taken");
       // create-or-update this user's profile row with the chosen username
+      const avatar = oauthAvatar(user);
       const { error } = await sb.from("profiles").upsert({
         id: user.id,
         username: v,
         display_name: profile.name || "",
+        avatar_url: avatar || null,
         games: gamesForDb(),
         updated_at: new Date().toISOString(),
       });
       if (error) return setupStatus(error.message, "taken");
       username = v;
+      profile.avatar = avatar || "";
       setupStatus("");
       $("gs-setup-uname").value = "";
       updateNav();
@@ -762,16 +808,59 @@
   async function loadOwnProfile() {
     const { data } = await sb
       .from("profiles")
-      .select("username, display_name, games, featured")
+      .select("username, display_name, games, featured, avatar_url")
       .eq("id", user.id)
       .maybeSingle();
     if (data) {
       username = data.username;
-      profile = { name: data.display_name || "", games: withIds(data.games), featured: Array.isArray(data.featured) ? data.featured : [] };
+      // Keep the stored avatar in sync with the current Google picture.
+      const ga = oauthAvatar(user);
+      let avatar = data.avatar_url || "";
+      if (ga && ga !== avatar) {
+        avatar = ga;
+        sb.from("profiles").update({ avatar_url: ga }).eq("id", user.id); // fire-and-forget
+      }
+      profile = {
+        name: data.display_name || "",
+        games: withIds(data.games),
+        featured: Array.isArray(data.featured) ? data.featured : [],
+        avatar,
+      };
       $("gs-name").value = profile.name;
     } else {
       username = null; // trigger may not have run yet, or account without username
+      // New OAuth user with no profile row yet — seed friendly defaults from
+      // their Google account so setup is one click, not a blank form.
+      const m = (user && user.user_metadata) || {};
+      profile = {
+        name: m.full_name || m.name || profile.name || "",
+        games: [],
+        featured: [],
+        avatar: oauthAvatar(user),
+      };
+      $("gs-name").value = profile.name;
     }
+  }
+
+  // Turn a Google name/email into a valid username suggestion, then find the
+  // first free variant (base, base2, base3…) and pre-fill the setup box.
+  async function suggestUsername() {
+    const input = $("gs-setup-uname");
+    if (!input || input.value.trim()) return; // never clobber what the user typed
+    const m = (user && user.user_metadata) || {};
+    const raw = m.full_name || m.name || (user.email || "").split("@")[0] || "";
+    let base = raw.toLowerCase().replace(/[^a-z0-9_]+/g, "").slice(0, 20);
+    if (base.length < 3) base = (base + "otaku").slice(0, 20); // pad short/empty
+    let candidate = base;
+    for (let i = 0; i < 12; i++) {
+      const { data } = await sb.from("profiles").select("username").eq("username", candidate).maybeSingle();
+      if (!data) break; // free
+      const suffix = String(i + 2);
+      candidate = base.slice(0, 20 - suffix.length) + suffix;
+    }
+    if (input.value.trim()) return; // user started typing while we were checking
+    input.value = candidate;
+    setupStatus("✓ Available", "ok");
   }
 
   async function onSignedIn(u) {
@@ -779,8 +868,10 @@
     await loadOwnProfile();
     authMsg("");
     updateNav();
+    if (!username) suggestUsername(); // pre-fill a friendly username to claim
     if (mode === "home") {
       renderView();
+      if (!username && !setupDismissed) setTimeout(() => $("gs-setup-uname").focus(), 60);
       if (wantEdit && username) {
         wantEdit = false;
         editorOpen = true;
@@ -795,7 +886,7 @@
     user = null;
     username = null;
     editorOpen = false;
-    profile = { name: "", games: [], featured: [] };
+    profile = { name: "", games: [], featured: [], avatar: "" };
     $("gs-name").value = "";
     updateNav();
     if (mode === "home") renderView();
@@ -860,7 +951,7 @@
       <div style="height:74px;background:${bannerFor(uname)};position:relative"><div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(11,10,22,.65))"></div></div>
       <div style="padding:0 18px 18px;margin-top:-26px;position:relative">
         <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px">
-          <div style="width:56px;height:56px;flex:none;border-radius:50%;background:${avatarFor(uname)};border:2px solid rgba(11,10,22,.9);display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:18px;color:#fff">${inits}</div>
+          ${avatarCircle(p.avatar_url, inits, avatarFor(uname), 56, 18, 2)}
           <div style="padding-bottom:3px;min-width:0">
             <div style="font-family:var(--font-heading);font-weight:800;font-size:16.5px;letter-spacing:-.02em">${name}</div>
             <div style="font-size:12px;color:rgba(244,242,248,.5)">@${esc(uname)} · ${games.length} game${games.length === 1 ? "" : "s"}</div>
@@ -935,7 +1026,7 @@
     }
     const { data, error } = await sb
       .from("profiles")
-      .select("username, display_name, games, likes_count, featured")
+      .select("username, display_name, games, likes_count, featured, avatar_url")
       .order("updated_at", { ascending: false })
       .limit(60);
     GALLERY = error || !data ? [] : data;
@@ -1023,7 +1114,7 @@
       </div>
       <div style="max-width:1320px;margin:0 auto;padding:0 28px 34px">
         <div style="position:relative;z-index:1;display:flex;gap:22px;align-items:flex-end;margin-top:-58px;flex-wrap:wrap">
-          <div style="width:118px;height:118px;flex:none;border-radius:50%;background:${avatarFor(uname)};border:3px solid rgba(11,10,22,.9);display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:38px;color:#fff">${inits}</div>
+          ${avatarCircle(p.avatar_url, inits, avatarFor(uname), 118, 38, 3)}
           <div style="flex:1;min-width:260px;padding-bottom:6px">
             <h1 style="font-family:var(--font-heading);font-weight:800;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.035em;margin:0 0 8px">${esc(name)}</h1>
             <p style="margin:0;font-size:15px;color:rgba(244,242,248,.62);max-width:60ch">${bio ? esc(bio) : "@" + esc(uname)}</p>
@@ -1070,7 +1161,7 @@
     if (!CLOUD) return (host.innerHTML = notFoundHtml("Cloud accounts aren't configured yet."));
     const { data, error } = await sb
       .from("profiles")
-      .select("id, username, display_name, games, likes_count")
+      .select("id, username, display_name, games, likes_count, avatar_url")
       .eq("username", u)
       .maybeSingle();
     if (error || !data) return (host.innerHTML = notFoundHtml(`No showcase found for “${esc(u)}”.`));
