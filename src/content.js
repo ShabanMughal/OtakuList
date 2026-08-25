@@ -73,7 +73,7 @@
       title: existing?.title || candidate.title,
       status,
       currentEpisode: candidate.episode ?? existing?.currentEpisode ?? null,
-      totalEpisodes: existing?.totalEpisodes ?? null,
+      totalEpisodes: candidate.totalEpisodes ?? existing?.totalEpisodes ?? null,
       cover: candidate.cover || existing?.cover || null,
       site: candidate.domain,
       sourceId: candidate.sourceId || existing?.sourceId || null,
@@ -267,6 +267,27 @@
     });
   }
 
+  // Ask the background worker for several AniList matches for a free-text query,
+  // used by the "Wrong anime?" corrector in the save card.
+  function searchAnimeList(query) {
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage({ type: "anilistSearch", query }, (res) => {
+          if (chrome.runtime.lastError) return resolve([]);
+          resolve(res?.results || []);
+        });
+      } catch {
+        resolve([]);
+      }
+    });
+  }
+
+  const escapeHtml = (s) =>
+    String(s == null ? "" : s).replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+    );
+
   // Guard against a bad title-search hit: require real word overlap between the
   // detected title and AniList's romaji/english before adopting its id/cover.
   function titleMatchesResolved(title, resolved) {
@@ -382,6 +403,27 @@
         .title:focus{border-color:var(--accent);}
         .ep{font-size:12px;color:var(--muted);margin:8px 0 0;}
         .ep b{color:var(--accent-2);}
+        /* "Wrong anime?" corrector */
+        .fix{background:transparent;border:none;color:var(--accent-2);font-size:11px;
+          font-weight:600;cursor:pointer;padding:0;margin:6px 0 0;text-decoration:underline;}
+        .fix:hover{color:var(--text);}
+        .search{padding:2px 14px 6px;}
+        .search-input{width:100%;font-size:12px;border:1px solid var(--line);
+          background:var(--panel-2);color:#fff;border-radius:8px;padding:7px 9px;outline:none;}
+        .search-input:focus{border-color:var(--accent);}
+        .results{max-height:190px;overflow:auto;margin-top:6px;display:flex;
+          flex-direction:column;gap:4px;}
+        .res{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+          background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+          padding:5px 7px;cursor:pointer;color:var(--text);}
+        .res:hover{background:#352f52;border-color:var(--accent);}
+        .res img,.res .ph{width:30px;height:40px;border-radius:5px;object-fit:cover;
+          flex:none;background:var(--bg);display:grid;place-items:center;font-size:14px;}
+        .res-t{display:flex;flex-direction:column;min-width:0;}
+        .res-t b{font-size:12px;font-weight:600;line-height:1.25;overflow:hidden;
+          text-overflow:ellipsis;white-space:nowrap;}
+        .res-t small{font-size:10px;color:var(--muted);}
+        .hint{font-size:11px;color:var(--muted);padding:6px 2px;}
         /* actions — primary + ghost like the popup buttons */
         .actions{display:flex;gap:8px;padding:12px 14px 14px;}
         .actions button{flex:1;border-radius:9px;padding:9px 6px;font-size:12px;
@@ -406,7 +448,12 @@
           <div class="meta">
             <input class="title" value="">
             <p class="ep">${candidate.episode ? `Episode <b>${candidate.episode}</b>` : "Episode not detected"}</p>
+            <button class="fix" type="button">Wrong anime?</button>
           </div>
+        </div>
+        <div class="search" hidden>
+          <input class="search-input" type="text" placeholder="Search the correct anime…">
+          <div class="results"></div>
         </div>
         <div class="actions">
           <button class="watch">▶ Watching</button>
@@ -437,6 +484,99 @@
       await saveAnime(candidate, "plan");
       finish("✓ Saved to Plan to Watch");
     };
+
+    // ── "Wrong anime?" corrector ──────────────────────────────────────
+    // Detection is a guess; let the user search AniList and pick the right
+    // show, which fixes the title, cover, canonical id and episode count.
+    const fixBtn = root.querySelector(".fix");
+    const searchPanel = root.querySelector(".search");
+    const searchInput = root.querySelector(".search-input");
+    const results = root.querySelector(".results");
+    let searchTimer = 0;
+    let hits = [];
+
+    // Swap the card's cover thumbnail to a new source (falls back to 🎬).
+    const setCover = (src) => {
+      const cur = root.querySelector(".top .cover");
+      if (!cur) return;
+      const img = document.createElement("img");
+      img.className = "cover";
+      img.src = src;
+      img.onerror = () =>
+        img.replaceWith(
+          Object.assign(document.createElement("div"), {
+            className: "cover",
+            textContent: "🎬",
+          })
+        );
+      cur.replaceWith(img);
+    };
+
+    const renderResults = (items) => {
+      if (!items.length) {
+        results.innerHTML = `<div class="hint">No matches — try a different spelling.</div>`;
+        return;
+      }
+      results.innerHTML = items
+        .map((m, i) => {
+          const name = m.english || m.romaji || "Untitled";
+          const sub = [m.format, m.seasonYear].filter(Boolean).join(" · ");
+          const thumb = m.cover
+            ? `<img src="${escapeHtml(m.cover)}" alt="">`
+            : `<span class="ph">🎬</span>`;
+          return `<button class="res" type="button" data-i="${i}">${thumb}<span class="res-t"><b>${escapeHtml(
+            name
+          )}</b><small>${escapeHtml(sub)}</small></span></button>`;
+        })
+        .join("");
+    };
+
+    const runSearch = () => {
+      const q = searchInput.value.trim();
+      clearTimeout(searchTimer);
+      if (!q) {
+        results.innerHTML = "";
+        return;
+      }
+      results.innerHTML = `<div class="hint">Searching…</div>`;
+      searchTimer = setTimeout(async () => {
+        const items = await searchAnimeList(q);
+        if (!host.isConnected) return;
+        hits = items;
+        renderResults(items);
+      }, 350);
+    };
+
+    fixBtn.onclick = () => {
+      const opening = searchPanel.hidden;
+      searchPanel.hidden = !opening;
+      if (opening) {
+        searchInput.value = input.value.trim() || candidate.title;
+        searchInput.focus();
+        searchInput.select();
+        runSearch(); // pre-fill matches for the current title
+      }
+    };
+
+    searchInput.addEventListener("input", runSearch);
+
+    results.addEventListener("click", (e) => {
+      const btn = e.target.closest(".res");
+      if (!btn) return;
+      const m = hits[Number(btn.dataset.i)];
+      if (!m) return;
+      const name = m.english || m.romaji || input.value;
+      input.value = name;
+      candidate.title = name;
+      candidate.anilistId = String(m.id);
+      candidate.sourceId = null; // the detected site id may belong to the wrong show
+      if (m.cover) {
+        candidate.cover = m.cover;
+        setCover(m.cover);
+      }
+      if (m.episodes) candidate.totalEpisodes = m.episodes;
+      searchPanel.hidden = true;
+    });
 
     // The poster often loads a beat after the card (SPA info panels, lazy imgs).
     // If we opened without a cover, keep re-checking briefly and swap it in.
