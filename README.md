@@ -15,6 +15,19 @@
   <img src="https://img.shields.io/badge/watchlist-100%25%20local-8b5cf6" alt="local" />
 </p>
 
+<p align="center">
+  <a href="https://shabanmughal.github.io/OtakuList/"><b>Website</b></a> ·
+  <a href="#-install-unpacked"><b>Install</b></a> ·
+  <a href="#️-how-to-use-it"><b>How it works</b></a> ·
+  <a href="#-gacha-showcase-companion-web-app"><b>Gacha Showcase</b></a>
+</p>
+
+<p align="center">
+  <a href="https://shabanmughal.github.io/OtakuList/">
+    <img src="screenshots/landing-hero.png" width="880" alt="OtakuList — your anime list, sealed forever" />
+  </a>
+</p>
+
 ---
 
 ## 📖 What is it?
