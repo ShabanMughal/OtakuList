@@ -9,6 +9,7 @@
     wuwa: { name: "Wuthering Waves", rank: "Union Level", g1: "#12c2c9", g2: "#0a6e86", mono: "WW" },
     hsr: { name: "Honkai: Star Rail", rank: "Trailblaze Level", g1: "#8b5cf6", g2: "#f2b950", mono: "HSR" },
     zzz: { name: "Zenless Zone Zero", rank: "Inter-Knot Level", g1: "#f5e003", g2: "#1a1a1a", mono: "ZZZ" },
+    pgr: { name: "Punishing: Gray Raven", rank: "Commandant Level", g1: "#e4002b", g2: "#1a1a1a", mono: "PGR" },
     genshin: { name: "Genshin Impact", rank: "Adventure Rank", g1: "#48c2b6", g2: "#e0b451", mono: "GI" },
     custom: { name: "Game", rank: "Level", g1: "#8b5cf6", g2: "#6366f1", mono: "★" },
   };
@@ -68,11 +69,17 @@
       ? `<img class="gs-charimg" src="${esc(img)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'gs-charini',textContent:'${esc(initials(name))}'}))">`
       : `<span class="gs-charini">${esc(initials(name))}</span>`;
   }
+  // Full-body card/portrait art (WuWa, PGR, ZZZ) reads best cropped from the top
+  // so the character's head stays in frame; the square GI/HSR icons look best
+  // centered.
+  const FULLBODY = { wuwa: 1, pgr: 1, zzz: 1 };
+  const coverPos = (game) => (FULLBODY[game] ? "top" : "center");
+
   // portrait filling its container (for tiles / cards), initials fallback
   function charCover(game, name) {
     const img = charImg(game, name);
     return img
-      ? `<img src="${esc(img)}" alt="${esc(name)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+      ? `<img src="${esc(img)}" alt="${esc(name)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${coverPos(game)}" onerror="this.style.display='none'">`
       : "";
   }
 
@@ -96,6 +103,7 @@
     hsr: "linear-gradient(140deg,#3b0764,#a855f7)",
     wuwa: "linear-gradient(140deg,#134e4a,#2dd4bf)",
     zzz: "linear-gradient(140deg,#422006,#facc15)",
+    pgr: "linear-gradient(140deg,#450a0a,#e4002b)",
     custom: "linear-gradient(140deg,#3b0764,#7d5cf5)",
   };
   const bannerFor = (u) => BANNERS[hashStr(u) % BANNERS.length];
@@ -933,7 +941,7 @@
         const bd = gold ? "rgba(251,191,36,.55)" : "rgba(167,139,250,.4)";
         const img = charImg(c.game, c.name);
         const fill = img
-          ? `<img src="${esc(img)}" alt="${esc(c.name)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+          ? `<img src="${esc(img)}" alt="${esc(c.name)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${coverPos(c.game)}" onerror="this.style.display='none'">`
           : `<span style="position:relative;font-family:var(--font-heading);font-weight:800;font-size:16px;color:#fff">${esc(initials(c.name))}</span>`;
         return `<div style="position:relative;flex:1;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:linear-gradient(160deg,#2a2444,#171226);display:flex;align-items:center;justify-content:center;border:1px solid ${bd}" title="${esc(c.name)}">${fill}<span style="position:absolute;bottom:2px;right:3px;font-size:9px;color:${col}">${gold ? "5★" : "4★"}</span></div>`;
       })
@@ -968,7 +976,7 @@
   }
 
   function renderTabs() {
-    const defs = [{ k: "all", label: "All games" }, { k: "wuwa" }, { k: "hsr" }, { k: "zzz" }, { k: "genshin" }];
+    const defs = [{ k: "all", label: "All games" }, { k: "wuwa" }, { k: "hsr" }, { k: "zzz" }, { k: "pgr" }, { k: "genshin" }];
     $("gs-tabs").innerHTML = defs
       .map((d) => {
         const active = filterGame === d.k;

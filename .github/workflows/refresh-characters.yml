@@ -1,0 +1,44 @@
+name: Refresh character roster
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # every Monday 06:00 UTC
+  workflow_dispatch: # manual "Run workflow" button
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-characters
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Regenerate characters.json
+        run: node web/scripts/fetch-characters.mjs
+
+      - name: Open PR if the roster changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          add-paths: web/public/data/characters.json
+          branch: bot/refresh-characters
+          commit-message: 'chore: refresh gacha character roster'
+          title: 'chore: refresh gacha character roster'
+          body: |
+            Automated weekly refresh of `web/public/data/characters.json`
+            (Genshin/HSR via yatta.moe, ZZZ/WuWa/PGR via Fandom).
+
+            Review the diff for new/renamed characters, then merge to deploy.
+          labels: automated
+          delete-branch: true
