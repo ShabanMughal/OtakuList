@@ -501,6 +501,76 @@
       "r": 5
     },
     {
+      "name": "Traveler (Anemo) · Aether",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerBoy.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Anemo) · Lumine",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerGirl.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Cryo) · Aether",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerBoy.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Cryo) · Lumine",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerGirl.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Dendro) · Aether",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerBoy.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Dendro) · Lumine",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerGirl.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Electro) · Aether",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerBoy.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Electro) · Lumine",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerGirl.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Geo) · Aether",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerBoy.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Geo) · Lumine",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerGirl.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Hydro) · Aether",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerBoy.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Hydro) · Lumine",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerGirl.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Pyro) · Aether",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerBoy.png",
+      "r": 5
+    },
+    {
+      "name": "Traveler (Pyro) · Lumine",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_PlayerGirl.png",
+      "r": 5
+    },
+    {
       "name": "Varesa",
       "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Varesa.png",
       "r": 5
@@ -993,28 +1063,53 @@
       "r": 5
     },
     {
-      "name": "Trailblazer (Physical)",
-      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8001.png",
-      "r": 5
-    },
-    {
-      "name": "Trailblazer (Fire)",
+      "name": "Trailblazer (Fire) · Caelus",
       "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8003.png",
       "r": 5
     },
     {
-      "name": "Trailblazer (Imaginary)",
-      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8005.png",
+      "name": "Trailblazer (Fire) · Stelle",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8004.png",
       "r": 5
     },
     {
-      "name": "Trailblazer (Ice)",
+      "name": "Trailblazer (Ice) · Caelus",
       "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8007.png",
       "r": 5
     },
     {
-      "name": "Trailblazer (Lightning)",
+      "name": "Trailblazer (Ice) · Stelle",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8008.png",
+      "r": 5
+    },
+    {
+      "name": "Trailblazer (Imaginary) · Caelus",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8005.png",
+      "r": 5
+    },
+    {
+      "name": "Trailblazer (Imaginary) · Stelle",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8006.png",
+      "r": 5
+    },
+    {
+      "name": "Trailblazer (Lightning) · Caelus",
       "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8009.png",
+      "r": 5
+    },
+    {
+      "name": "Trailblazer (Lightning) · Stelle",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8010.png",
+      "r": 5
+    },
+    {
+      "name": "Trailblazer (Physical) · Caelus",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8001.png",
+      "r": 5
+    },
+    {
+      "name": "Trailblazer (Physical) · Stelle",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/8002.png",
       "r": 5
     },
     {
@@ -1055,351 +1150,988 @@
   ],
   "zzz": [
     {
-      "name": "Anby",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle01.png",
+      "name": "Alexandrina Sebastiane",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/4/40/Agent_Alexandrina_Sebastiane_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Alice Thymefield",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/2/2d/Agent_Alice_Thymefield_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Anby Demara",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/b/bd/Agent_Anby_Demara_Portrait.png",
       "r": 4
     },
     {
-      "name": "Anton",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle15.png",
+      "name": "Anton Ivanov",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/1/1d/Agent_Anton_Ivanov_Portrait.png",
       "r": 4
     },
     {
-      "name": "Ben",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle16.png",
-      "r": 4
-    },
-    {
-      "name": "Billy",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle10.png",
-      "r": 4
-    },
-    {
-      "name": "Corin",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle09.png",
-      "r": 4
-    },
-    {
-      "name": "Nekomata",
-      "img": "assets/chars/zzz/nekomata.png",
+      "name": "Aria",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/0/0b/Agent_Aria_Portrait.png",
       "r": 5
     },
     {
-      "name": "Nicole",
-      "img": "assets/chars/zzz/nicole.png",
-      "r": 5
-    },
-    {
-      "name": "Soldier 11",
-      "img": "assets/chars/zzz/soldier-11.png",
-      "r": 5
-    },
-    {
-      "name": "Grace",
-      "img": "assets/chars/zzz/grace.png",
-      "r": 5
-    },
-    {
-      "name": "Koleda",
-      "img": "assets/chars/zzz/koleda.png",
-      "r": 5
-    },
-    {
-      "name": "Rina",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle22.png",
-      "r": 5
-    },
-    {
-      "name": "Ellen",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle21.png",
-      "r": 5
-    },
-    {
-      "name": "Lycaon",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle18.png",
-      "r": 5
-    },
-    {
-      "name": "Soukaku",
-      "img": "assets/chars/zzz/soukaku.png",
-      "r": 5
-    },
-    {
-      "name": "Lucy",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle27.png",
-      "r": 4
-    },
-    {
-      "name": "Piper",
-      "img": "assets/chars/zzz/piper.png",
-      "r": 5
-    },
-    {
-      "name": "Zhu Yuan",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle23.png",
-      "r": 5
-    },
-    {
-      "name": "Qingyi",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle29.png",
-      "r": 5
-    },
-    {
-      "name": "Jane Doe",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle24.png",
-      "r": 5
-    },
-    {
-      "name": "Seth",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle30.png",
-      "r": 4
-    },
-    {
-      "name": "Caesar",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle25.png",
-      "r": 5
-    },
-    {
-      "name": "Burnice",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle32.png",
-      "r": 5
-    },
-    {
-      "name": "Yanagi",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle31.png",
-      "r": 5
-    },
-    {
-      "name": "Miyabi",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle11.png",
-      "r": 5
-    },
-    {
-      "name": "Harumasa",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle35.png",
-      "r": 5
-    },
-    {
-      "name": "Lighter",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle26.png",
-      "r": 5
-    },
-    {
-      "name": "Evelyn",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle37.png",
+      "name": "Asaba Harumasa",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/f/f6/Agent_Asaba_Harumasa_Portrait.png",
       "r": 5
     },
     {
       "name": "Astra Yao",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle36.png",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/4/44/Agent_Astra_Yao_Portrait.png",
       "r": 5
     },
     {
-      "name": "Pulchra",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle38.png",
+      "name": "Banyue",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/4/43/Agent_Banyue_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Ben Bigger",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/3/35/Agent_Ben_Bigger_Portrait.png",
       "r": 4
     },
     {
-      "name": "Trigger",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle39.png",
+      "name": "Billy Kid",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/d/dc/Agent_Billy_Kid_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Burnice White",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/d/d1/Agent_Burnice_White_Portrait.png",
       "r": 5
     },
     {
-      "name": "Vivian",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle41.png",
+      "name": "Caesar King",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/b/b8/Agent_Caesar_King_Portrait.png",
       "r": 5
     },
     {
-      "name": "Yixuan",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle44.png",
+      "name": "Cissia",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/8/83/Agent_Cissia_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Corin Wickes",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/c/cf/Agent_Corin_Wickes_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Dialyn",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/9/9f/Agent_Dialyn_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Ellen Joe",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/e/e3/Agent_Ellen_Joe_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Evelyn Chevalier",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/d/d2/Agent_Evelyn_Chevalier_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Grace Howard",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/9/9a/Agent_Grace_Howard_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Hoshimi Miyabi",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/d/da/Agent_Hoshimi_Miyabi_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Hugo Vlad",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/5/5e/Agent_Hugo_Vlad_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Jane Doe",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/1/11/Agent_Jane_Doe_Portrait.png",
       "r": 5
     },
     {
       "name": "Ju Fufu",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle43.png",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/2/2a/Agent_Ju_Fufu_Portrait.png",
       "r": 5
     },
     {
-      "name": "Alice",
-      "img": "https://enka.network/ui/zzz/IconRoleCircle46.png",
+      "name": "Koleda Belobog",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/d/d6/Agent_Koleda_Belobog_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Komano Manato",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/a/a1/Agent_Komano_Manato_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Lighter",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/d/dd/Agent_Lighter_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Lucia Elowen",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/4/49/Agent_Lucia_Elowen_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Luciana de Montefio",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/9/9f/Agent_Luciana_de_Montefio_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Nangong Yu",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/2/27/Agent_Nangong_Yu_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Nekomiya Mana",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/b/bc/Agent_Nekomiya_Mana_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Nicole Demara",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/7/7a/Agent_Nicole_Demara_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Norma Hollowell",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/1/10/Agent_Norma_Hollowell_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Orphie Magnusson & Magus",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/c/cf/Agent_Orphie_Magnusson_%26_Magus_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Pan Yinhu",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/8/87/Agent_Pan_Yinhu_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Piper Wheel",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/a/a9/Agent_Piper_Wheel_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Promeia",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/3/34/Agent_Promeia_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Pulchra Fellini",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/7/77/Agent_Pulchra_Fellini_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Pyrois",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/4/45/Agent_Pyrois_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Qingyi",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/d/d3/Agent_Qingyi_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Remielle Dan",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/b/b1/Agent_Remielle_Dan_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Seed",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/6/68/Agent_Seed_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Seth Lowell",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/f/f9/Agent_Seth_Lowell_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Sigrid de L'Azur",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/d/d4/Agent_Sigrid_de_L%27Azur_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Soldier 0 - Anby",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/9/90/Agent_Soldier_0_-_Anby_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Soldier 11",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/3/36/Agent_Soldier_11_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Soukaku",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/3/35/Agent_Soukaku_Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Starlight - Billy Kid",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/4/46/Agent_Starlight_-_Billy_Kid_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Sunna",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/3/39/Agent_Sunna_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Trigger",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/a/a4/Agent_Trigger_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Tsukishiro Yanagi",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/c/cb/Agent_Tsukishiro_Yanagi_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Ukinami Yuzuha",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/6/6d/Agent_Ukinami_Yuzuha_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Velina Airgid",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/c/cf/Agent_Velina_Airgid_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Vivian Banshee",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/f/f5/Agent_Vivian_Banshee_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Von Lycaon",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/5/5f/Agent_Von_Lycaon_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Ye Shunguang",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/b/bb/Agent_Ye_Shunguang_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Yidhari Murphy",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/0/03/Agent_Yidhari_Murphy_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Yixuan",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/8/89/Agent_Yixuan_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Zhao",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/a/a6/Agent_Zhao_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Zhu Yuan",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/0/07/Agent_Zhu_Yuan_Portrait.png",
       "r": 5
     }
   ],
   "wuwa": [
     {
-      "name": "Rover",
-      "img": "assets/chars/wuwa/rover.png",
-      "r": 4
-    },
-    {
       "name": "Aalto",
-      "img": "assets/chars/wuwa/aalto.png",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/6/65/Aalto_Card.jpg",
       "r": 4
     },
     {
-      "name": "Baizhi",
-      "img": "assets/chars/wuwa/baizhi.png",
-      "r": 4
-    },
-    {
-      "name": "Chixia",
-      "img": "assets/chars/wuwa/chixia.png",
-      "r": 4
-    },
-    {
-      "name": "Danjin",
-      "img": "assets/chars/wuwa/danjin.png",
-      "r": 4
-    },
-    {
-      "name": "Encore",
-      "img": "assets/chars/wuwa/encore.png",
-      "r": 4
-    },
-    {
-      "name": "Jianxin",
-      "img": "assets/chars/wuwa/jianxin.png",
-      "r": 4
-    },
-    {
-      "name": "Lingyang",
-      "img": "assets/chars/wuwa/lingyang.png",
-      "r": 4
-    },
-    {
-      "name": "Mortefi",
-      "img": "assets/chars/wuwa/mortefi.png",
-      "r": 4
-    },
-    {
-      "name": "Sanhua",
-      "img": "assets/chars/wuwa/sanhua.png",
-      "r": 4
-    },
-    {
-      "name": "Taoqi",
-      "img": "assets/chars/wuwa/taoqi.png",
-      "r": 4
-    },
-    {
-      "name": "Verina",
-      "img": "assets/chars/wuwa/verina.png",
-      "r": 5
-    },
-    {
-      "name": "Yangyang",
-      "img": "assets/chars/wuwa/yangyang.png",
-      "r": 4
-    },
-    {
-      "name": "Yuanwu",
-      "img": "assets/chars/wuwa/yuanwu.png",
-      "r": 4
-    },
-    {
-      "name": "Calcharo",
-      "img": "assets/chars/wuwa/calcharo.png",
-      "r": 5
-    },
-    {
-      "name": "Jiyan",
-      "img": "assets/chars/wuwa/jiyan.png",
-      "r": 5
-    },
-    {
-      "name": "Lumi",
-      "img": "assets/chars/wuwa/lumi.png",
-      "r": 4
-    },
-    {
-      "name": "Yinlin",
-      "img": "assets/chars/wuwa/yinlin.png",
-      "r": 5
-    },
-    {
-      "name": "Jinhsi",
-      "img": "assets/chars/wuwa/jinhsi.png",
-      "r": 5
-    },
-    {
-      "name": "Changli",
-      "img": "assets/chars/wuwa/changli.png",
-      "r": 5
-    },
-    {
-      "name": "Zhezhi",
-      "img": "assets/chars/wuwa/zhezhi.png",
-      "r": 5
-    },
-    {
-      "name": "Xiangli Yao",
-      "img": "assets/chars/wuwa/xiangli-yao.png",
-      "r": 5
-    },
-    {
-      "name": "Shorekeeper",
-      "img": "assets/chars/wuwa/shorekeeper.png",
-      "r": 5
-    },
-    {
-      "name": "Camellya",
-      "img": "assets/chars/wuwa/camellya.png",
-      "r": 5
-    },
-    {
-      "name": "Carlotta",
-      "img": "assets/chars/wuwa/carlotta.png",
-      "r": 5
-    },
-    {
-      "name": "Roccia",
-      "img": "assets/chars/wuwa/roccia.png",
-      "r": 5
-    },
-    {
-      "name": "Phoebe",
-      "img": "assets/chars/wuwa/phoebe.png",
-      "r": 5
-    },
-    {
-      "name": "Brant",
-      "img": "assets/chars/wuwa/brant.png",
-      "r": 5
-    },
-    {
-      "name": "Cantarella",
-      "img": "assets/chars/wuwa/cantarella.png",
-      "r": 5
-    },
-    {
-      "name": "Zani",
-      "img": "assets/chars/wuwa/zani.png",
-      "r": 5
-    },
-    {
-      "name": "Ciaccona",
-      "img": "assets/chars/wuwa/ciaccona.png",
-      "r": 5
-    },
-    {
-      "name": "Cartethyia",
-      "img": "assets/chars/wuwa/cartethyia.png",
-      "r": 5
-    },
-    {
-      "name": "Lupa",
-      "img": "assets/chars/wuwa/lupa.png",
-      "r": 5
-    },
-    {
-      "name": "Phrolova",
-      "img": "assets/chars/wuwa/phrolova.png",
+      "name": "Aemeath",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/f/fc/Aemeath_Card.jpg",
       "r": 5
     },
     {
       "name": "Augusta",
-      "img": "assets/chars/wuwa/augusta.png",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/3/39/Augusta_Card.png",
       "r": 5
+    },
+    {
+      "name": "Baizhi",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/e/ed/Baizhi_Card.png",
+      "r": 4
+    },
+    {
+      "name": "Brant",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/2/2d/Brant_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Buling",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/5/58/Buling_Card.jpg",
+      "r": 4
+    },
+    {
+      "name": "Calcharo",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/e/e5/Calcharo_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Camellya",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/8/8f/Camellya_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Cantarella",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/0/01/Cantarella_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Carlotta",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/8/8a/Carlotta_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Cartethyia",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/d/d5/Cartethyia_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Changli",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/e/e9/Changli_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Chisa",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/c/ca/Chisa_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Chixia",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/d/da/Chixia_Card.png",
+      "r": 4
+    },
+    {
+      "name": "Ciaccona",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/6/68/Ciaccona_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Danjin",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/3/3e/Danjin_Card.png",
+      "r": 4
+    },
+    {
+      "name": "Denia",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/b/b2/Denia_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Encore",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/6/6c/Encore_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Galbrena",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/9/9d/Galbrena_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Hiyuki",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/d/dc/Hiyuki_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Iuno",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/1/1f/Iuno_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Jianxin",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/8/8a/Jianxin_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Jinhsi",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/a/a9/Jinhsi_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Jiyan",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/0/0d/Jiyan_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Lingyang",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/9/98/Lingyang_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Lucilla",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/5/51/Lucilla_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Lucy",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/3/32/Lucy_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Lumi",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/e/ee/Lumi_Card.jpg",
+      "r": 4
+    },
+    {
+      "name": "Lupa",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/e/e4/Lupa_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Luuk Herssen",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/f/fe/Luuk_Herssen_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Lynae",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/7/71/Lynae_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Mornye",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/e/eb/Mornye_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Mortefi",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/8/8e/Mortefi_Card.jpg",
+      "r": 4
+    },
+    {
+      "name": "Phoebe",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/5/54/Phoebe_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Phrolova",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/0/0b/Phrolova_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Qingxiao",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/1/1b/Qingxiao_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Qiuyuan",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/1/17/Qiuyuan_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Rebecca",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/c/c5/Rebecca_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Roccia",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/e/ea/Roccia_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Rover · Female",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/a/ad/Female_Rover_Model.png",
+      "r": 5
+    },
+    {
+      "name": "Rover · Male",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/0/05/Male_Rover_Model.png",
+      "r": 5
+    },
+    {
+      "name": "Sanhua",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/5/5d/Sanhua_Card.png",
+      "r": 4
+    },
+    {
+      "name": "Shorekeeper",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/8/85/Shorekeeper_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Sigrika",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/f/f6/Sigrika_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Suisui",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/8/83/Suisui_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Taoqi",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/a/ae/Taoqi_Card.jpg",
+      "r": 4
+    },
+    {
+      "name": "Verina",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/7/7c/Verina%27s_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Xiangli Yao",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/e/e9/Xiangli_Yao_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Yangyang",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/a/a7/Yangyang_Card.png",
+      "r": 4
+    },
+    {
+      "name": "Yangyang: Xuanling",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/4/4d/Yangyang_Xuanling_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Yinlin",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/3/33/Yinlin_Card.jpg",
+      "r": 5
+    },
+    {
+      "name": "Youhu",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/b/b6/Youhu_Card.png",
+      "r": 4
+    },
+    {
+      "name": "Yuanwu",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/5/53/Yuanwu_Card.jpg",
+      "r": 4
+    },
+    {
+      "name": "Zani",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/d/df/Zani_Card.png",
+      "r": 5
+    },
+    {
+      "name": "Zhezhi",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/f/f0/Zhezhi_Card.png",
+      "r": 5
+    }
+  ],
+  "pgr": [
+    {
+      "name": "2B",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/a/a5/Character-2B-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "9S",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/9/9a/Character-9S-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "A2",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/de/Character-A2-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Alisa - Echo",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/b9/Alisa_-_Echo.png",
+      "r": 5
+    },
+    {
+      "name": "Ayla - Brilliance",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/b1/Character-Brilliance-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Ayla - Kaleido",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/b0/Ayla_-_Kaleido.png",
+      "r": 5
+    },
+    {
+      "name": "Bambinata - Vitrum",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/e/e3/Bambinata_-_Vitrum.png",
+      "r": 4
+    },
+    {
+      "name": "Bianca - Crepuscule",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/1/13/Bianca_-_Crepuscule.png",
+      "r": 5
+    },
+    {
+      "name": "Bianca - Stigmata",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/48/Bianca_-_Stigmata.png",
+      "r": 5
+    },
+    {
+      "name": "Bianca - Veritas",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/1/15/Character-Veritas-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Bianca - Zero",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/3/3b/Character-Zero-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "BLACK★ROCK SHOOTER",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/2/2d/BLACK%E2%98%85ROCK_SHOOTER.png",
+      "r": 4
+    },
+    {
+      "name": "Bridget - Ardeo",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/5/58/Bridget_-_Ardeo.png",
+      "r": 4
+    },
+    {
+      "name": "Camu - Crocotta",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/8/8e/Character-Crocotta-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Changyu - Qilin",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/b5/Changyu_-_Qilin.png",
+      "r": 4
+    },
+    {
+      "name": "Chrome - Arclight",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/bd/Character-Arclight-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Chrome - Glory",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/c/c6/Character-Glory-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Dante",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/0/0a/Dante.png",
+      "r": 5
+    },
+    {
+      "name": "Discord - Secator",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/c/cb/Discord_-_Secator.png",
+      "r": 4
+    },
+    {
+      "name": "Haicma - Starveil",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/f/f7/Haicma_-_Starveil.png",
+      "r": 5
+    },
+    {
+      "name": "Hanying - Solacetune",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/d0/Hanying_-_Solacetune.png",
+      "r": 5
+    },
+    {
+      "name": "Hanying - Zitherwoe",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/d0/Hanying_-_Zitherwoe.png",
+      "r": 4
+    },
+    {
+      "name": "Helentine - Lacrimosa",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/44/Helentine_-_Lacrimosa.png",
+      "r": 5
+    },
+    {
+      "name": "Ishmael - Parhelion",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/b7/Ishmael_-_Parhelion.png",
+      "r": 5
+    },
+    {
+      "name": "Jetavie - Daybreak",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/49/Jetavie_-_Daybreak.png",
+      "r": 4
+    },
+    {
+      "name": "Kamui - Aeternion",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/6/68/Kamui_-_Aeternion.png",
+      "r": 5
+    },
+    {
+      "name": "Kamui - Bastion",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/1/19/Character-Bastion-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Kamui - Tenebrion",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/9/98/Character-Tenebrion-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Karenina - Blast",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/f/f6/Character-Blast-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Karenina - Effulgence",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/c/c3/Karenina_-_Effulgence.png",
+      "r": 5
+    },
+    {
+      "name": "Karenina - Ember",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/f/f8/Character-Ember-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Karenina - Scire",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/e/e9/Karenina_-_Scire.png",
+      "r": 5
+    },
+    {
+      "name": "Lamia - Lost Lullaby",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/0/05/Lamia_-_Lost_Lullaby.png",
+      "r": 5
+    },
+    {
+      "name": "Lee - Entropy",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/c/c9/Character-Entropy-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Lee - Hyperreal",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/0/0a/Lee_-_Hyperreal.png",
+      "r": 5
+    },
+    {
+      "name": "Lee - Palefire",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/a/a1/Character-Palefire-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Lilith - Daemonissa",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/48/Lilith_-_Daemonissa.png",
+      "r": 5
+    },
+    {
+      "name": "Liv - Eclipse",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/a/a0/Character-Eclipse-Portrait.png",
+      "r": 3
+    },
+    {
+      "name": "Liv - Empyrea",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/d0/Liv_-_Empyrea.png",
+      "r": 5
+    },
+    {
+      "name": "Liv - Limpidity",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/41/Liv_-_Limpidity.png",
+      "r": 5
+    },
+    {
+      "name": "Liv - Luminance",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/8/89/Character-Luminance-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Liv - Lux",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/a/a1/Character-Lux-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Lucia - Crimson Abyss",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/1/11/Character-CrimsonAbyss-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Lucia - Crimson Weave",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/6/6f/Lucia_-_Crimson_Weave.png",
+      "r": 5
+    },
+    {
+      "name": "Lucia - Dawn",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/a/aa/Lucia_-_Dawn.png",
+      "r": 4
+    },
+    {
+      "name": "Lucia - Inverse Crown",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/a/a6/Lucia_-_Inverse_Crown.png",
+      "r": 5
+    },
+    {
+      "name": "Lucia - Lotus",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/f/f6/Character-Lotus-Portrait.png",
+      "r": 3
+    },
+    {
+      "name": "Lucia - Plume",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/7/75/Character-Plume-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Lucia - Pyroath",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/2/20/Lucia_-_Pyroath.png",
+      "r": 5
+    },
+    {
+      "name": "Luna - Laurel",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/b3/Character-Laurel-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Luna - Oblivion",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/1/1a/Luna_-_Oblivion.png",
+      "r": 5
+    },
+    {
+      "name": "Nanami - Pulse",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/d9/Character-Pulse-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Nanami - Starfarer",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/9/90/Nanami_-_Starfarer_%28_New_Version_%29.png",
+      "r": 5
+    },
+    {
+      "name": "Nanami - Startrail",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/0/05/Nanami_-_Startrail.png",
+      "r": 5
+    },
+    {
+      "name": "Nanami - Storm",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/d8/Character-Storm-Portrait.png",
+      "r": 3
+    },
+    {
+      "name": "Nirvatia - Dirge",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/46/Nirvatia_-_Dirge.png",
+      "r": 5
+    },
+    {
+      "name": "No.21 - Feral",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/db/No.21_-_Feral.png",
+      "r": 5
+    },
+    {
+      "name": "No.21 - XXI",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/45/Character-XXI-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Noan - Arca",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/9/98/Noan_-_Arca.png",
+      "r": 5
+    },
+    {
+      "name": "Noctis - Indomitus",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/7/79/Noctis_-_Indomitus.png",
+      "r": 4
+    },
+    {
+      "name": "Pulao - Dragontoll",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/8/80/Pulao_-_Dragontoll.png",
+      "r": 5
+    },
+    {
+      "name": "Qu - Pavo",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/a/a0/Qu_-_Pavo.png",
+      "r": 5
+    },
+    {
+      "name": "Qu - Shukra",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/47/Qu_-_Shukra.png",
+      "r": 5
+    },
+    {
+      "name": "Roland - Flambeau",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/f/f5/Roland_-_Flambeau.png",
+      "r": 5
+    },
+    {
+      "name": "Rosetta - Arete",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/d5/Rosetta_-_Arete.png",
+      "r": 5
+    },
+    {
+      "name": "Rosetta - Rigor",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/2/26/Rosetta_-_Rigor.png",
+      "r": 5
+    },
+    {
+      "name": "Selena - Capriccio",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/6/67/Selena-Capriccio-New.png",
+      "r": 5
+    },
+    {
+      "name": "Selena - Pianissimo",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/4/49/Selena_-_Pianissimo.png",
+      "r": 5
+    },
+    {
+      "name": "Selena - Tempest",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/f/f1/Character-Tempest-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Sophia - Silverfang",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/7/7a/Character-Silverfang-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Teddy - Decryptor",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/e/e3/Teddy_-_Decryptor.png",
+      "r": 4
+    },
+    {
+      "name": "Teddy - Spectre",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/8/85/Teddy_-_Spectre.png",
+      "r": 5
+    },
+    {
+      "name": "Vera - Garnet",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/a/a9/Vera_-_Garnet.png",
+      "r": 5
+    },
+    {
+      "name": "Vera - Geiravor",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/bf/Vera_-_Geiravor.png",
+      "r": 5
+    },
+    {
+      "name": "Vera - Rozen",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/da/Character-Rozen-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Vergil",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/8/89/Vergil.png",
+      "r": 5
+    },
+    {
+      "name": "Veronica - Aegis",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/2/2c/Veronica_-_Aegis.png",
+      "r": 5
+    },
+    {
+      "name": "Wanshi - Hypnos",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/0/0b/Wanshi_-_Hypnos.png",
+      "r": 4
+    },
+    {
+      "name": "Wanshi - Lucid Dreamer",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/9/9c/Wanshi_-_Lucid_Dreamer.png",
+      "r": 5
+    },
+    {
+      "name": "Watanabe - Astral",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/2/20/Character-Astral-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Watanabe - Epitaph",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/3/35/Watanabe_-_Epitaph.png",
+      "r": 5
+    },
+    {
+      "name": "Watanabe - Nightblade",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/8/85/Character-Nightblade-Portrait.png",
+      "r": 4
+    },
+    {
+      "name": "Yata - Fulgor",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/b/bb/Yata_-_Fulgor.png",
+      "r": 4
     }
   ]
 }

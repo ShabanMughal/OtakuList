@@ -1920,6 +1920,20 @@ img {
 .gs-charadd {
   color: var(--accent-2);
 }
+/* Larger, portrait-shaped thumbnails inside the picker dropdown so the
+   character art is clearly visible when choosing (chips stay compact). */
+.gs-charopt .gs-charimg,
+.gs-charopt .gs-charini {
+  width: 40px;
+  height: 52px;
+  border-radius: 8px;
+  object-position: top center;
+  font-size: 15px;
+}
+.gs-charopt {
+  font-size: 14.5px;
+  padding: 7px 9px;
+}
 
 .gs-charempty {
   padding: 10px 8px;
