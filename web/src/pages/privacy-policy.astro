@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+---
+
+<BaseLayout
+  title="Privacy Policy | OtakuList"
+  description="Privacy information for OtakuList, including how we handle local watchlist data and browser storage."
+  canonical="https://shabanmughal.github.io/OtakuList/privacy-policy.html"
+  page="privacy"
+>
+  <main class="mx-auto max-w-4xl px-6 py-16 text-[#f4f2f8]">
+    <div class="mb-8">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#a78bfa]">OtakuList</p>
+      <h1 class="text-4xl font-black tracking-[-0.04em] md:text-5xl">Privacy Policy</h1>
+    </div>
+
+    <div class="space-y-8 rounded-2xl border border-white/10 bg-white/[0.04] p-6 md:p-8">
+      <section>
+        <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">Summary</h2>
+        <p class="text-[15px] leading-7 text-[#f4f2f8]/70">
+          OtakuList is designed to keep your anime watchlist local to your browser. We do not require an account,
+          we do not sell your data, and we do not run a user database for your list.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">What data we store</h2>
+        <p class="text-[15px] leading-7 text-[#f4f2f8]/70">
+          The extension stores your watchlist in your browser's local storage. This includes anime titles, episode
+          counts, status (Watching, Completed, etc.), and related list information you choose to save.
+        </p>
+        <p class="mt-3 text-[15px] leading-7 text-[#f4f2f8]/70">
+          This data is kept on your device and is not uploaded to our servers as part of normal usage.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">What we do not collect</h2>
+        <ul class="list-disc space-y-2 pl-6 text-[15px] leading-7 text-[#f4f2f8]/70">
+          <li>We do not require user accounts.</li>
+          <li>We do not store your personal identity or profile data.</li>
+          <li>We do not sell, rent, or trade your list information.</li>
+          <li>We do not build a separate database of your watchlist.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">External data requests</h2>
+        <p class="text-[15px] leading-7 text-[#f4f2f8]/70">
+          In order to identify titles and fetch anime metadata such as cover art or official name data, the extension may
+          access public metadata services such as AniList. These requests are made to provide better title matching and a
+          cleaner watchlist experience. This is not used to create a user profile or track personal browsing behavior.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">Website usage</h2>
+        <p class="text-[15px] leading-7 text-[#f4f2f8]/70">
+          The OtakuList website is a static project and does not require an account or login. We do not intentionally
+          collect personal information from visitors. If we add analytics or contact forms later, we will update this page.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">Your control</h2>
+        <p class="text-[15px] leading-7 text-[#f4f2f8]/70">
+          You can remove your saved data by clearing your browser's site data or removing the extension. On Chromium
+          browsers, you can also delete the extension's stored data from the browser storage settings.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">Contact</h2>
+        <p class="text-[15px] leading-7 text-[#f4f2f8]/70">
+          If you have any privacy questions, email us at <a href="mailto:thandermughal@gmail.com" class="text-[#a78bfa] underline">thandermughal@gmail.com</a>.
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

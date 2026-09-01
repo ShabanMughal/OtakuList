@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+---
+
+<BaseLayout
+  title="Contact | OtakuList"
+  description="Contact OtakuList for support, feedback, or privacy questions."
+  canonical="https://shabanmughal.github.io/OtakuList/contact.html"
+  page="contact"
+>
+  <main class="mx-auto max-w-4xl px-6 py-16 text-[#f4f2f8]">
+    <div class="mb-8">
+      <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#a78bfa]">Support</p>
+      <h1 class="text-4xl font-black tracking-[-0.04em] md:text-5xl">Contact OtakuList</h1>
+    </div>
+
+    <div class="grid gap-8 rounded-2xl border border-white/10 bg-white/[0.04] p-6 md:grid-cols-[1.2fr_0.8fr] md:p-8">
+      <section>
+        <h2 class="mb-4 text-2xl font-bold tracking-[-0.03em]">We’re here to help</h2>
+        <p class="mb-6 text-[15px] leading-7 text-[#f4f2f8]/70">
+          Reach out for support, feature questions, bugs, or general feedback about the extension or website.
+        </p>
+
+        <div class="space-y-4 text-[15px] text-[#f4f2f8]/80">
+          <div class="rounded-xl border border-white/10 bg-[#17141f] p-4">
+            <p class="text-xs uppercase tracking-[0.14em] text-[#f4f2f8]/45">Email</p>
+            <a href="mailto:thandermughal@gmail.com" class="mt-2 block text-lg font-semibold text-[#a78bfa]">thandermughal@gmail.com</a>
+          </div>
+
+          <div class="rounded-xl border border-white/10 bg-[#17141f] p-4">
+            <p class="text-xs uppercase tracking-[0.14em] text-[#f4f2f8]/45">GitHub</p>
+            <a href="https://github.com/ShabanMughal/OtakuList/issues" target="_blank" rel="noopener" class="mt-2 block text-lg font-semibold text-[#a78bfa]">
+              Report an issue
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="rounded-2xl border border-white/10 bg-[#17141f] p-5">
+        <h3 class="mb-3 text-lg font-bold">Quick info</h3>
+        <ul class="space-y-3 text-[15px] leading-6 text-[#f4f2f8]/70">
+          <li>• For bug reports, include browser name and version.</li>
+          <li>• For feature ideas, include the use case and expected behavior.</li>
+          <li>• For privacy questions, see the <a href={`${base}privacy-policy.html`} class="text-[#a78bfa] underline">privacy policy</a>.</li>
+        </ul>
+      </aside>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
