@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "OtakuList — Anime Watchlist Keeper",
-  "version": "1.0.0",
-  "description": "Auto-detects the anime you're watching and saves your watchlist locally — so you never lose track even if a site gets blocked.",
-  "permissions": ["storage"],
+  "name": "OtakuList: Anime Watchlist Tracker",
+  "version": "1.0.1",
+  "description": "Track the anime and episode you're watching. Save your watchlist locally so your progress survives blocked streaming sites.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
   "host_permissions": ["https://graphql.anilist.co/"],
   "action": {
     "default_popup": "src/popup.html",
@@ -24,8 +27,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["src/content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/content.js"
+      ],
       "run_at": "document_idle",
       "all_frames": false
     }
@@ -39,7 +46,9 @@
         "fonts/poppins-600.woff2",
         "fonts/poppins-700.woff2"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }
