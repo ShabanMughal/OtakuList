@@ -3,6 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/Footer.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 const REPO = 'https://github.com/ShabanMughal/OtakuList';
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 
 const theme =
   "--color-bg:#0b0a16;--color-surface:#17142a;--color-text:#f4f2f8;" +
@@ -46,6 +48,9 @@ const theme =
           <button id="al-export" type="button" class="cursor-pointer rounded-full border border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">Export</button>
           <button id="al-import" type="button" class="cursor-pointer rounded-full border border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">Import</button>
           <input id="al-importfile" type="file" accept="application/json,.json" hidden />
+          <span id="al-cloud-status" class="text-xs text-[#f4f2f8]/50" aria-live="polite"></span>
+          <button id="al-login" type="button" class="cursor-pointer rounded-full border border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]" hidden>Log in</button>
+          <button id="al-logout" type="button" class="cursor-pointer rounded-full border border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]" hidden>Log out</button>
           <button id="al-add" type="button" class="cursor-pointer rounded-full border-none bg-iris px-5 py-2.5 font-heading text-sm font-extrabold text-white">＋ Add anime</button>
         </div>
       </div>
@@ -66,6 +71,22 @@ const theme =
         <span class="text-xl">🧩</span>
         <span class="text-sm text-[#e7e2ff]"><b id="al-extcount">0</b> titles found in your OtakuList extension.</span>
         <button id="al-extload" type="button" class="ml-auto cursor-pointer rounded-full border-none bg-iris px-[18px] py-[9px] font-heading text-[13px] font-extrabold text-white">Load into this page</button>
+      </div>
+    </div>
+
+    <div id="al-auth-modal" class="am-overlay" hidden>
+      <div class="am-card">
+        <button class="am-x" id="al-auth-close" type="button" aria-label="Close">✕</button>
+        <h2 class="am-title" id="al-auth-title">Log in to sync</h2>
+        <form id="al-auth-form" class="am-form">
+          <label class="am-label" for="al-auth-email">Email</label>
+          <input id="al-auth-email" class="am-in" type="email" required autocomplete="email" />
+          <label class="am-label" for="al-auth-password">Password</label>
+          <input id="al-auth-password" class="am-in" type="password" required minlength="6" autocomplete="current-password" />
+          <p id="al-auth-error" class="text-sm text-[#f4f2f8]/60" hidden></p>
+          <button type="submit" class="am-submit" id="al-auth-submit">Log in</button>
+          <button type="button" class="am-link" id="al-auth-toggle">Create an account</button>
+        </form>
       </div>
     </div>
 
@@ -147,6 +168,12 @@ const theme =
   </div>
 
   <Fragment slot="scripts">
+    <script is:inline src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script is:inline define:vars={{ SUPABASE_URL, SUPABASE_ANON_KEY }}>
+      window.sb = window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+    </script>
     <script is:inline src={`${base}js/animelist.js`}></script>
   </Fragment>
 </BaseLayout>

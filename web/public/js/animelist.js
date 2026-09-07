@@ -6,6 +6,10 @@
   const KEY = "otakulist-animelist";
   const VIEWKEY = "otakulist-view";
   const STATUSES = { watching: "Watching", plan: "Plan to Watch", completed: "Completed", onhold: "On Hold" };
+  const CLOUD = typeof sb !== "undefined" && !!sb;
+  let cloudUser = null;
+  let cloudReady = false;
+  let cloudTimer = null;
 
   const esc = (s) =>
     String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
@@ -28,6 +32,73 @@
   }
   function save() {
     localStorage.setItem(KEY, JSON.stringify(state));
+    if (cloudReady) {
+      clearTimeout(cloudTimer);
+      cloudTimer = setTimeout(saveCloud, 500);
+    }
+  }
+
+  function cloudStatus(text) {
+    const el = $("#al-cloud-status");
+    if (el) el.textContent = text || "";
+  }
+
+  async function saveCloud() {
+    if (!cloudUser || !cloudReady) return;
+    cloudStatus("Saving…");
+    const { error } = await sb.from("anime_lists").upsert({ user_id: cloudUser.id, list: state }, { onConflict: "user_id" });
+    cloudStatus(error ? "Cloud save failed" : "Synced");
+  }
+
+  async function loadCloud(user) {
+    cloudUser = user;
+    const { data, error } = await sb.from("anime_lists").select("list").eq("user_id", user.id).maybeSingle();
+    if (error) {
+      cloudStatus("Cloud sync unavailable");
+      return;
+    }
+    if (data && data.list && typeof data.list === "object" && !Array.isArray(data.list)) {
+      state = data.list;
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } else if (Object.keys(state).length) {
+      await saveCloud();
+    }
+    cloudReady = true;
+    cloudStatus("Synced");
+    render();
+  }
+
+  function setAuthUi(signedIn) {
+    $("#al-login").hidden = !CLOUD || signedIn;
+    $("#al-logout").hidden = !CLOUD || !signedIn;
+    if (!CLOUD) cloudStatus("");
+  }
+
+  function openAuth() {
+    $("#al-auth-modal").hidden = false;
+    $("#al-auth-error").hidden = true;
+    $("#al-auth-email").focus();
+  }
+
+  async function initCloud() {
+    setAuthUi(false);
+    if (!CLOUD) return;
+    const { data } = await sb.auth.getSession();
+    if (data.session) {
+      setAuthUi(true);
+      await loadCloud(data.session.user);
+    }
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        setAuthUi(true);
+        await loadCloud(session.user);
+      } else if (event === "SIGNED_OUT") {
+        cloudUser = null;
+        cloudReady = false;
+        setAuthUi(false);
+        cloudStatus("");
+      }
+    });
   }
 
   const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -341,8 +412,46 @@
   });
   $("#al-extload").addEventListener("click", mergeExt);
 
+  // ── optional Supabase cloud sync ────────────────────────────────────
+  let authMode = "login";
+  $("#al-login").addEventListener("click", openAuth);
+  $("#al-logout").addEventListener("click", () => sb.auth.signOut());
+  $("#al-auth-close").addEventListener("click", () => { $("#al-auth-modal").hidden = true; });
+  $("#al-auth-modal").addEventListener("click", (e) => {
+    if (e.target === $("#al-auth-modal")) $("#al-auth-modal").hidden = true;
+  });
+  $("#al-auth-toggle").addEventListener("click", () => {
+    authMode = authMode === "login" ? "signup" : "login";
+    $("#al-auth-title").textContent = authMode === "login" ? "Log in to sync" : "Create an account";
+    $("#al-auth-submit").textContent = authMode === "login" ? "Log in" : "Create account";
+    $("#al-auth-toggle").textContent = authMode === "login" ? "Create an account" : "Already have an account";
+    $("#al-auth-password").autocomplete = authMode === "login" ? "current-password" : "new-password";
+    $("#al-auth-error").hidden = true;
+  });
+  $("#al-auth-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = $("#al-auth-email").value.trim();
+    const password = $("#al-auth-password").value;
+    const errorEl = $("#al-auth-error");
+    const submit = $("#al-auth-submit");
+    submit.disabled = true;
+    errorEl.hidden = true;
+    const result = authMode === "login"
+      ? await sb.auth.signInWithPassword({ email, password })
+      : await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.href } });
+    submit.disabled = false;
+    if (result.error) {
+      errorEl.textContent = result.error.message;
+      errorEl.hidden = false;
+      return;
+    }
+    $("#al-auth-modal").hidden = true;
+    if (authMode === "signup" && !result.data.session) toast("Check your email to confirm your account.");
+  });
+
   // ── init ─────────────────────────────────────────────────────────────
   document.querySelectorAll(".al-vbtn").forEach((x) => x.classList.toggle("on", x.dataset.view === view));
   render();
+  initCloud();
   requestExt(); // ask the extension (if installed) for its list
 })();

@@ -1,6 +1,6 @@
 # Supabase
 
-Database setup for the **Gacha Showcase** feature (`docs/showcase.html`).
+Database setup for the **Gacha Showcase** and optional private **Anime List cloud sync** features.
 
 ## Run the migration
 
@@ -22,6 +22,18 @@ supabase db push
    - `http://localhost:8000/showcase.html`
 3. **Project Settings → API**: copy the **Project URL** and **anon public key** into
    `docs/supabase-config.js`.
+
+### Anime List cloud sync
+
+Run [`migrations/20260907000000_anime_lists.sql`](migrations/20260907000000_anime_lists.sql) after the profiles
+migrations. The Anime List page uses the `anime_lists` table only when a user signs in; its RLS policies allow each
+authenticated user to read and update only their own list. Add the same public Supabase URL and anon key to
+`web/.env`:
+
+```dotenv
+PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
+```
 
 ## Security notes
 - The **anon key is public** — safe to commit. Data is protected by the RLS policies in the
