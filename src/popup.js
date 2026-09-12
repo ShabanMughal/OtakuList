@@ -327,15 +327,157 @@ importFile.addEventListener("change", async (e) => {
   importFile.value = "";
 });
 
+// ── optional cloud sync ─────────────────────────────────────────────
+// Logging in is never required: the list works exactly as before without an
+// account. All the real work (auth, merge, upload) happens in the background
+// worker — the popup only shows its state and forwards button presses.
+const authPanel = $("#authPanel");
+const authForm = $("#authForm");
+const authAccount = $("#authAccount");
+const cloudBtn = $("#cloudBtn");
+let authMode = "login";
+let cloud = { configured: false, status: { state: "signed-out" } };
+
+const sendCloud = (msg) =>
+  new Promise((resolve) =>
+    chrome.runtime.sendMessage(msg, (res) =>
+      resolve(chrome.runtime.lastError ? { error: chrome.runtime.lastError.message } : res || {})
+    )
+  );
+
+const SYNC_LABELS = {
+  syncing: "Syncing…",
+  synced: "Synced ✓",
+  error: "Sync paused",
+};
+
+function setAuthError(message) {
+  const el = $("#authError");
+  el.textContent = message || "";
+  el.hidden = !message;
+}
+
+function renderCloud() {
+  const { configured, status } = cloud;
+  // The ☁ button stays visible even when sync isn't configured — a button that
+  // silently isn't there just looks broken. The panel explains what's missing.
+  cloudBtn.hidden = false;
+  $("#authSetup").hidden = configured;
+  if (!configured) {
+    authForm.hidden = true;
+    authAccount.hidden = true;
+    cloudBtn.classList.remove("on", "warn");
+    cloudBtn.title = "Cloud sync isn't set up";
+    return;
+  }
+  const signedIn = status.state !== "signed-out";
+  const label = SYNC_LABELS[status.state] || "";
+
+  authForm.hidden = signedIn;
+  authAccount.hidden = !signedIn;
+  cloudBtn.classList.toggle("on", signedIn && status.state !== "error");
+  cloudBtn.classList.toggle("warn", status.state === "error");
+  cloudBtn.title = signedIn ? `${status.email || "Signed in"} — ${label}` : "Log in to sync";
+
+  $("#subtitle").textContent = signedIn
+    ? `${label}${status.email ? ` · ${status.email}` : ""}`
+    : "Your anime watchlist, kept safe";
+
+  if (signedIn) {
+    $("#authEmailLabel").textContent = status.email || "Signed in";
+    $("#authStatus").textContent =
+      status.state === "error" ? status.message || "Sync paused" : label;
+  } else if (status.message) {
+    // e.g. the refresh token expired while the popup was closed
+    setAuthError(status.message);
+  }
+}
+
+cloudBtn.addEventListener("click", () => {
+  authPanel.hidden = !authPanel.hidden;
+  if (!authPanel.hidden) {
+    addForm.hidden = true;
+    if (!authForm.hidden) $("#authEmail").focus();
+  }
+});
+
+$("#authToggle").addEventListener("click", () => {
+  authMode = authMode === "login" ? "signup" : "login";
+  const login = authMode === "login";
+  $("#authTitle").textContent = login ? "Log in to sync" : "Create an account";
+  $("#authSubmit").textContent = login ? "Log in" : "Create account";
+  $("#authToggle").textContent = login ? "Create an account" : "I already have one";
+  $("#authPass").autocomplete = login ? "current-password" : "new-password";
+  setAuthError("");
+});
+
+authForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = $("#authEmail").value.trim();
+  const password = $("#authPass").value;
+  const submit = $("#authSubmit");
+  submit.disabled = true;
+  setAuthError("");
+
+  const res =
+    authMode === "login"
+      ? await sendCloud({ type: "cloudSignIn", email, password })
+      : await sendCloud({ type: "cloudSignUp", email, password });
+
+  submit.disabled = false;
+  if (res.error) {
+    setAuthError(res.error);
+    return;
+  }
+  authForm.reset();
+  if (res.confirmationRequired) {
+    setAuthError("");
+    showToast("Check your email to confirm, then log in.");
+    return;
+  }
+  authPanel.hidden = true;
+  showToast("Logged in — your list is syncing ✓");
+});
+
+$("#signOutBtn").addEventListener("click", async () => {
+  await sendCloud({ type: "cloudSignOut" });
+  // The list itself stays exactly where it is — only the sync stops.
+  showToast("Logged out. Your list is still saved here.");
+});
+
+$("#syncBtn").addEventListener("click", async () => {
+  const res = await sendCloud({ type: "cloudSync", mode: "merge" });
+  if (res.error) showToast(res.error);
+});
+
 // live updates if the content script saves something while popup is open
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && changes[KEY]) {
+  if (area !== "local") return;
+  if (changes[KEY]) {
     state = changes[KEY].newValue || {};
     render();
+  }
+  if (changes.otakuSyncStatus) {
+    cloud.status = changes.otakuSyncStatus.newValue || { state: "signed-out" };
+    renderCloud();
   }
 });
 
 // init
+sendCloud({ type: "cloudState" }).then((res) => {
+  if (res.error) {
+    // The background worker didn't answer — say so rather than looking dead.
+    $("#authSetupMsg").textContent = `Sync unavailable: ${res.error}`;
+    return renderCloud();
+  }
+  if (!res.configured) return renderCloud();
+  cloud = res;
+  renderCloud();
+  // Opening the popup is a good moment to pick up edits made on the website or
+  // in another browser.
+  if (cloud.status.state !== "signed-out") sendCloud({ type: "cloudSync", mode: "merge" });
+});
+
 getList().then((list) => {
   state = list;
   // "Dropped" was removed — rescue any such items into On Hold so they're not lost.

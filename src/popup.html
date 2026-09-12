@@ -15,8 +15,55 @@
         <p id="subtitle">Your anime watchlist, kept safe</p>
       </div>
     </div>
-    <button id="addBtn" title="Add anime manually">＋</button>
+    <div class="head-actions">
+      <button id="cloudBtn" class="cloud-btn" title="Sync &amp; account" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M7 18a4 4 0 0 1 .4-8 5.5 5.5 0 0 1 10.5 1.6A3.3 3.3 0 0 1 17.5 18z" />
+        </svg>
+      </button>
+      <button id="addBtn" title="Add anime manually">＋</button>
+    </div>
   </header>
+
+  <!-- optional cloud sync: signed-out form, or the signed-in account panel -->
+  <div id="authPanel" class="auth-panel" hidden>
+    <div id="authSetup" class="auth-setup" hidden>
+      <div class="auth-head">
+        <b>Cloud sync isn't set up</b>
+        <span class="auth-sub" id="authSetupMsg">
+          Add your Supabase project URL and anon key to <code>src/cloud-config.js</code>, then reload the extension at
+          <code>chrome://extensions</code>. Until then your list stays on this device — everything else works as normal.
+        </span>
+      </div>
+    </div>
+
+    <form id="authForm" class="auth-form">
+      <div class="auth-head">
+        <b id="authTitle">Log in to sync</b>
+        <span class="auth-sub">Optional — your list already works without an account.</span>
+      </div>
+      <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="username" required>
+      <input id="authPass" type="password" placeholder="Password" autocomplete="current-password" minlength="6"
+        required>
+      <p id="authError" class="auth-error" hidden></p>
+      <div class="add-actions">
+        <button type="button" id="authToggle" class="ghost">Create an account</button>
+        <button type="submit" id="authSubmit" class="primary">Log in</button>
+      </div>
+    </form>
+
+    <div id="authAccount" class="auth-account" hidden>
+      <div class="auth-head">
+        <b id="authEmailLabel">Signed in</b>
+        <span class="auth-sub" id="authStatus">Synced</span>
+      </div>
+      <div class="add-actions">
+        <button type="button" id="signOutBtn" class="ghost">Log out</button>
+        <button type="button" id="syncBtn" class="primary">Sync now</button>
+      </div>
+    </div>
+  </div>
 
   <div class="tabs" id="tabs">
     <button class="tab active" data-status="watching">Watching <span></span></button>

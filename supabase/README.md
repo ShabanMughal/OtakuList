@@ -35,6 +35,13 @@ PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
 ```
 
+The **browser extension** syncs to the same `anime_lists` table, so one account covers both. Give it the same two
+values with `node scripts/sync-ext-config.mjs`, which writes the gitignored `cloud-config.local.json` so they stay out
+of the repo; without it the extension runs local-only. The extension calls the Supabase REST and Auth endpoints
+directly (no SDK — MV3 forbids remote scripts), which the `https://*.supabase.co/*` host permission in `manifest.json`
+allows. Sign-up from the extension uses email + password; if **Confirm email** is on, the user must click the emailed
+link before the list starts syncing.
+
 ## Security notes
 - The **anon key is public** — safe to commit. Data is protected by the RLS policies in the
   migration (anyone can read a showcase; only the owner can write theirs).

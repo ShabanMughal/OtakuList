@@ -1,0 +1,7 @@
+# local env files (the website reads these at build time)
+.env
+.env.local
+
+# the extension's Supabase config, written by scripts/sync-ext-config.mjs.
+# Keeps project values out of the repo; the extension runs local-only without it.
+cloud-config.local.json

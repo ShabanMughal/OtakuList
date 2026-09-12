@@ -1,5 +1,8 @@
 // OtakuList background service worker.
-// Keeps the toolbar badge showing how many anime are currently "watching".
+// Keeps the toolbar badge showing how many anime are currently "watching", and
+// owns the optional cloud sync (it is the only writer, so the popup and the
+// content script can never race each other against Supabase).
+import * as cloud from "./cloud.js";
 
 const KEY = "animeList";
 
@@ -14,8 +17,28 @@ async function refreshBadge() {
 chrome.runtime.onInstalled.addListener(refreshBadge);
 chrome.runtime.onStartup.addListener(refreshBadge);
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && changes[KEY]) refreshBadge();
+  if (area === "local" && changes[KEY]) {
+    refreshBadge();
+    schedulePush();
+  }
 });
+
+// ---------- cloud sync (optional, only once signed in) ----------
+// Every local edit — a save from the content script, an episode bump, a delete
+// in the popup — lands in storage, so one listener covers the lot. Debounced so
+// holding "+" through five episodes is a single upload.
+const PUSH_DELAY_MS = 1500;
+let pushTimer = null;
+
+function schedulePush() {
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => cloud.syncNow("push"), PUSH_DELAY_MS);
+}
+
+// Pull in anything changed elsewhere (the website, another browser) when the
+// browser starts or the extension updates.
+chrome.runtime.onStartup.addListener(() => cloud.syncNow("merge"));
+chrome.runtime.onInstalled.addListener(() => cloud.syncNow("merge"));
 
 // ---------- AniList resolver ----------
 // Give every site a canonical AniList identity (id + poster) so the same anime
@@ -114,6 +137,31 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     searchAnime(msg.query)
       .then((results) => sendResponse({ results }))
       .catch((err) => sendResponse({ results: [], error: String(err) }));
+    return true;
+  }
+
+  // ---------- cloud sync, driven by the popup ----------
+  const cloudHandlers = {
+    cloudState: async () => ({
+      configured: await cloud.isConfigured(),
+      status: await cloud.getStatus(),
+    }),
+    cloudSignIn: async () => ({ ok: true, user: await cloud.signIn(msg.email, msg.password) }),
+    cloudSignUp: async () => ({ ok: true, ...(await cloud.signUp(msg.email, msg.password)) }),
+    cloudSignOut: async () => {
+      await cloud.signOut();
+      return { ok: true };
+    },
+    cloudSync: async () => {
+      await cloud.syncNow(msg.mode || "merge");
+      return { ok: true };
+    },
+  };
+  const handler = cloudHandlers[msg?.type];
+  if (handler) {
+    handler()
+      .then(sendResponse)
+      .catch((err) => sendResponse({ error: String(err?.message || err) }));
     return true;
   }
 });

@@ -119,6 +119,109 @@ header h1 {
   background: var(--accent);
 }
 
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cloud-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  background: var(--panel-2);
+  color: var(--muted);
+  transition: .15s;
+}
+
+.cloud-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.cloud-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* signed in and synced — the cloud lights up */
+.cloud-btn.on {
+  color: var(--accent-2);
+}
+
+.cloud-btn.warn {
+  color: #f0a4a4;
+}
+
+/* account / sync panel */
+.auth-panel {
+  margin: 8px 12px 4px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.auth-form,
+.auth-account {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.auth-head b {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-sub {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.auth-panel input {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+}
+
+.auth-panel input:focus {
+  border-color: var(--accent);
+}
+
+.auth-error {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #f0a4a4;
+}
+
+.auth-setup code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 4px;
+  color: var(--accent-2);
+}
+
 /* tabs */
 .tabs {
   display: flex;

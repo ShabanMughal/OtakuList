@@ -7,7 +7,7 @@
     "storage",
     "activeTab"
   ],
-  "host_permissions": ["https://graphql.anilist.co/"],
+  "host_permissions": ["https://graphql.anilist.co/", "https://*.supabase.co/*"],
   "action": {
     "default_popup": "src/popup.html",
     "default_title": "OtakuList",
@@ -23,7 +23,8 @@
     "128": "icons/icon128.png"
   },
   "background": {
-    "service_worker": "src/background.js"
+    "service_worker": "src/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {

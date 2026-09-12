@@ -30,7 +30,8 @@
 
 > **The problem it solves:** Pirate and mirror sites get blocked or disappear all the time. When they do, you lose track of *what you were watching* and *what's next*. OtakuList keeps that list with you — not on the site — so it never disappears with the site.
 
-- 🔒 **Local & private watchlist** — your list stays in your browser, never uploaded.
+- 🔒 **Local & private watchlist** — your list stays in your browser. Nothing is uploaded unless *you* log in.
+- ☁️ **Optional cloud sync** — log in and the same list follows you to your other browsers and the website.
 - 🤖 **Auto-detects** the anime, episode, and cover art as you watch.
 - 🖼️ **Real cover art** — posters pulled from [AniList](https://anilist.co), not the site's random banner.
 - 🔗 **One entry per anime** — the same show on a different site updates your existing entry instead of duplicating it.
@@ -53,6 +54,7 @@ There's also an **optional companion web app** — the [Gacha Showcase](#-gacha-
 | 🔢 **Episode tracking** | Bumps your episode count automatically as you move through a series — silently. |
 | 📌 **Toolbar badge** | A live count of how many anime you're currently watching. |
 | ✍️ **Manual add** | Missed by detection? Add any title, status, and episode by hand. |
+| ☁️ **Optional cloud sync** | Log in from the popup and your list is mirrored to your private row on the server — same account and same list as the website's *Create list* page. Stay logged out and nothing ever leaves the browser. |
 | 🌐 **Web sync bridge** | The official OtakuList site can read your local list (for the *Create list* / *Import* pages) — gated to the official domain + localhost. |
 
 ---
@@ -86,6 +88,38 @@ There's also an **optional companion web app** — the [Gacha Showcase](#-gacha-
    - Change an anime's **status** from the dropdown
    - **Search** your list, open the source site, or **delete** an entry
    - Hit **＋** to add something manually
+
+---
+
+## ☁️ Cloud sync (optional)
+
+Logging in is **never required** — the extension works exactly the same without an account, and nothing is uploaded while you're logged out.
+
+**To use it:** click the ☁ button in the popup header → **Log in** (or **Create an account**). It's the same account as the website, so the list you sync here shows up on the [Create list](https://shabanmughal.github.io/OtakuList/animelist.html) page too.
+
+| What happens | When |
+| :--- | :--- |
+| **Merge** — your local list and your cloud list are combined; if the same anime is in both, the one you touched most recently wins | You log in, the browser starts, or you open the popup |
+| **Upload** — your list is saved to the server (deletions included) | ~1.5 s after any change: a save, an episode bump, an edit, a delete |
+| **Nothing** | Whenever you're logged out — including after **Log out**, which keeps your list on this device |
+
+If your connection drops, the popup shows *Sync paused* and picks up again on the next change or the next time you open it.
+
+### Setup (maintainers)
+
+Run the [`anime_lists` migration](supabase/migrations/20260907000000_anime_lists.sql), then point the extension at the same Supabase project the website uses:
+
+```bash
+node scripts/sync-ext-config.mjs                # take them from .env / web/.env
+node scripts/sync-ext-config.mjs --from-source  # move them out of src/cloud-config.js
+node scripts/sync-ext-config.mjs --clear        # back to local-only
+```
+
+That writes `cloud-config.local.json` next to the manifest, which **`.gitignore` keeps out of the repo** — so your project's values never get pushed. The extension reads it at runtime (with `fetch`, so a missing file just means "not set up" rather than a broken service worker) and falls back to [`src/cloud-config.js`](src/cloud-config.js), which stays empty in git. Reload at `chrome://extensions` after either changes.
+
+Chrome loads the extension's files exactly as they sit on disk, so no `.env` can be substituted at runtime — that's what the script is for. Keep `cloud-config.local.json` when you zip a build for the Web Store; drop it and the extension runs local-only, with the ☁ button explaining that sync isn't set up.
+
+Worth knowing: the anon key isn't a secret in either file. It already ships in the website's JavaScript and inside any packaged build, so anyone can read it. Your list is protected by row-level security, not by hiding the key.
 
 ---
 
