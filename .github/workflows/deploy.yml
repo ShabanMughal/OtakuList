@@ -7,6 +7,15 @@ on:
       - 'web/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
+  # Called by refresh-characters.yml, which pushes with GITHUB_TOKEN and so
+  # cannot trigger this workflow through the `push` event above.
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Git ref to build and deploy. Defaults to the triggering ref.'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -24,6 +33,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # empty for push / workflow_dispatch, which checks out the triggering ref
+          ref: ${{ inputs.ref }}
       - name: Build Astro site
         uses: withastro/action@v3
         with:

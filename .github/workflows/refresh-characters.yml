@@ -7,15 +7,19 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 concurrency:
   group: refresh-characters
   cancel-in-progress: true
 
+env:
+  BOT_BRANCH: bot/refresh-characters
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,20 +29,50 @@ jobs:
         with:
           node-version: 20
 
+      # The script keeps the previous entries for any game whose source is down,
+      # then exits 1 to flag it. That partial result is still worth shipping, so
+      # don't let it stop the run — if it failed outright the file is untouched
+      # and the commit step below simply finds nothing to push.
       - name: Regenerate characters.json
+        id: generate
+        continue-on-error: true
         run: node web/scripts/fetch-characters.mjs
 
-      - name: Open PR if the roster changed
-        uses: peter-evans/create-pull-request@v6
-        with:
-          add-paths: web/public/data/characters.json
-          branch: bot/refresh-characters
-          commit-message: 'chore: refresh gacha character roster'
-          title: 'chore: refresh gacha character roster'
-          body: |
-            Automated weekly refresh of `web/public/data/characters.json`
-            (Genshin/HSR via yatta.moe, ZZZ/WuWa/PGR via Fandom).
+      - name: Note partial failures
+        if: steps.generate.outcome == 'failure'
+        run: echo "⚠️ At least one game's source failed — those entries kept their previous data. See the *Regenerate characters.json* step log." >> "$GITHUB_STEP_SUMMARY"
 
-            Review the diff for new/renamed characters, then merge to deploy.
-          labels: automated
-          delete-branch: true
+      # Push straight to the bot branch — no pull request. The branch is reset to
+      # the current main every run, so it always holds exactly one commit's worth
+      # of roster diff rather than accumulating stale ones.
+      - name: Commit to the bot branch if the roster changed
+        id: commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BOT_BRANCH"
+          git add web/public/data/characters.json
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Roster unchanged — nothing to push."
+            exit 0
+          fi
+          git commit -m 'chore: refresh gacha character roster'
+          git push --force origin "$BOT_BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "Pushed the refreshed roster to \`$BOT_BRANCH\`." >> "$GITHUB_STEP_SUMMARY"
+
+  # A push made with GITHUB_TOKEN never triggers another workflow, so deploy.yml
+  # would not fire on its own. Call it directly instead, pointed at the branch we
+  # just pushed.
+  deploy:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      ref: bot/refresh-characters
+    secrets: inherit
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
