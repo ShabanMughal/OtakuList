@@ -29,13 +29,50 @@
     "abuse", "billing", "contact", "team", "owner", "null", "undefined",
   ]);
 
-  // Free-text fields are published on a page under this project's domain. Strip
-  // the two things that make an open text box worth abusing: links and contact
-  // handles. Not a content filter — just enough that a public profile is not a
-  // free billboard.
-  const LINKISH =
-    /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|io|xyz|ru|cn|gg|me|link|top|shop|club|live|app)\b|\bt\.me\b|\bdiscord\.gg\b|@[a-z0-9_]{3,})/gi;
-  const stripLinks = (s) => String(s || "").replace(LINKISH, "").replace(/\s{2,}/g, " ").trim();
+  // Free-text fields are published on a page under this project's domain, with
+  // signup open. Three things come out on the way to the database:
+  //
+  //   invisible & bidi controls — zero-width joiners and RTL overrides make a
+  //     string render as something other than what it contains, which is how
+  //     "OtakuList Staff" gets spoofed in a display name. Stripped from every
+  //     field, including rank and UID.
+  //   links & contact handles — a profile note is not a place for links. Only
+  //     from the public free-text fields (display name, custom game name, IGN,
+  //     note), because a UID is not prose.
+  //   runs of whitespace, newlines included — so a note cannot shove the rest
+  //     of a card off the screen, and padding cannot be used to sneak real text
+  //     past a length cap.
+  //
+  // Deliberately not a content filter: no profanity list, no judgement about
+  // what a note says. The ⚑ report link and self-delete cover what filtering
+  // cannot. Mirrored in the database by
+  // supabase/migrations/20260919000001_profile_text_hygiene.sql, which is the
+  // layer that actually guarantees it; this one exists so the user sees the
+  // result before they save.
+  const LINKISH = new RegExp(
+    [
+      "https?://\\S*", // an explicit URL, however it continues
+      "\\bwww\\.\\S*",
+      // A bare domain with a path. The optional inner labels are what make
+      // "sketchy.co.uk/free" go entirely, instead of leaving "sketchy." behind.
+      "\\b[a-z0-9-]{2,}(?:\\.[a-z0-9-]{2,})*\\.[a-z]{2,10}/\\S*",
+      // A bare domain on a TLD that turns up in this kind of spam. Deliberately
+      // a list rather than \w+\.\w+, which eats "a.k.a" and "e.g".
+      "\\b[a-z0-9-]{2,}(?:\\.[a-z0-9-]{2,})*\\.(?:com|net|org|io|xyz|ru|cn|gg|me|link|top|shop|club|live|app|info|biz|online|site|store|fun|icu|vip|pw|cc|tk|ml|ga|cf|su|to|ws|sh|dev|page|buzz|click|download|stream)\\b",
+      "@[a-z0-9_]{3,}", // a handle on some other service
+    ].join("|"),
+    "gi"
+  );
+  const INVISIBLE = /[­​-‏‪-‮⁦-⁩﻿]/g;
+
+  // Applied to every stored field.
+  const normalize = (s) =>
+    String(s == null ? "" : s)
+      .replace(INVISIBLE, "")
+      .replace(/[\s ]+/g, " ")
+      .trim();
+  // Applied to the ones that are prose on a public page.
+  const cleanText = (s) => normalize(normalize(s).replace(LINKISH, ""));
 
   let mode = "home"; // "home" | "profile"
   let user = null;
@@ -639,9 +676,11 @@
   // Trimming here keeps a long paste from being rejected by the database with an
   // opaque error; the constraint is still what actually guarantees the bound.
   const FIELD_MAX = { customName: 40, rank: 16, ign: 40, uid: 24, note: 280, chars: 2000 };
-  const cap = (value, field) => String(value || "").trim().slice(0, FIELD_MAX[field]);
-  // Public free text also gets links stripped (see stripLinks).
-  const capText = (value, field) => stripLinks(value).slice(0, FIELD_MAX[field]);
+  // Cap after cleaning, so a strip cannot leave a dangling space inside the cap
+  // and padding cannot be used to push real text past it. See normalize and
+  // cleanText near the top of the file for what each one removes.
+  const cap = (value, field) => normalize(value).slice(0, FIELD_MAX[field]);
+  const capText = (value, field) => cleanText(value).slice(0, FIELD_MAX[field]);
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();

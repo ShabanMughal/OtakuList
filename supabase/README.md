@@ -45,7 +45,7 @@ link before the list starts syncing.
 
 ## Hardening migrations
 
-Three migrations tighten what may be *written*, as opposed to who may write it. RLS answers
+Four migrations tighten what may be *written*, as opposed to who may write it. RLS answers
 "whose row is this?" and nothing else — a row's owner can still put anything they like in it, and
 `profiles` is world-readable, so its contents reach every visitor.
 
@@ -55,7 +55,9 @@ Three migrations tighten what may be *written*, as opposed to who may write it. 
 | `20260910000001_profile_payload_limits.sql` | Shape and size bounds on `games` / `featured`: known game keys only, per-field length caps, ≤ 4 cover characters, and a 16 KB ceiling — so one account cannot park a blob that every gallery visitor then downloads. Note `games` is an **array**; only `anime_lists.list` is object-shaped. |
 | `20260910000002_reserved_usernames.sql` | Blocks `admin`, `support`, `otakulist`, … from being claimed, and adds `gs_delete_my_profile()` so a user can delete their own showcase from the app. |
 
-A fourth is not hardening but privacy:
+| `20260919000001_profile_text_hygiene.sql` | Content bounds on the public free-text fields, where 20260910000001 only set length bounds. Rejects explicit links and invisible / bidi control characters in `display_name` and in each entry's `customName`, `ign` and `note` — the second of those is how a display name gets dressed up as "OtakuList Staff". Existing rows are **scrubbed in place**, never blanked: losing a whole games array over one link in one note would cost the user everything else in it. |
+
+A further one is not hardening but privacy:
 
 | Migration | What it does |
 | :--- | :--- |
@@ -80,8 +82,12 @@ so this needs no code change — it is a dashboard toggle.
 `display_name`, per-game notes and the custom game name are free text on public pages served from
 this project's domain. Current handling:
 
-- links and `@handles` are stripped on write (`stripLinks`) — enough that a profile is not a free
-  billboard, not a content filter;
+- links, `@handles`, and invisible / bidi control characters are stripped on write (`cleanText` and
+  `normalize` in `web/public/js/showcase.js`), and whitespace runs are collapsed. The database
+  enforces the unambiguous half of that — explicit `http(s)://` / `www.` links and the
+  invisible/bidi characters — in `20260919000001_profile_text_hygiene.sql`. Bare-domain detection
+  is a heuristic and stays client-side, where a false positive is a visibly cleaned field rather
+  than an opaque save failure. None of this is a content filter, and there is no profanity list;
 - every profile carries a **⚑ Report this profile** link that opens a pre-filled GitHub issue;
 - a user can delete their own showcase from their profile page;
 - to remove one as maintainer: `delete from public.profiles where username = '…';` in the SQL editor.
