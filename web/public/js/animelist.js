@@ -16,6 +16,12 @@
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
     );
 
+  // A delete writes a tombstone — { id, deleted:true, updatedAt } — rather than
+  // dropping the key, so it survives a merge with the extension or another
+  // device that still holds its copy. Every read below filters them out.
+  const isTombstone = (a) => !!a && a.deleted === true;
+  const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
   let state = load();
   let activeTab = "watching";
   let query = "";
@@ -25,7 +31,13 @@
   function load() {
     try {
       const raw = JSON.parse(localStorage.getItem(KEY) || "{}");
-      return raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+      // Expire tombstones once every device has had ample time to see them.
+      const now = Date.now();
+      for (const [id, a] of Object.entries(raw)) {
+        if (isTombstone(a) && now - (a.updatedAt || 0) > TOMBSTONE_TTL_MS) delete raw[id];
+      }
+      return raw;
     } catch (_) {
       return {};
     }
@@ -60,7 +72,7 @@
     if (data && data.list && typeof data.list === "object" && !Array.isArray(data.list)) {
       state = data.list;
       localStorage.setItem(KEY, JSON.stringify(state));
-    } else if (Object.keys(state).length) {
+    } else if (Object.values(state).some((a) => !isTombstone(a))) {
       await saveCloud();
     }
     cloudReady = true;
@@ -126,6 +138,12 @@
       : `<div class="al-cover al-cover-ph">🎬</div>`;
     const total = a.totalEpisodes ? ` <span class="al-dim">/ ${esc(a.totalEpisodes)}</span>` : "";
     const cur = a.currentEpisode ?? 0;
+    // Some sites number from episode 1 of the whole series; shown alongside
+    // rather than written into progress against a season count.
+    const abs =
+      a.absoluteEpisode && a.absoluteEpisode !== a.currentEpisode
+        ? ` <span class="al-dim" title="Absolute episode number across the whole series">· abs. ${esc(a.absoluteEpisode)}</span>`
+        : "";
     const siteLink = a.url
       ? `<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.site || "open")}</a>`
       : esc(a.site || "");
@@ -144,7 +162,7 @@
         <div class="al-site">${siteLink}</div>
         <div class="al-ep">
           <button class="al-step" data-act="dec" title="Previous episode">−</button>
-          <span>Ep <b>${esc(cur)}</b>${total}</span>
+          <span>Ep <b>${esc(cur)}</b>${total}${abs}</span>
           <button class="al-step" data-act="inc" title="Next episode">＋</button>
         </div>
         ${starsHtml(a.rating || 0)}
@@ -160,7 +178,7 @@
   }
 
   function render() {
-    const all = Object.values(state);
+    const all = Object.values(state).filter((a) => !isTombstone(a));
     // tab counts
     document.querySelectorAll(".al-tab").forEach((t) => {
       const s = t.dataset.status;
@@ -210,7 +228,8 @@
       save();
       render();
     } else if (act === "del") {
-      delete state[card.dataset.id];
+      const id = card.dataset.id;
+      state[id] = { id, deleted: true, updatedAt: Date.now() };
       save();
       render();
     } else if (act === "notetoggle") {
@@ -311,8 +330,12 @@
 
   // ── export / import (extension-compatible) ───────────────────────────
   $("#al-export").addEventListener("click", () => {
-    if (!Object.keys(state).length) return toast("Your list is empty, nothing to export.");
-    const payload = { app: "OtakuList", version: 1, exportedAt: new Date().toISOString(), list: state };
+    // Strip tombstones — a backup is the list, not its sync bookkeeping.
+    const exportable = Object.fromEntries(
+      Object.entries(state).filter(([, a]) => !isTombstone(a))
+    );
+    if (!Object.keys(exportable).length) return toast("Your list is empty, nothing to export.");
+    const payload = { app: "OtakuList", version: 1, exportedAt: new Date().toISOString(), list: exportable };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -335,8 +358,8 @@
       if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) throw 0;
       let count = 0;
       for (const [id, item] of Object.entries(incoming)) {
-        if (!item || !item.title) continue;
-        state[id] = { ...item, id };
+        if (!item || isTombstone(item) || !item.title) continue;
+        state[id] = { ...item, id, deleted: false };
         if (!STATUSES[state[id].status]) state[id].status = "onhold";
         count++;
       }
@@ -375,8 +398,8 @@
     if (!extList) return;
     let c = 0;
     for (const [id, item] of Object.entries(extList)) {
-      if (!item || !item.title) continue;
-      state[id] = { ...item, id };
+      if (!item || isTombstone(item) || !item.title) continue;
+      state[id] = { ...item, id, deleted: false };
       if (!STATUSES[state[id].status]) state[id].status = "onhold";
       c++;
     }
@@ -387,11 +410,12 @@
   }
 
   function onExtList(list) {
-    extList = list && typeof list === "object" && !Array.isArray(list) ? list : {};
+    const raw = list && typeof list === "object" && !Array.isArray(list) ? list : {};
+    extList = Object.fromEntries(Object.entries(raw).filter(([, a]) => !isTombstone(a)));
     const n = Object.keys(extList).length;
     if (!n) return;
     // auto-load once if this page's list is still empty, else offer a button
-    if (!Object.keys(state).length && !autoLoaded) {
+    if (!Object.values(state).some((a) => !isTombstone(a)) && !autoLoaded) {
       autoLoaded = true;
       mergeExt();
       return;

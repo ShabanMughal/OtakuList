@@ -9,7 +9,11 @@ const KEY = "animeList";
 async function refreshBadge() {
   const data = await chrome.storage.local.get(KEY);
   const list = data[KEY] || {};
-  const watching = Object.values(list).filter((a) => a.status === "watching").length;
+  // Tombstoned entries (deleted, kept only so the delete survives a merge)
+  // carry no status, but filter them explicitly so the count can't drift.
+  const watching = Object.values(list).filter(
+    (a) => a && !a.deleted && a.status === "watching"
+  ).length;
   await chrome.action.setBadgeBackgroundColor({ color: "#8b5cf6" });
   await chrome.action.setBadgeText({ text: watching ? String(watching) : "" });
 }

@@ -66,7 +66,7 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
         <div>
           <div class="mb-[26px] inline-flex items-center gap-[9px] rounded-full border border-iris/[.45] bg-iris/[.12] px-3.5 py-[7px] text-[11.5px] font-semibold uppercase tracking-[.14em] text-iris-2">
             <span class="h-1.5 w-1.5 bg-sky" style="animation:pulseRing 2s ease-in-out infinite"></span>
-            Free · Open source · No account
+            Free · Open source · No account needed
           </div>
           <h1 class="m-0 mb-[22px] text-[clamp(40px,5.4vw,68px)] leading-[1.02] tracking-[-.035em] [text-wrap:balance]">
             Your watchlist survives<br><span class="text-iris-2">when the site doesn't.</span>
@@ -79,7 +79,7 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
             <a href={`${base}animelist.html`} class="btn btn-secondary px-5 py-3.5 text-[15px]">See the web app</a>
           </div>
           <div class="mt-10 flex flex-wrap gap-7 border-t border-white/[.075] pt-[26px]">
-            <div><div class="font-heading text-[26px] font-extrabold">0</div><div class="text-xs uppercase tracking-[.1em] text-[#f4f2f8]/50">Servers used</div></div>
+            <div><div class="font-heading text-[26px] font-extrabold">100%</div><div class="text-xs uppercase tracking-[.1em] text-[#f4f2f8]/50">Local by default</div></div>
             <div><div class="font-heading text-[26px] font-extrabold">38k+</div><div class="text-xs uppercase tracking-[.1em] text-[#f4f2f8]/50">Episodes tracked</div></div>
             <div><div class="font-heading text-[26px] font-extrabold">MIT</div><div class="text-xs uppercase tracking-[.1em] text-[#f4f2f8]/50">License</div></div>
           </div>
@@ -188,7 +188,7 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
             <div class="mb-3.5 text-[11.5px] uppercase tracking-[.16em] text-iris-2">Features</div>
             <h2 class="m-0 text-[clamp(30px,3.4vw,44px)] tracking-[-.03em]">Built for people who watch<br>where the anime actually is.</h2>
           </div>
-          <p class="m-0 max-w-[34ch] text-[15px] text-[#f4f2f8]/60">No sign-up wall, no sync server, no telemetry. Just a tracker that keeps working when everything else disappears.</p>
+          <p class="m-0 max-w-[34ch] text-[15px] text-[#f4f2f8]/60">No sign-up wall, no ads, no telemetry. Sync only if you ask for it. Just a tracker that keeps working when everything else disappears.</p>
         </div>
         <div class="bento">
           <!-- hero tile (2x2) -->
@@ -206,7 +206,7 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
           <div class="rd-card b-2x1 rounded-[20px] border border-white/10 bg-white/[.045] p-[26px]">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5cf5" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
             <h3 class="mb-2 mt-3.5 text-[19px] tracking-[-.02em]">Local and private</h3>
-            <p class="m-0 max-w-[52ch] text-[14.5px] text-[#f4f2f8]/[.62]">Everything lives in your browser's own storage. No account, no servers, nothing leaves the device, we couldn't read your list if we wanted to.</p>
+            <p class="m-0 max-w-[52ch] text-[14.5px] text-[#f4f2f8]/[.62]">Your list lives in your browser's own storage. Nothing is uploaded unless you create an account — and if you do, it goes to one private row only your login can read.</p>
           </div>
 
           <!-- small tile -->
@@ -306,8 +306,13 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
           </details>
           <details class="faq-item border-b border-white/[.075] px-1 py-5">
             <summary class="flex cursor-pointer list-none items-center gap-4 font-heading text-[17.5px] font-extrabold"><span class="faq-plus flex-none text-[20px] leading-none text-iris-2">+</span>Where exactly is my data stored?</summary>
-            <div class="faq-body"><p class="ml-8 mt-3 text-[15px] text-[#f4f2f8]/[.65]">In your browser's local extension storage, on your machine. There is no OtakuList account and no backend to sync to. You can export the whole list as JSON any time, and deleting the extension deletes the data.</p></div>
+            <div class="faq-body"><p class="ml-8 mt-3 text-[15px] text-[#f4f2f8]/[.65]">In your browser's local extension storage, on your machine. That is the default and it needs no account — nothing is uploaded while you are logged out. If you <em>choose</em> to create an account, your list is also mirrored to a single private row on our Supabase database that only your own login can read, so it can follow you to another browser. Either way you can export the whole list as JSON any time, and deleting the extension deletes the local copy.</p></div>
           </details>
+          <details class="faq-item border-b border-white/[.075] px-1 py-5">
+            <summary class="flex cursor-pointer list-none items-center gap-4 font-heading text-[17.5px] font-extrabold"><span class="faq-plus flex-none text-[20px] leading-none text-iris-2">+</span>If I turn on sync, what exactly gets uploaded?</summary>
+            <div class="faq-body"><p class="ml-8 mt-3 text-[15px] text-[#f4f2f8]/[.65]">Your watchlist as you see it: titles, status, episode numbers, ratings, notes, cover art — and, because each entry has a <b>Resume</b> button, the address of the page you last watched it on. That includes the site's domain. It is what makes "pick up where I left off" work, but it does mean that turning on sync uploads which sites you watch on. If you would rather that never leaves your machine, stay logged out — everything else works identically.</p></div>
+          </details>
+
           <details class="faq-item border-b border-white/[.075] px-1 py-5">
             <summary class="flex cursor-pointer list-none items-center gap-4 font-heading text-[17.5px] font-extrabold"><span class="faq-plus flex-none text-[20px] leading-none text-iris-2">+</span>What happens if a site gets blocked?</summary>
             <div class="faq-body"><p class="ml-8 mt-3 text-[15px] text-[#f4f2f8]/[.65]">Nothing happens to your list. Progress is stored against the show, not the site, so you open a different mirror and keep going from the episode you were on.</p></div>

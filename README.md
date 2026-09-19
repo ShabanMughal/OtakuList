@@ -7,11 +7,11 @@
 [![Platform](https://img.shields.io/badge/Platform-Chrome%20%7C%20Edge%20%7C%20Brave-8b5cf6?style=for-the-badge&logo=googlechrome&logoColor=white)](https://shabanmughal.github.io/OtakuList/)
 [![Manifest V3](https://img.shields.io/badge/Manifest-v3-8b5cf6?style=for-the-badge&logo=codefactor&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![License](https://img.shields.io/badge/Price-Free-8b5cf6?style=for-the-badge)](https://shabanmughal.github.io/OtakuList/)
-[![Privacy](https://img.shields.io/badge/Watchlist-100%25%20Local-8b5cf6?style=for-the-badge&logo=shield&logoColor=white)](#%EF%B8%8F-good-to-know)
+[![Privacy](https://img.shields.io/badge/Watchlist-100%25%20Local-8b5cf6?style=for-the-badge&logo=shield&logoColor=white)](#️-cloud-sync-optional)
 
 <p align="center">
   <a href="https://shabanmughal.github.io/OtakuList/"><b>Website</b></a> ·
-  <a href="#-install-unpacked"><b>Install</b></a> ·
+  <a href="#-install"><b>Install</b></a> ·
   <a href="#%EF%B8%8F-how-to-use-it"><b>How it works</b></a> ·
   <a href="#-gacha-showcase-companion-web-app"><b>Gacha Showcase</b></a>
 </p>
@@ -59,14 +59,23 @@ There's also an **optional companion web app** — the [Gacha Showcase](#-gacha-
 
 ---
 
-## 🚀 Install (unpacked)
+## 🚀 Install
+
+**[➕ Add to Chrome — free](https://chromewebstore.google.com/detail/otakulist-%E2%80%94-anime-watchli/amfnmledhfgfeafdibdkhjdjdnkjcgfo)**
+
+Works on Chrome, Edge, Brave, and other Chromium browsers.
+
+<details>
+<summary><b>Install unpacked (for development)</b></summary>
 
 1. Open `chrome://extensions` (or `edge://extensions`, `brave://extensions`).
 2. Turn on **Developer mode** (top-right toggle).
-3. Click **Load unpacked** and select this `extention` folder.
-4. Pin the **OtakuList** icon to your toolbar — done! 🎉
+3. Click **Load unpacked** and select this repository's root folder (the one with `manifest.json`).
+4. Pin the **OtakuList** icon to your toolbar.
 
-> Works on Chrome, Edge, Brave, and other Chromium browsers.
+Chrome loads the files exactly as they sit on disk — there's no build step, so reload at `chrome://extensions` after every change.
+
+</details>
 
 ---
 
@@ -104,6 +113,8 @@ Logging in is **never required** — the extension works exactly the same withou
 | **Nothing** | Whenever you're logged out — including after **Log out**, which keeps your list on this device |
 
 If your connection drops, the popup shows *Sync paused* and picks up again on the next change or the next time you open it.
+
+> **What syncing actually uploads.** Each entry stores the address of the page you last watched that anime on — that's what the **Resume** button opens, and it includes the site's domain. So turning on sync does upload which sites you watch on, to your own private row. Given who uses this, that's worth saying plainly rather than burying: if you'd rather that never leaves your machine, stay logged out. Everything else works identically.
 
 ### Setup (maintainers)
 

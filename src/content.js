@@ -51,7 +51,7 @@
   function findExistingKey(list, candidate) {
     const nk = normText(candidate.title);
     for (const [k, a] of Object.entries(list)) {
-      if (!a) continue;
+      if (!a || a.deleted) continue; // tombstone — treat as absent
       if (candidate.anilistId && a.anilistId && String(a.anilistId) === String(candidate.anilistId))
         return k;
       if (candidate.sourceId && a.sourceId && String(a.sourceId) === String(candidate.sourceId))
@@ -74,6 +74,7 @@
       status,
       currentEpisode: candidate.episode ?? existing?.currentEpisode ?? null,
       totalEpisodes: candidate.totalEpisodes ?? existing?.totalEpisodes ?? null,
+      absoluteEpisode: candidate.absoluteEpisode ?? existing?.absoluteEpisode ?? null,
       cover: candidate.cover || existing?.cover || null,
       site: candidate.domain,
       sourceId: candidate.sourceId || existing?.sourceId || null,
@@ -288,15 +289,73 @@
       (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
     );
 
+  // AniList models each season as its OWN media id, but seasons share almost
+  // every word of their title — "Jujutsu Kaisen 2nd Season" overlaps season 1
+  // by 100% of its ordinary words. Word overlap alone therefore happily adopts
+  // the wrong id, and with it the wrong episode count and the wrong poster.
+  //
+  // So a season marker is not treated as an ordinary word: it is extracted
+  // first and has to agree. Returns null when a title carries no marker (i.e.
+  // season 1, or a title that doesn't say).
+  function seasonMarker(text) {
+    const t = String(text || "").toLowerCase();
+    if (/\bfinal\s+(season|arc)\b/.test(t)) return "final";
+    // 2nd Season / Season 2 / S2 / Part 2 / Cour 2 / 2期 (Japanese "season")
+    const m =
+      t.match(/\b(\d{1,2})\s*(?:nd|rd|th|st)?\s*(?:season|期|cour|part)\b/) ||
+      t.match(/\b(?:season|cour|part)\s*(\d{1,2})\b/) ||
+      t.match(/\bs(\d{1,2})\b(?!\d)/);
+    if (m) return String(parseInt(m[1], 10));
+    // Roman numerals II–VI as a trailing token ("Made in Abyss II")
+    const roman = t.match(/\s(ii|iii|iv|v|vi)\s*$/);
+    if (roman) return String({ ii: 2, iii: 3, iv: 4, v: 5, vi: 6 }[roman[1]]);
+    return null;
+  }
+
+  // Sites disagree about episode numbering: some count within the season, some
+  // count from episode 1 of the whole series (One Piece at 1088). When the
+  // detected number is far beyond what this entry actually has, writing it into
+  // currentEpisode produces a figure that will never reconcile with the total.
+  // Keep it as absoluteEpisode instead and leave currentEpisode alone, so the
+  // UI can show "Ep 12 (abs. 1088)" rather than a silently wrong 1088 / 24.
+  //
+  // "Far beyond" deliberately allows slack: a total of null, a season still
+  // airing, or an off-by-a-few site are all normal.
+  const ABSOLUTE_SLACK = 5;
+  function markAbsolute(candidate, totalEpisodes) {
+    const ep = candidate.episode;
+    if (ep == null || !totalEpisodes) return;
+    if (ep > totalEpisodes + ABSOLUTE_SLACK) {
+      candidate.absoluteEpisode = ep;
+      candidate.episode = null; // don't overwrite in-season progress with it
+    }
+  }
+
   // Guard against a bad title-search hit: require real word overlap between the
   // detected title and AniList's romaji/english before adopting its id/cover.
   function titleMatchesResolved(title, resolved) {
-    const want = new Set(normText(title).split(" ").filter((w) => w.length > 2));
-    if (!want.size) return false;
     const got = normText([resolved.romaji, resolved.english].filter(Boolean).join(" "));
     if (!got) return false;
+
+    // A season mismatch fails outright, however well the words line up. Note
+    // "no marker" is not the same as "season 1": plenty of sequels are titled
+    // without one, so only compare when BOTH sides declare a season.
+    const wantSeason = seasonMarker(title);
+    const gotSeason = seasonMarker([resolved.romaji, resolved.english].filter(Boolean).join(" "));
+    if (wantSeason && gotSeason && wantSeason !== gotSeason) return false;
+    // One side says "season 3" and the other says nothing — that is very likely
+    // the base entry for a different season, so don't adopt it either.
+    if (!!wantSeason !== !!gotSeason) return false;
+
+    // Unchanged 50% floor on ordinary words, with season tokens removed so they
+    // can't pad the overlap in either direction.
+    const strip = (s) =>
+      normText(s).replace(/\b(\d{1,2}(nd|rd|th|st)?|season|cour|part|final|s\d{1,2}|ii|iii|iv|vi)\b/g, " ");
+    const want = new Set(strip(title).split(" ").filter((w) => w.length > 2));
+    if (!want.size) return false;
+    const gotStripped = strip(got);
     let hits = 0;
-    for (const w of want) if (got.includes(w)) hits++;
+    for (const w of want) if (gotStripped.includes(w)) hits++;
     return hits / want.size >= 0.5;
   }
 
@@ -683,6 +742,8 @@
       if (trusted) {
         candidate.anilistId = String(resolved.id);
         if (resolved.cover) candidate.cover = resolved.cover;
+        if (resolved.episodes) candidate.totalEpisodes = resolved.episodes;
+        markAbsolute(candidate, resolved.episodes);
       }
     }
 
@@ -691,6 +752,18 @@
 
     // Already in "Watching" → advance the episode silently, no modal.
     if (existing && existing.status === "watching") {
+      // An absolute number (One Piece 1088) is recorded but never treated as
+      // progress against a season's episode count.
+      if (
+        candidate.absoluteEpisode != null &&
+        candidate.absoluteEpisode !== existing.absoluteEpisode
+      ) {
+        existing.absoluteEpisode = candidate.absoluteEpisode;
+        existing.updatedAt = Date.now();
+        await chrome.storage.local.set({ [KEY]: list });
+        showToast(`Noted episode <b>${candidate.absoluteEpisode}</b> (absolute)`);
+        return;
+      }
       if (candidate.episode !== null && candidate.episode !== existing.currentEpisode) {
         existing.currentEpisode = candidate.episode;
         existing.url = candidate.url;
@@ -780,7 +853,12 @@
 
     async function sendList() {
       const store = await chrome.storage.local.get(KEY);
-      window.postMessage({ source: "otakulist-ext", type: "list", list: store[KEY] || {} }, location.origin);
+      // Tombstones are sync bookkeeping (see src/cloud.js) — the website only
+      // wants real entries.
+      const list = Object.fromEntries(
+        Object.entries(store[KEY] || {}).filter(([, a]) => !(a && a.deleted))
+      );
+      window.postMessage({ source: "otakulist-ext", type: "list", list }, location.origin);
     }
 
     window.addEventListener("message", (e) => {

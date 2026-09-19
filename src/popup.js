@@ -12,6 +12,14 @@ let activeTab = "watching";
 let query = "";
 let sortBy = "recent";
 
+// Deleting writes a tombstone — { id, deleted:true, updatedAt } — instead of
+// removing the key, so the delete survives a cloud merge with a device that
+// still has its copy (see src/cloud.js). Nothing below the storage layer should
+// ever show one, so every read filters them out.
+const isTombstone = (a) => !!a && a.deleted === true;
+const liveEntries = () => Object.values(state).filter((a) => !isTombstone(a));
+const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
 const $ = (sel) => document.querySelector(sel);
 const listEl = $("#list");
 const emptyEl = $("#empty");
@@ -51,21 +59,22 @@ function starsHtml(rating) {
 
 function render() {
   // tab counts
+  const live = liveEntries();
   document.querySelectorAll(".tab").forEach((t) => {
     const s = t.dataset.status;
-    const n = Object.values(state).filter((a) => a.status === s).length;
+    const n = live.filter((a) => a.status === s).length;
     t.querySelector("span").textContent = n;
     t.classList.toggle("active", s === activeTab);
   });
 
   const q = query.trim().toLowerCase();
   const items = sortItems(
-    Object.values(state)
+    live
       .filter((a) => a.status === activeTab)
       .filter((a) => !q || a.title.toLowerCase().includes(q))
   );
 
-  const totalCount = Object.keys(state).length;
+  const totalCount = live.length;
   $("#count").textContent = `${totalCount} title${totalCount === 1 ? "" : "s"} saved`;
 
   if (!items.length) {
@@ -79,6 +88,12 @@ function render() {
     .map((a) => {
       const total = a.totalEpisodes ? `<span> / ${a.totalEpisodes}</span>` : "";
       const cur = a.currentEpisode ?? 0;
+      // Sites that count from episode 1 of the whole series record an absolute
+      // number; show it alongside rather than pretending it's season progress.
+      const abs =
+        a.absoluteEpisode && a.absoluteEpisode !== a.currentEpisode
+          ? `<span class="abs" title="Absolute episode number across the whole series">abs. ${escapeHtml(a.absoluteEpisode)}</span>`
+          : "";
       const cover = a.cover
         ? `<img class="cover" src="${escapeHtml(a.cover)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover',textContent:'🎬'}))">`
         : `<div class="cover">🎬</div>`;
@@ -101,7 +116,7 @@ function render() {
           <div class="site">${siteLink}</div>
           <div class="prog">
             <button data-act="dec" title="Previous episode">−</button>
-            <div class="epnum">Ep <b>${cur}</b>${total}</div>
+            <div class="epnum">Ep <b>${cur}</b>${total}${abs}</div>
             <button data-act="inc" title="Next episode">＋</button>
           </div>
           ${starsHtml(a.rating || 0)}
@@ -148,7 +163,9 @@ listEl.addEventListener("click", async (e) => {
     return; // handled by the "change" listener below
   } else if (act === "del") {
     const removed = { ...item };
-    delete state[id];
+    // Tombstone, not a key removal — otherwise a merge from a device that
+    // still holds this entry would bring it straight back.
+    state[id] = { id, deleted: true, updatedAt: Date.now() };
     await setList(state);
     showUndo(removed);
     render();
@@ -217,7 +234,8 @@ function showUndo(item) {
   toastTimer = setTimeout(() => t.remove(), 6000);
   t.querySelector("button").addEventListener("click", async () => {
     clearTimeout(toastTimer);
-    state[item.id] = item;
+    // Restamp so the restored entry outranks the tombstone we just pushed.
+    state[item.id] = { ...item, deleted: false, updatedAt: Date.now() };
     await setList(state);
     t.remove();
     render();
@@ -274,7 +292,12 @@ addForm.addEventListener("submit", async (e) => {
 
 // ── export / import backup ──────────────────────────────────────────
 $("#exportBtn").addEventListener("click", () => {
-  if (!Object.keys(state).length) {
+  // A backup is a snapshot of the list, not of its sync bookkeeping — strip
+  // tombstones so an exported file never carries deletions around.
+  const exportable = Object.fromEntries(
+    Object.entries(state).filter(([, a]) => !isTombstone(a))
+  );
+  if (!Object.keys(exportable).length) {
     showToast("Your list is empty — nothing to export.");
     return;
   }
@@ -282,7 +305,7 @@ $("#exportBtn").addEventListener("click", () => {
     app: "OtakuList",
     version: 1,
     exportedAt: new Date().toISOString(),
-    list: state,
+    list: exportable,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -312,8 +335,10 @@ importFile.addEventListener("change", async (e) => {
     }
     let count = 0;
     for (const [id, item] of Object.entries(incoming)) {
-      if (!item || !item.title) continue;
-      state[id] = { ...item, id };
+      // Older or hand-edited files may carry tombstones — ignore them rather
+      // than importing a deletion as if it were a title.
+      if (!item || isTombstone(item) || !item.title) continue;
+      state[id] = { ...item, id, deleted: false };
       if (!STATUSES[state[id].status]) state[id].status = "onhold";
       count++;
     }
@@ -480,9 +505,18 @@ sendCloud({ type: "cloudState" }).then((res) => {
 
 getList().then((list) => {
   state = list;
-  // "Dropped" was removed — rescue any such items into On Hold so they're not lost.
   let changed = false;
-  for (const a of Object.values(state)) {
+  const now = Date.now();
+  for (const [id, a] of Object.entries(state)) {
+    // Expire tombstones once every device has had ample time to see them.
+    if (isTombstone(a)) {
+      if (now - (a.updatedAt || 0) > TOMBSTONE_TTL_MS) {
+        delete state[id];
+        changed = true;
+      }
+      continue; // a tombstone has no status to rescue
+    }
+    // "Dropped" was removed — rescue any such items into On Hold so they're not lost.
     if (!STATUSES[a.status]) {
       a.status = "onhold";
       changed = true;

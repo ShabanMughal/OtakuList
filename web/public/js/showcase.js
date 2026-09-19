@@ -20,6 +20,23 @@
     );
   const enc = encodeURIComponent;
 
+  // Names that read as official can't be claimed. Mirrors the DB constraint in
+  // supabase/migrations/…_reserved_usernames.sql — this copy only exists so the
+  // user gets told before they submit.
+  const RESERVED_USERNAMES = new Set([
+    "admin", "administrator", "api", "support", "staff", "showcase", "mod",
+    "moderator", "otakulist", "system", "root", "help", "official", "security",
+    "abuse", "billing", "contact", "team", "owner", "null", "undefined",
+  ]);
+
+  // Free-text fields are published on a page under this project's domain. Strip
+  // the two things that make an open text box worth abusing: links and contact
+  // handles. Not a content filter — just enough that a public profile is not a
+  // free billboard.
+  const LINKISH =
+    /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|io|xyz|ru|cn|gg|me|link|top|shop|club|live|app)\b|\bt\.me\b|\bdiscord\.gg\b|@[a-z0-9_]{3,})/gi;
+  const stripLinks = (s) => String(s || "").replace(LINKISH, "").replace(/\s{2,}/g, " ").trim();
+
   let mode = "home"; // "home" | "profile"
   let user = null;
   let username = null;
@@ -53,20 +70,77 @@
   // Profile picture from OAuth metadata (Google returns `avatar_url`/`picture`).
   const oauthAvatar = (u) => {
     const m = (u && u.user_metadata) || {};
-    return m.avatar_url || m.picture || "";
+    return safeAvatarUrl(m.avatar_url || m.picture || "");
   };
+
+  // RLS controls WHO writes a row, not WHAT they write, so avatar_url arrives
+  // here as an arbitrary attacker-chosen string. Rendered in a public gallery
+  // that means any profile owner could log the IP and user-agent of everyone
+  // browsing it. Allow only the hosts we actually produce: Google's OAuth
+  // picture CDN and this project's own Supabase storage. Anything else renders
+  // as the initials medallion instead. The same rule is enforced in the
+  // database by supabase/migrations/20260910000000_avatar_url_allowlist.sql --
+  // this is the second layer, not the only one.
+  const AVATAR_HOSTS = [
+    /^lh[0-9]+\.googleusercontent\.com$/,
+    /^[a-z0-9-]+\.googleusercontent\.com$/,
+    /^[a-z0-9-]+\.supabase\.co$/,
+  ];
+  function safeAvatarUrl(raw) {
+    const value = String(raw || "").trim();
+    if (!value) return "";
+    let u;
+    try {
+      u = new URL(value);
+    } catch (_) {
+      return "";
+    }
+    if (u.protocol !== "https:") return ""; // blocks javascript:, data:, http:
+    if (!AVATAR_HOSTS.some((re) => re.test(u.hostname))) return "";
+    // Supabase storage: only the public object path, not arbitrary endpoints.
+    if (/\.supabase\.co$/.test(u.hostname) && !u.pathname.startsWith("/storage/v1/object/public/"))
+      return "";
+    return u.href;
+  }
+  // The avatar a profile should show. A real photo only when its owner opted in
+  // (avatar_url set); otherwise their first cover character, which is both more
+  // on-theme and not a picture of a person. Initials are the last resort.
+  function profileAvatarUrl(p) {
+    const photo = safeAvatarUrl(p && p.avatar_url);
+    if (photo) return photo;
+    const games = sanitizeGames(p && p.games);
+    let pick = Array.isArray(p && p.featured) ? p.featured[0] : null;
+    if (!pick) {
+      // no cover chosen — fall back to the rarest character they list
+      const flat = [];
+      games.forEach((g) =>
+        splitChars(g.chars).forEach((cn) => flat.push({ game: g.game, name: cn, r: charRank(g.game, cn) }))
+      );
+      flat.sort((a, b) => b.r - a.r);
+      pick = flat[0];
+    }
+    return pick ? charImg(pick.game, pick.name) : "";
+  }
+
   // Round avatar: the real picture if we have one, else an initials medallion.
   // On a broken image url it falls back to the same initials medallion.
   function avatarCircle(url, inits, bg, size, fs, border) {
     const ring = `width:${size}px;height:${size}px;flex:none;border-radius:50%;border:${border}px solid rgba(11,10,22,.9);`;
     const fallStyle = `${ring}background:${bg};display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:${fs}px;color:#fff`;
-    if (!url) return `<div style="${fallStyle}">${inits}</div>`;
-    return `<img src="${esc(url)}" alt="${inits}" referrerpolicy="no-referrer" loading="lazy" style="${ring}object-fit:cover;background:${bg}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{style:'${fallStyle}',textContent:'${inits}'}))">`;
+    // `url` is expected to be vetted already — profileAvatarUrl() returns either
+    // an allowlisted photo or a roster portrait from our own data file.
+    const safe = String(url || "");
+    if (!safe) return `<div style="${fallStyle}">${inits}</div>`;
+    // The fallback reads its text from a data attribute rather than having it
+    // interpolated into the onerror JS: entity-decoding happens before the
+    // attribute is parsed as script, so user text inside a JS string literal
+    // there would be a quote-escape waiting to happen.
+    return `<img src="${esc(safe)}" alt="${inits}" referrerpolicy="no-referrer" loading="lazy" style="${ring}object-fit:cover;background:${bg}" data-fb-style="${esc(fallStyle)}" data-fb-ini="${esc(inits)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{style:this.dataset.fbStyle,textContent:this.dataset.fbIni}))">`;
   }
   function charThumb(game, name) {
     const img = charImg(game, name);
     return img
-      ? `<img class="gs-charimg" src="${esc(img)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'gs-charini',textContent:'${esc(initials(name))}'}))">`
+      ? `<img class="gs-charimg" src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-fb-ini="${esc(initials(name))}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'gs-charini',textContent:this.dataset.fbIni}))">`
       : `<span class="gs-charini">${esc(initials(name))}</span>`;
   }
   // Full-body card/portrait art (WuWa, PGR, ZZZ) reads best cropped from the top
@@ -76,11 +150,25 @@
   const coverPos = (game) => (FULLBODY[game] ? "top" : "center");
 
   // portrait filling its container (for tiles / cards), initials fallback
+  // Portraits are hotlinked from yatta.moe and the Fandom wikis (see
+  // web/scripts/fetch-characters.mjs). Either can start blocking hotlinks at any
+  // time, which would break art across every profile at once with no deploy
+  // involved — so send no referrer, and degrade to an initials medallion rather
+  // than an empty slot or a broken-image icon.
+  const charFallback = (name) =>
+    `<span style="position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:22px;color:rgba(244,242,248,.75)">${esc(
+      initials(name)
+    )}</span>`;
+
   function charCover(game, name) {
     const img = charImg(game, name);
-    return img
-      ? `<img src="${esc(img)}" alt="${esc(name)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${coverPos(game)}" onerror="this.style.display='none'">`
-      : "";
+    if (!img) return charFallback(name);
+    return (
+      `<img src="${esc(img)}" alt="${esc(name)}" loading="lazy" referrerpolicy="no-referrer"` +
+      ` style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${coverPos(game)}"` +
+      ` data-fb-ini="${esc(initials(name))}"` +
+      ` onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:this.dataset.fbIni,style:'position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:22px;color:rgba(244,242,248,.75)'}))">`
+    );
   }
 
   // ── modernist palettes (deterministic per username) ───────────────────
@@ -115,9 +203,57 @@
   const LOGO_GAMES = { genshin: 1, hsr: 1, zzz: 1, wuwa: 1 };
   const gameLogo = (g) => (LOGO_GAMES[g.game] ? ASSET(`assets/games/${g.game}.png`) : "");
 
+  // ── UID → server region ──────────────────────────────────────────────
+  // Co-op is region-locked, so a UID from another server is useless to whoever
+  // is reading the profile. Showing the region is what turns the gallery from a
+  // card wall into a co-op finder.
+  //
+  // Genshin only, deliberately. The mapping below is verified against the
+  // Genshin Impact Wiki: a 9-digit UID's first digit is the server, and a
+  // 10-digit UID uses the first TWO digits — with 18… also being America.
+  // Honkai: Star Rail is widely said to use the same scheme, but I could only
+  // confirm 8 = Asia for it, so HSR UIDs are left unlabelled rather than
+  // labelled wrongly. Verify the rest before extending GAMES_WITH_REGION.
+  const GAMES_WITH_REGION = new Set(["genshin"]);
+  const REGIONS = {
+    cn: "China",
+    na: "America",
+    eu: "Europe",
+    asia: "Asia",
+    tw: "TW/HK/MO",
+  };
+
+  function uidRegion(game, uid) {
+    if (!GAMES_WITH_REGION.has(game)) return null;
+    const digits = String(uid || "").replace(/\D/g, "");
+    if (digits.length === 10) {
+      // only the 18… prefix is documented well enough to label
+      return digits.startsWith("18") ? "na" : null;
+    }
+    if (digits.length !== 9) return null;
+    const first = digits[0];
+    if (first >= "1" && first <= "5") return "cn";
+    return { 6: "na", 7: "eu", 8: "asia", 9: "tw" }[first] || null;
+  }
+
+  // Every region a profile has a UID on.
+  function profileRegions(games) {
+    const out = new Set();
+    for (const g of sanitizeGames(games)) {
+      const r = uidRegion(g.game, g.uid);
+      if (r) out.add(r);
+    }
+    return out;
+  }
+
   const cardsEl = $("gs-cards");
   const emptyEl = $("gs-empty");
-  const withIds = (arr) => (arr || []).map((x) => ({ ...x, id: seq++ }));
+  // Ignore entries with an unknown game key on read: a row written before the
+  // payload constraints landed, or by anything other than this page, should not
+  // reach the renderer.
+  const isKnownGame = (g) => !!g && typeof g === "object" && !!GAMES[g.game];
+  const sanitizeGames = (arr) => (Array.isArray(arr) ? arr.filter(isKnownGame) : []);
+  const withIds = (arr) => sanitizeGames(arr).map((x) => ({ ...x, id: seq++ }));
   const gamesForDb = () => profile.games.map(({ id, ...rest }) => rest);
   const publicUrl = (name) => `${location.origin + location.pathname}?u=${enc(name)}`;
 
@@ -156,7 +292,7 @@
 
     const logo = gameLogo(gme);
     const badge = logo
-      ? `<img class="gs-cardlogo" src="${esc(logo)}" alt="${esc(name)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'gs-mono',textContent:'${esc(mono)}'}))">`
+      ? `<img class="gs-cardlogo" src="${esc(logo)}" alt="${esc(name)}" data-fb-ini="${esc(mono)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'gs-mono',textContent:this.dataset.fbIni}))">`
       : `<span class="gs-mono">${esc(mono)}</span>`;
     return `
     <article class="gs-card" style="--g1:${preset.g1};--g2:${preset.g2}">
@@ -342,6 +478,18 @@
       location.href = location.pathname + "#edit";
       return;
     }
+    if (e.target.closest("[data-deleteprofile]")) {
+      if (!(CLOUD && user)) return;
+      if (!confirm("Delete your showcase?\n\nYour profile page, cover and game cards are removed for good. Your account and your anime list are not affected.")) return;
+      // RLS scopes this to your own row; the RPC exists so the intent is explicit.
+      const { error } = await sb.rpc("gs_delete_my_profile");
+      if (error) {
+        const del = await sb.from("profiles").delete().eq("id", user.id);
+        if (del.error) return alert("Couldn't delete the showcase: " + del.error.message);
+      }
+      location.href = location.pathname;
+      return;
+    }
     const likeEl = e.target.closest("[data-like]");
     if (likeEl) {
       if (!CLOUD) return;
@@ -397,7 +545,7 @@
       $("nav-mylink").textContent = label;
       $("nav-mylink").href = username ? publicUrl(username) : "#";
       const av = $("nav-avatar");
-      const url = profile.avatar || oauthAvatar(user);
+      const url = profileAvatarUrl({ avatar_url: profile.avatar, games: profile.games, featured: profile.featured });
       if (url) {
         av.src = url;
         av.hidden = false;
@@ -467,17 +615,25 @@
     $("gs-cancel").hidden = true;
   }
 
+  // Mirrors the caps enforced by supabase/migrations/…_profile_payload_limits.sql.
+  // Trimming here keeps a long paste from being rejected by the database with an
+  // opaque error; the constraint is still what actually guarantees the bound.
+  const FIELD_MAX = { customName: 40, rank: 16, ign: 40, uid: 24, note: 280, chars: 2000 };
+  const cap = (value, field) => String(value || "").trim().slice(0, FIELD_MAX[field]);
+  // Public free text also gets links stripped (see stripLinks).
+  const capText = (value, field) => stripLinks(value).slice(0, FIELD_MAX[field]);
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    profile.name = $("gs-name").value.trim();
+    profile.name = capText($("gs-name").value, "customName");
     const entry = {
-      game: gameSel.value,
-      customName: customIn.value.trim(),
-      rank: $("gs-rank").value.trim(),
-      ign: $("gs-ign").value.trim(),
-      uid: $("gs-uid").value.trim(),
-      chars: selChars.join(", "),
-      note: $("gs-note").value.trim(),
+      game: GAMES[gameSel.value] ? gameSel.value : "custom",
+      customName: capText(customIn.value, "customName"),
+      rank: cap($("gs-rank").value, "rank"),
+      ign: capText($("gs-ign").value, "ign"),
+      uid: cap($("gs-uid").value, "uid"),
+      chars: cap(selChars.join(", "), "chars"),
+      note: capText($("gs-note").value, "note"),
     };
     if (editingId != null) {
       const g = profile.games.find((x) => x.id === editingId);
@@ -518,7 +674,8 @@
   });
 
   $("gs-name").addEventListener("input", () => {
-    profile.name = $("gs-name").value.trim();
+    // Don't rewrite the field while they type — clean it on the way to the DB.
+    profile.name = capText($("gs-name").value, "customName");
     persist();
   });
 
@@ -614,6 +771,71 @@
     if (!charmenu.hidden) openMenu(charinput.value);
   });
 
+  // ═══════════════════════════ profile picture (opt-in photo) ═══════════════════════════
+  // Default is a character portrait. A real photo is published only by an
+  // explicit choice here, never as a side effect of signing in with Google.
+  const PHOTO_NOTICE_KEY = "otakulist-photo-notice-dismissed";
+
+  function photoStatus(text) {
+    const el = $("gs-photo-status");
+    if (!el) return;
+    el.hidden = !text;
+    el.textContent = text || "";
+  }
+
+  async function setPhotoOptIn(on) {
+    if (!(CLOUD && user && username)) return;
+    const next = on ? oauthAvatar(user) : "";
+    if (on && !next) {
+      photoStatus("The account you signed in with didn't provide a photo.");
+      $("gs-usephoto").checked = false;
+      return;
+    }
+    photoStatus("Saving…");
+    const { error } = await sb.from("profiles").update({ avatar_url: next || null }).eq("id", user.id);
+    if (error) {
+      photoStatus("Couldn't save, try again.");
+      $("gs-usephoto").checked = !on;
+      return;
+    }
+    profile.avatar = next;
+    photoStatus(on ? "Using your account photo ✓" : "Using your cover character ✓");
+    updateNav();
+  }
+
+  function syncPhotoUi() {
+    const box = $("gs-usephoto");
+    if (box) box.checked = !!profile.avatar;
+    // Existing profiles had the photo adopted for them; offer a way out, once.
+    const notice = $("gs-photo-notice");
+    if (!notice) return;
+    let dismissed = false;
+    try {
+      dismissed = localStorage.getItem(PHOTO_NOTICE_KEY) === "1";
+    } catch (_) {}
+    notice.hidden = !(profile.avatar && username && !dismissed);
+  }
+
+  const dismissPhotoNotice = () => {
+    try {
+      localStorage.setItem(PHOTO_NOTICE_KEY, "1");
+    } catch (_) {}
+    const n = $("gs-photo-notice");
+    if (n) n.hidden = true;
+  };
+
+  if ($("gs-usephoto")) {
+    $("gs-usephoto").addEventListener("change", (e) => setPhotoOptIn(e.target.checked));
+  }
+  if ($("gs-photo-swap")) {
+    $("gs-photo-swap").addEventListener("click", async () => {
+      await setPhotoOptIn(false);
+      syncPhotoUi();
+      dismissPhotoNotice();
+    });
+  }
+  if ($("gs-photo-keep")) $("gs-photo-keep").addEventListener("click", dismissPhotoNotice);
+
   // ═══════════════════════════ messages ═══════════════════════════
   function authMsg(text, ok) {
     const el = $("auth-msg");
@@ -689,6 +911,12 @@
       status.textContent = "3–20 chars: a–z, 0–9, _";
       return;
     }
+    if (RESERVED_USERNAMES.has(v)) {
+      status.hidden = false;
+      status.className = "gs-uname-status taken";
+      status.textContent = "✗ Reserved, pick another";
+      return;
+    }
     status.hidden = false;
     status.className = "gs-uname-status dim";
     status.textContent = "Checking…";
@@ -716,6 +944,7 @@
         if (pass.length < 6) return authErr("Password must be at least 6 characters.");
         if (!/^[a-z0-9_]{3,20}$/.test(uname))
           return authErr("Username: 3–20 chars, lowercase letters, numbers or underscore.");
+        if (RESERVED_USERNAMES.has(uname)) return authErr("That username is reserved, try another.");
         // pre-check availability for a friendly error
         const { data: taken } = await sb.from("profiles").select("username").eq("username", uname).maybeSingle();
         if (taken) return authErr("That username is taken, try another.");
@@ -770,6 +999,7 @@
     clearTimeout(setupCheck);
     if (!v) return setupStatus("");
     if (!/^[a-z0-9_]{3,20}$/.test(v)) return setupStatus("3–20 chars: a–z, 0–9, _", "dim");
+    if (RESERVED_USERNAMES.has(v)) return setupStatus("✗ Reserved, pick another", "taken");
     setupStatus("Checking…", "dim");
     setupCheck = setTimeout(async () => {
       const { data } = await sb.from("profiles").select("username").eq("username", v).maybeSingle();
@@ -784,24 +1014,27 @@
     const v = $("gs-setup-uname").value.trim().toLowerCase();
     if (!/^[a-z0-9_]{3,20}$/.test(v))
       return setupStatus("Username: 3–20 chars, a–z, 0–9 or _", "taken");
+    if (RESERVED_USERNAMES.has(v)) return setupStatus("That username is reserved, pick another.", "taken");
     $("gs-setup-save").disabled = true;
     try {
       const { data: taken } = await sb
         .from("profiles").select("username").eq("username", v).maybeSingle();
       if (taken) return setupStatus("✗ Taken, try another", "taken");
       // create-or-update this user's profile row with the chosen username
-      const avatar = oauthAvatar(user);
+      // No avatar_url here: claiming a username must not quietly publish the
+      // photo attached to the Google account used to sign in. See the
+      // "Use my Google photo" toggle in the editor.
       const { error } = await sb.from("profiles").upsert({
         id: user.id,
         username: v,
         display_name: profile.name || "",
-        avatar_url: avatar || null,
+        avatar_url: null,
         games: gamesForDb(),
         updated_at: new Date().toISOString(),
       });
       if (error) return setupStatus(error.message, "taken");
       username = v;
-      profile.avatar = avatar || "";
+      profile.avatar = "";
       setupStatus("");
       $("gs-setup-uname").value = "";
       updateNav();
@@ -821,10 +1054,13 @@
       .maybeSingle();
     if (data) {
       username = data.username;
-      // Keep the stored avatar in sync with the current Google picture.
+      // Your real photo is NOT adopted automatically. Signing in with Google is
+      // a choice about authentication, not a decision to publish your face on a
+      // public, scrapeable page — so a photo appears only if you switch it on
+      // (usePhoto below), and we keep it fresh only once you have.
+      let avatar = safeAvatarUrl(data.avatar_url || "");
       const ga = oauthAvatar(user);
-      let avatar = data.avatar_url || "";
-      if (ga && ga !== avatar) {
+      if (avatar && ga && ga !== avatar) {
         avatar = ga;
         sb.from("profiles").update({ avatar_url: ga }).eq("id", user.id); // fire-and-forget
       }
@@ -844,7 +1080,7 @@
         name: m.full_name || m.name || profile.name || "",
         games: [],
         featured: [],
-        avatar: oauthAvatar(user),
+        avatar: "", // no photo by default — opt in from the editor
       };
       $("gs-name").value = profile.name;
     }
@@ -876,6 +1112,7 @@
     await loadOwnProfile();
     authMsg("");
     updateNav();
+    syncPhotoUi();
     if (!username) suggestUsername(); // pre-fill a friendly username to claim
     if (mode === "home") {
       renderView();
@@ -897,6 +1134,7 @@
     profile = { name: "", games: [], featured: [], avatar: "" };
     $("gs-name").value = "";
     updateNav();
+    syncPhotoUi();
     if (mode === "home") renderView();
   }
 
@@ -920,14 +1158,19 @@
   let PROFILE_DATA = null; // last-loaded single profile (for re-render after roster loads)
   let filterGame = "all";
   let filterQuery = "";
+  let filterRegion = "all";
+  // A near-empty grid ordered by "recently updated" reads as abandoned, so lead
+  // with the profiles people actually liked.
+  let gallerySort = "liked";
 
   function profileCardHtml(p) {
-    const games = Array.isArray(p.games) ? p.games : [];
+    const games = sanitizeGames(p.games);
     const uname = p.username || "";
     const name = p.display_name ? esc(p.display_name) : "@" + esc(uname);
     const inits = esc(initials(p.display_name || uname));
     let feat;
     if (Array.isArray(p.featured) && p.featured.length) {
+      // cover is capped at 4 by the DB, but never trust the row
       feat = p.featured.slice(0, 4).map((f) => ({ game: f.game, name: f.name, r: charRank(f.game, f.name) }));
     } else {
       const flat = [];
@@ -941,7 +1184,7 @@
         const bd = gold ? "rgba(251,191,36,.55)" : "rgba(167,139,250,.4)";
         const img = charImg(c.game, c.name);
         const fill = img
-          ? `<img src="${esc(img)}" alt="${esc(c.name)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${coverPos(c.game)}" onerror="this.style.display='none'">`
+          ? `<img src="${esc(img)}" alt="${esc(c.name)}" loading="lazy" referrerpolicy="no-referrer" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${coverPos(c.game)}" data-fb-ini="${esc(initials(c.name))}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:this.dataset.fbIni,style:'position:relative;font-family:var(--font-heading);font-weight:800;font-size:16px;color:#fff'}))">`
           : `<span style="position:relative;font-family:var(--font-heading);font-weight:800;font-size:16px;color:#fff">${esc(initials(c.name))}</span>`;
         return `<div style="position:relative;flex:1;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:linear-gradient(160deg,#2a2444,#171226);display:flex;align-items:center;justify-content:center;border:1px solid ${bd}" title="${esc(c.name)}">${fill}<span style="position:absolute;bottom:2px;right:3px;font-size:9px;color:${col}">${gold ? "5★" : "4★"}</span></div>`;
       })
@@ -959,7 +1202,7 @@
       <div style="height:74px;background:${bannerFor(uname)};position:relative"><div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(11,10,22,.65))"></div></div>
       <div style="padding:0 18px 18px;margin-top:-26px;position:relative">
         <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px">
-          ${avatarCircle(p.avatar_url, inits, avatarFor(uname), 56, 18, 2)}
+          ${avatarCircle(profileAvatarUrl(p), inits, avatarFor(uname), 56, 18, 2)}
           <div style="padding-bottom:3px;min-width:0">
             <div style="font-family:var(--font-heading);font-weight:800;font-size:16.5px;letter-spacing:-.02em">${name}</div>
             <div style="font-size:12px;color:rgba(244,242,248,.5)">@${esc(uname)} · ${games.length} game${games.length === 1 ? "" : "s"}</div>
@@ -991,8 +1234,9 @@
     const empty = $("gallery-empty");
     const q = filterQuery.trim().toLowerCase();
     const list = GALLERY.filter((p) => {
-      const games = Array.isArray(p.games) ? p.games : [];
+      const games = sanitizeGames(p.games);
       if (filterGame !== "all" && !games.some((g) => g.game === filterGame)) return false;
+      if (filterRegion !== "all" && !profileRegions(games).has(filterRegion)) return false;
       if (!q) return true;
       return (
         (p.username || "").toLowerCase().includes(q) ||
@@ -1010,7 +1254,13 @@
       return;
     }
     empty.hidden = true;
-    wrap.innerHTML = list.map(profileCardHtml).join("");
+    const ordered = list.slice().sort((a, b) =>
+      gallerySort === "liked"
+        ? (b.likes_count || 0) - (a.likes_count || 0) ||
+          String(b.updated_at || "").localeCompare(String(a.updated_at || ""))
+        : String(b.updated_at || "").localeCompare(String(a.updated_at || ""))
+    );
+    wrap.innerHTML = ordered.map(profileCardHtml).join("");
   }
 
   $("gs-tabs").addEventListener("click", (e) => {
@@ -1024,6 +1274,18 @@
     filterQuery = e.target.value;
     renderGallery();
   });
+  if ($("gs-region")) {
+    $("gs-region").addEventListener("change", (e) => {
+      filterRegion = e.target.value;
+      renderGallery();
+    });
+  }
+  if ($("gs-sort")) {
+    $("gs-sort").addEventListener("change", (e) => {
+      gallerySort = e.target.value;
+      renderGallery();
+    });
+  }
 
   async function loadGallery() {
     renderTabs();
@@ -1034,7 +1296,7 @@
     }
     const { data, error } = await sb
       .from("profiles")
-      .select("username, display_name, games, likes_count, featured, avatar_url")
+      .select("username, display_name, games, likes_count, featured, avatar_url, updated_at")
       .order("updated_at", { ascending: false })
       .limit(60);
     GALLERY = error || !data ? [] : data;
@@ -1068,10 +1330,14 @@
       `<div style="color:rgba(244,242,248,.4);font-size:13px">No characters listed.</div>`;
     const logo = gameLogo(g);
     const badge = logo
-      ? `<img src="${esc(logo)}" alt="" style="width:60px;height:60px;object-fit:contain;border-radius:16px;flex:none" onerror="this.replaceWith(Object.assign(document.createElement('div'),{textContent:'${esc(gameShort(g))}',className:'gs-gamebadge-fb'}))">`
+      ? `<img src="${esc(logo)}" alt="" style="width:60px;height:60px;object-fit:contain;border-radius:16px;flex:none" data-fb-ini="${esc(gameShort(g))}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{textContent:this.dataset.fbIni,className:'gs-gamebadge-fb'}))">`
       : `<div class="gs-gamebadge-fb">${esc(gameShort(g))}</div>`;
+    const region = uidRegion(g.game, g.uid);
+    const regionChip = region
+      ? `<span title="Server region, derived from the UID — co-op only works within a region" style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid rgba(110,231,183,.45);background:rgba(110,231,183,.12);color:#6ee7b7">${esc(REGIONS[region])}</span>`
+      : "";
     const uidPart = g.uid
-      ? `<span style="display:inline-flex;align-items:center;gap:7px">UID <b style="color:var(--color-text);font-weight:600">${esc(g.uid)}</b>` +
+      ? `<span style="display:inline-flex;align-items:center;gap:7px">UID <b style="color:var(--color-text);font-weight:600">${esc(g.uid)}</b>${regionChip}` +
         `<button type="button" data-copy="${esc(g.uid)}" title="Copy UID for friend requests" style="display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid rgba(125,92,245,.5);background:rgba(125,92,245,.14);color:#b9a8ff;cursor:pointer">⧉ Copy</button></span>`
       : "";
     const ignPart = g.ign ? `<span>${esc(g.ign)}</span>` : "";
@@ -1093,6 +1359,17 @@
     </section>`;
   }
 
+  // Open signup + public free text needs somewhere for a viewer to complain to.
+  // A GitHub issue is a low-ceremony start; swap the href if a form appears.
+  function reportLink(uname) {
+    const url =
+      "https://github.com/ShabanMughal/OtakuList/issues/new?labels=report&title=" +
+      enc(`Report: showcase @${uname}`) +
+      "&body=" +
+      enc(`Profile: ${publicUrl(uname)}\n\nWhat's wrong with it:\n`);
+    return `<a href="${esc(url)}" target="_blank" rel="noopener nofollow" style="font-size:12px;color:rgba(244,242,248,.45);text-decoration:none">⚑ Report this profile</a>`;
+  }
+
   function likeBtn(pid, liked, count) {
     return `<button type="button" data-like="${esc(pid)}" data-liked="${liked ? 1 : 0}" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-heading);font-weight:800;font-size:14px;padding:11px 20px;border-radius:999px;cursor:pointer;transition:transform .12s;border:1px solid ${liked ? "rgba(217,100,127,.7)" : "var(--color-divider)"};background:${liked ? "rgba(217,100,127,.18)" : "transparent"};color:${liked ? "#ff9db0" : "var(--color-text)"}"><span style="font-size:15px">${liked ? "❤" : "🤍"}</span><span data-likecount>${count || 0}</span></button>`;
   }
@@ -1102,7 +1379,7 @@
   function profileViewHtml(p) {
     const uname = p.username || "";
     const name = p.display_name || "@" + uname;
-    const games = Array.isArray(p.games) ? p.games : [];
+    const games = sanitizeGames(p.games);
     const inits = esc(initials(p.display_name || uname));
     const editBtn = `<button type="button" data-editprofile="1" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-heading);font-weight:800;font-size:14px;padding:11px 20px;border-radius:999px;cursor:pointer;border:none;background:#7d5cf5;color:#fff">✎ Edit showcase</button>`;
     const likeControl = p.__own ? `${likePill(p.likes_count)}${editBtn}` : likeBtn(p.id, p.__liked, p.likes_count);
@@ -1122,7 +1399,7 @@
       </div>
       <div style="max-width:1320px;margin:0 auto;padding:0 28px 34px">
         <div style="position:relative;z-index:1;display:flex;gap:22px;align-items:flex-end;margin-top:-58px;flex-wrap:wrap">
-          ${avatarCircle(p.avatar_url, inits, avatarFor(uname), 118, 38, 3)}
+          ${avatarCircle(profileAvatarUrl(p), inits, avatarFor(uname), 118, 38, 3)}
           <div style="flex:1;min-width:260px;padding-bottom:6px">
             <h1 style="font-family:var(--font-heading);font-weight:800;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.035em;margin:0 0 8px">${esc(name)}</h1>
             <p style="margin:0;font-size:15px;color:rgba(244,242,248,.62);max-width:60ch">${bio ? esc(bio) : "@" + esc(uname)}</p>
@@ -1131,6 +1408,9 @@
         </div>
         <div style="display:flex;gap:34px;margin-top:26px;padding-top:20px;border-top:1px solid rgba(255,255,255,.075);flex-wrap:wrap">
           ${stat(games.length, "Games")}${stat(fiveCount, "5★ owned")}${stat(charCount, "Characters")}${stat("@" + uname, "Handle")}
+          <div style="margin-left:auto;align-self:flex-end;display:flex;gap:14px;align-items:center">
+            ${p.__own ? `<button type="button" data-deleteprofile="1" style="font:inherit;font-size:12px;background:none;border:none;color:rgba(255,157,176,.75);cursor:pointer;padding:0">Delete my showcase</button>` : reportLink(uname)}
+          </div>
         </div>
       </div>
     </section>

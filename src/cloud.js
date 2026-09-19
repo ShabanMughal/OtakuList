@@ -218,6 +218,16 @@ async function rest(path, init, session) {
 
 const isListShape = (v) => !!v && typeof v === "object" && !Array.isArray(v);
 
+// A delete is stored as a tombstone — { id, deleted:true, updatedAt } — rather
+// than removing the key, because a union merge cannot represent absence: the
+// device that hadn't synced yet would merge its surviving copy back in and
+// resurrect the entry everywhere. A tombstone is just another entry, so the
+// existing last-write-wins rule makes the delete stick.
+export const isTombstone = (item) => !!item && typeof item === "object" && item.deleted === true;
+// Anything we should keep: a real entry (needs a title) or a tombstone.
+const isKeepable = (item) =>
+  !!item && typeof item === "object" && (isTombstone(item) || !!item.title);
+
 async function pull(session) {
   const res = await rest(
     `${TABLE}?select=list&user_id=eq.${encodeURIComponent(session.user.id)}`,
@@ -227,10 +237,10 @@ async function pull(session) {
   const rows = await res.json();
   const list = Array.isArray(rows) ? rows[0]?.list : null;
   if (!isListShape(list)) return {};
-  // Never let a malformed row poison the local list.
-  return Object.fromEntries(
-    Object.entries(list).filter(([, item]) => item && typeof item === "object" && item.title)
-  );
+  // Never let a malformed row poison the local list. Tombstones carry no title,
+  // so they have to be allowed through explicitly or a delete would be dropped
+  // here and the entry would come back on the next merge.
+  return Object.fromEntries(Object.entries(list).filter(([, item]) => isKeepable(item)));
 }
 
 // Skip a push that would write exactly what we last wrote (the storage listener
@@ -259,11 +269,26 @@ async function push(session, list) {
 export function mergeLists(local, remote) {
   const merged = { ...remote };
   for (const [key, item] of Object.entries(local)) {
-    if (!item || typeof item !== "object" || !item.title) continue;
+    if (!isKeepable(item)) continue;
     const rival = merged[key];
     if (!rival || (item.updatedAt || 0) >= (rival.updatedAt || 0)) merged[key] = item;
   }
   return merged;
+}
+
+// Tombstones only need to outlive the slowest device's sync. Drop them after
+// 90 days so the row can't grow forever.
+export const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
+export function sweepTombstones(list, now = Date.now()) {
+  let changed = false;
+  for (const [key, item] of Object.entries(list)) {
+    if (isTombstone(item) && now - (item.updatedAt || 0) > TOMBSTONE_TTL_MS) {
+      delete list[key];
+      changed = true;
+    }
+  }
+  return changed;
 }
 
 // ---------- sync ----------
@@ -299,6 +324,10 @@ async function runSync(mode) {
     let next = local;
     if (mode === "merge") {
       next = mergeLists(local, await pull(session));
+      // Expire old tombstones here as well as locally: a merge re-adds whatever
+      // the cloud still holds, so sweeping only on this device would never
+      // actually clear them.
+      sweepTombstones(next);
       if (signature(next) !== signature(local)) {
         await chrome.storage.local.set({ [LIST_KEY]: next });
       }

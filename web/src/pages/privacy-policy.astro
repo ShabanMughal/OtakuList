@@ -20,8 +20,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
       <section>
         <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">Summary</h2>
         <p class="text-[15px] leading-7 text-[#f4f2f8]/70">
-          OtakuList is designed to keep your anime watchlist local to your browser. We do not require an account,
-          we do not sell your data, and we do not run a user database for your list.
+          OtakuList is designed to keep your anime watchlist local to your browser. We do not require an account and we
+          do not sell your data. Cloud sync is entirely optional: while you are logged out, nothing about your list ever
+          leaves your device. If you do create an account, your list is stored in a single private record that only your
+          own login can read.
         </p>
       </section>
 
@@ -32,19 +34,33 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
           counts, status (Watching, Completed, etc.), and related list information you choose to save.
         </p>
         <p class="mt-3 text-[15px] leading-7 text-[#f4f2f8]/70">
-            By default, this data is kept on your device. If you choose to log in — either on the Anime List page or from
-            the extension popup — your list is stored in a private Supabase record that only your authenticated account
-            can access. Logging out stops the syncing and leaves your list on your device.
+            Each saved entry also records the address of the page you last watched that anime on, which is what the
+            <b>Resume</b> button opens. That address includes the site's domain.
+        </p>
+        <p class="mt-3 text-[15px] leading-7 text-[#f4f2f8]/70">
+            By default all of this is kept on your device. If you choose to log in — either on the Anime List page or from
+            the extension popup — the same entries, <em>including those page addresses</em>, are mirrored to a private
+            Supabase record that only your authenticated account can access. If you would prefer that information never
+            leave your machine, simply do not log in; every other feature behaves identically. Logging out stops the
+            syncing and leaves your list on your device.
+        </p>
+        <p class="mt-3 text-[15px] leading-7 text-[#f4f2f8]/70">
+            Creating an account also means we hold the email address you signed up with (or the one your Google account
+            provides), because that is what identifies the account. The optional Gacha Profiles feature stores whatever
+            you put on your profile — and that profile is <b>public by design</b>.
         </p>
       </section>
 
       <section>
         <h2 class="mb-3 text-2xl font-bold tracking-[-0.03em]">What we do not collect</h2>
         <ul class="list-disc space-y-2 pl-6 text-[15px] leading-7 text-[#f4f2f8]/70">
-          <li>We do not require user accounts.</li>
-          <li>We do not store your personal identity or profile data.</li>
+          <li>We do not require user accounts — the extension and the web list work fully without one.</li>
+          <li>We do not track your browsing. The extension inspects a page to detect the anime on it; it never records
+            a history of the pages you visit.</li>
           <li>We do not sell, rent, or trade your list information.</li>
-          <li>We do not build a separate database of your watchlist.</li>
+          <li>We do not run any analytics, telemetry or advertising on the site or in the extension.</li>
+          <li>We do not read your list. Row-level security means a synced list is readable only by the account that
+            wrote it.</li>
         </ul>
       </section>
 

@@ -477,6 +477,14 @@ button.ghost {
   color: var(--accent-2);
 }
 
+/* absolute episode number, when a site counts across the whole series */
+.prog .epnum .abs {
+  display: block;
+  font-size: 10px;
+  opacity: 0.55;
+  letter-spacing: 0.02em;
+}
+
 /* rating */
 .rating {
   display: flex;
