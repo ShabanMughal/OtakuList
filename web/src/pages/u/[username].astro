@@ -1,0 +1,67 @@
+---
+// One real HTML file per public profile.
+//
+// Why this exists: a showcase link is meant to be pasted into Discord, and a
+// crawler builds its embed from the bytes it is served — it never runs the
+// page's JavaScript. On GitHub Pages every `showcase.html?u=name` is the same
+// file, so every profile unfurled as the same generic OtakuList card. Giving
+// each profile its own file is what makes the tags, and the content, correct
+// before any script runs.
+//
+// With `build: { format: 'file' }` and `base: '/OtakuList'` in astro.config.mjs
+// this route emits `dist/u/<name>.html`, served at
+// `https://shabanmughal.github.io/OtakuList/u/<name>.html`.
+//
+// functions/[[path]].js solves the same problem at the edge and stays as the
+// upgrade path for a custom domain on Cloudflare; both import their preview
+// strings from src/lib/showcase-meta.mjs so a profile cannot unfurl two ways.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShowcaseApp from '../../components/ShowcaseApp.astro';
+import ShowcaseScripts from '../../components/ShowcaseScripts.astro';
+import { fetchProfiles, loadRoster } from '../../lib/profiles.mjs';
+import { buildMeta } from '../../lib/showcase-meta.mjs';
+
+export async function getStaticPaths() {
+  // fetchProfiles() never throws and never rejects: on a missing key, an
+  // outage or a malformed body it warns and hands back []. A Supabase problem
+  // must not be able to stop the landing page and the anime list deploying.
+  const profiles = await fetchProfiles();
+  return profiles.map((profile) => ({ params: { username: profile.username }, props: { profile } }));
+}
+
+const { profile } = Astro.props;
+const roster = loadRoster();
+
+const site = 'https://shabanmughal.github.io';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const pageUrl = `${site}${base}u/${profile.username}.html`;
+const meta = buildMeta(profile, roster, pageUrl, `${site}${base}assets/og-image.png`);
+
+// P1.6, maintainer's call: noindex unless the owner opted in. A robots
+// directive is a search directive only — Discord and Twitter unfurl either way.
+const robots = profile.searchable ? 'index, follow' : 'noindex, follow';
+---
+
+<BaseLayout
+  title={meta.title}
+  description={meta.description}
+  canonical={pageUrl}
+  ogTitle={meta.title}
+  ogDescription={meta.description}
+  ogImage={meta.image}
+  robots={robots}
+  page="showcase"
+  chrome={false}
+>
+  <link
+    slot="head"
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <ShowcaseApp profile={profile} roster={roster} />
+
+  <Fragment slot="scripts">
+    <ShowcaseScripts profileUser={profile.username} />
+  </Fragment>
+</BaseLayout>

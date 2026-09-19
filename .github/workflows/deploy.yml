@@ -7,6 +7,25 @@ on:
       - 'web/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
+
+  # The per-profile pages under u/ are generated at build time from Supabase, so
+  # a profile created or edited since the last deploy has no page (or a stale
+  # one) until the next build. Two triggers close that window:
+  #
+  #   schedule            — a floor. Nothing is ever more than an hour stale.
+  #   repository_dispatch — the fast path. A Supabase database webhook on
+  #                         insert/update of `profiles` POSTs to
+  #                         /repos/:owner/:repo/dispatches with
+  #                         {"event_type":"profiles-changed"} and the build
+  #                         starts within seconds. See web/DEPLOYING.md.
+  #
+  # The hourly run is what makes the webhook optional rather than load-bearing:
+  # if it is never set up, or breaks, profile pages still refresh on their own.
+  schedule:
+    - cron: '17 * * * *' # hourly, off the hour to dodge the scheduling rush
+  repository_dispatch:
+    types: [profiles-changed]
+
   # Called by refresh-characters.yml, which pushes with GITHUB_TOKEN and so
   # cannot trigger this workflow through the `push` event above.
   workflow_call:

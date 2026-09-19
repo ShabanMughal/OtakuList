@@ -1,0 +1,25 @@
+---
+// Bootstraps web/public/js/showcase.js. Shared by showcase.html and the
+// generated per-profile pages so the two never fall out of step.
+//
+// `profileUser` is set only on a per-profile page: showcase.js reads it when
+// there is no ?u= in the query string, which is how u/<name>.html shows a
+// profile without changing the old link format.
+const { profileUser = '' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+---
+
+<script is:inline src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script is:inline define:vars={{ SUPABASE_URL, SUPABASE_ANON_KEY, base, profileUser }}>
+  window.sb =
+    window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+  // The site root ("/OtakuList/"). Profile pages live one directory deeper than
+  // showcase.html, so the script cannot derive it from location.pathname.
+  window.GS_BASE = base;
+  window.GS_PROFILE_USER = profileUser || null;
+</script>
+<script is:inline src={`${base}js/showcase.js`}></script>

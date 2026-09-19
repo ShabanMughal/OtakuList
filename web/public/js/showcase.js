@@ -255,7 +255,27 @@
   const sanitizeGames = (arr) => (Array.isArray(arr) ? arr.filter(isKnownGame) : []);
   const withIds = (arr) => sanitizeGames(arr).map((x) => ({ ...x, id: seq++ }));
   const gamesForDb = () => profile.games.map(({ id, ...rest }) => rest);
-  const publicUrl = (name) => `${location.origin + location.pathname}?u=${enc(name)}`;
+  // Where a link to a profile points. Per-profile pages (u/<name>.html) are
+  // real files with their own og: tags, generated at build time by
+  // src/pages/u/[username].astro — so a link pasted into Discord unfurls as
+  // that profile rather than as the generic site card.
+  //
+  // showcase.html?u=name keeps working and is still rendered client-side by
+  // loadProfile() below: those links were shared before these pages existed.
+  // Only newly produced links use the new shape.
+  //
+  // GS_BASE is the site root ("/OtakuList/"), injected by the page. A profile
+  // page sits one directory deeper than showcase.html, so neither URL can be
+  // derived from location.pathname.
+  // Set on a generated per-profile page, null on showcase.html. Also the signal
+  // that this page already carries real, server-rendered profile content.
+  const BAKED_USER =
+    typeof window.GS_PROFILE_USER === "string" && window.GS_PROFILE_USER ? window.GS_PROFILE_USER : null;
+  const SITE_BASE =
+    (typeof window.GS_BASE === "string" && window.GS_BASE) || location.pathname.replace(/[^/]*$/, "");
+  const publicUrl = (name) => location.origin + SITE_BASE + "u/" + enc(name) + ".html";
+  // The gallery — and the page auth redirects come back to.
+  const homeUrl = () => location.origin + SITE_BASE + "showcase.html";
 
   // ═══════════════════════════ card rendering ═══════════════════════════
   function monoChip(g) {
@@ -471,11 +491,11 @@
   });
   $("view-profile").addEventListener("click", async (e) => {
     if (e.target.closest("[data-back]")) {
-      location.href = location.pathname;
+      location.href = homeUrl();
       return;
     }
     if (e.target.closest("[data-editprofile]")) {
-      location.href = location.pathname + "#edit";
+      location.href = homeUrl() + "#edit";
       return;
     }
     if (e.target.closest("[data-deleteprofile]")) {
@@ -487,7 +507,7 @@
         const del = await sb.from("profiles").delete().eq("id", user.id);
         if (del.error) return alert("Couldn't delete the showcase: " + del.error.message);
       }
-      location.href = location.pathname;
+      location.href = homeUrl();
       return;
     }
     const likeEl = e.target.closest("[data-like]");
@@ -836,6 +856,75 @@
   }
   if ($("gs-photo-keep")) $("gs-photo-keep").addEventListener("click", dismissPhotoNotice);
 
+  // ═══════════════════════════ search indexing (opt-in) ═══════════════════════════
+  // A generated profile page ships <meta name="robots" content="noindex">
+  // unless its owner turned this on. Indexing is a much stronger form of public
+  // than "anyone with the link can look": a UID and an in-game name become
+  // searchable and stay cached long after the profile is edited or deleted. So
+  // it is a deliberate choice, not the default.
+  //
+  // Unfurling in Discord and Twitter does not go through robots directives, so
+  // link previews work either way — this switch only speaks to search engines.
+  //
+  // The flag is read at build time (web/src/lib/profiles.mjs), so flipping it
+  // takes effect on the next site build, not immediately.
+  let searchSupported = false;
+
+  function searchStatus(text) {
+    const el = $("gs-search-status");
+    if (!el) return;
+    el.hidden = !text;
+    el.textContent = text || "";
+  }
+
+  // `searchable` arrived after the rest of the row (migration 20260919000000).
+  // Read it on its own so a project that hasn't applied that migration yet gets
+  // a working editor with the toggle hidden, rather than a 400 that takes the
+  // whole profile select down with it.
+  async function loadSearchable() {
+    searchSupported = false;
+    profile.searchable = false;
+    if (!(CLOUD && user)) return;
+    const { data, error } = await sb
+      .from("profiles")
+      .select("searchable")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (error) return;
+    searchSupported = true;
+    profile.searchable = !!(data && data.searchable);
+  }
+
+  function syncSearchUi() {
+    const wrap = $("gs-search-opt");
+    if (!wrap) return;
+    wrap.hidden = !(searchSupported && username);
+    const box = $("gs-searchable");
+    if (box) box.checked = !!profile.searchable;
+    searchStatus("");
+  }
+
+  async function setSearchable(on) {
+    if (!(CLOUD && user && username && searchSupported)) return;
+    searchStatus("Saving…");
+    const { error } = await sb.from("profiles").update({ searchable: on }).eq("id", user.id);
+    if (error) {
+      searchStatus("Couldn't save, try again.");
+      $("gs-searchable").checked = !on;
+      return;
+    }
+    profile.searchable = on;
+    searchStatus(
+      on
+        ? "Search engines may list your showcase from the next site build ✓"
+        : "Hidden from search from the next site build ✓"
+    );
+  }
+
+  if ($("gs-searchable")) {
+    $("gs-searchable").addEventListener("change", (e) => setSearchable(e.target.checked));
+  }
+
   // ═══════════════════════════ messages ═══════════════════════════
   function authMsg(text, ok) {
     const el = $("auth-msg");
@@ -892,7 +981,7 @@
     const email = $("am-email").value.trim();
     if (!email) return authErr("Enter your email above, then click Forgot password.");
     const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: location.origin + location.pathname,
+      redirectTo: homeUrl(),
     });
     authErr(error ? error.message : "✉️ Password reset link sent, check your email.", !error);
   });
@@ -952,7 +1041,7 @@
         const { data, error } = await sb.auth.signUp({
           email,
           password: pass,
-          options: { data: { username: uname }, emailRedirectTo: location.origin + location.pathname },
+          options: { data: { username: uname }, emailRedirectTo: homeUrl() },
         });
         if (error) return authErr(error.message);
         if (data.session) {
@@ -974,7 +1063,7 @@
     authErr("");
     const { error } = await sb.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: location.origin + location.pathname },
+      options: { redirectTo: homeUrl() },
     });
     if (error) authErr(error.message);
   });
@@ -1037,8 +1126,11 @@
       profile.avatar = "";
       setupStatus("");
       $("gs-setup-uname").value = "";
+      // The row exists now, so the search-indexing toggle can be offered.
+      await loadSearchable();
       updateNav();
       renderView();
+      syncSearchUi();
       authMsg("Username set ✓, build your showcase below.", true);
     } finally {
       $("gs-setup-save").disabled = false;
@@ -1110,9 +1202,12 @@
   async function onSignedIn(u) {
     user = u;
     await loadOwnProfile();
+    // after loadOwnProfile, which replaces `profile` wholesale
+    await loadSearchable();
     authMsg("");
     updateNav();
     syncPhotoUi();
+    syncSearchUi();
     if (!username) suggestUsername(); // pre-fill a friendly username to claim
     if (mode === "home") {
       renderView();
@@ -1131,10 +1226,12 @@
     user = null;
     username = null;
     editorOpen = false;
-    profile = { name: "", games: [], featured: [], avatar: "" };
+    profile = { name: "", games: [], featured: [], avatar: "", searchable: false };
+    searchSupported = false;
     $("gs-name").value = "";
     updateNav();
     syncPhotoUi();
+    syncSearchUi();
     if (mode === "home") renderView();
   }
 
@@ -1421,7 +1518,7 @@
     `<div style="max-width:1320px;margin:0 auto;padding:80px 28px;text-align:center">
       <h1 style="font-family:var(--font-heading);font-weight:800;font-size:26px;margin:0 0 10px">Showcase not found</h1>
       <p style="color:rgba(244,242,248,.55);margin:0 0 20px">${msg}</p>
-      <a href="${location.pathname}" style="color:#b9a8ff;font-weight:600">← All profiles</a></div>`;
+      <a href="${homeUrl()}" style="color:#b9a8ff;font-weight:600">← All profiles</a></div>`;
 
   // resolve the current viewer's liked-state, then render the profile
   async function renderProfileView() {
@@ -1442,24 +1539,37 @@
     host.innerHTML = profileViewHtml(d);
   }
 
+  // A generated page's content is baked in at build time, so it can be stale:
+  // the profile may have been edited, or deleted outright, since the last
+  // deploy. The live row is therefore always fetched, and always wins.
   async function loadProfile(u) {
     mode = "profile";
     renderView();
     const host = $("view-profile");
-    if (!CLOUD) return (host.innerHTML = notFoundHtml("Cloud accounts aren't configured yet."));
+    // Only replace baked-in content once we know something better. "We could
+    // not ask" is not the same as "there is no such profile".
+    const keepBaked = (msg) => {
+      if (!BAKED_USER) host.innerHTML = notFoundHtml(msg);
+    };
+    if (!CLOUD) return keepBaked("Cloud accounts aren't configured yet.");
     const { data, error } = await sb
       .from("profiles")
-      .select("id, username, display_name, games, likes_count, avatar_url")
+      .select("id, username, display_name, games, featured, likes_count, avatar_url")
       .eq("username", u)
       .maybeSingle();
-    if (error || !data) return (host.innerHTML = notFoundHtml(`No showcase found for “${esc(u)}”.`));
+    if (error) return keepBaked("Couldn't load this showcase, try again.");
+    // No row: deleted since this page was built (or never existed). Show the
+    // empty state rather than leaving the stale copy up.
+    if (!data) return (host.innerHTML = notFoundHtml(`No showcase found for “${esc(u)}”.`));
     PROFILE_DATA = data;
     renderProfileView();
   }
 
   // ═══════════════════════════ init ═══════════════════════════
   const params = new URLSearchParams(location.search);
-  const viewUser = params.get("u");
+  // Either ?u=name on showcase.html (the original, still-shared link shape) or
+  // the profile a generated u/<name>.html page was built for.
+  const viewUser = params.get("u") || BAKED_USER;
   wantEdit = location.hash === "#edit";
 
   // characters render with initials first, then swap to portraits once loaded

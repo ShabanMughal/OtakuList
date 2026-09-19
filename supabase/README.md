@@ -44,7 +44,7 @@ link before the list starts syncing.
 
 ## Hardening migrations
 
-Three later migrations tighten what may be *written*, as opposed to who may write it. RLS answers
+Three migrations tighten what may be *written*, as opposed to who may write it. RLS answers
 "whose row is this?" and nothing else — a row's owner can still put anything they like in it, and
 `profiles` is world-readable, so its contents reach every visitor.
 
@@ -53,6 +53,15 @@ Three later migrations tighten what may be *written*, as opposed to who may writ
 | `20260910000000_avatar_url_allowlist.sql` | `avatar_url` must be an `https` URL on Google's picture CDN or this project's Supabase public storage. An arbitrary URL there would let any profile owner log the IP and user-agent of everyone browsing the gallery. Existing out-of-policy values are nulled (those users fall back to initials), and `handle_new_user()` now drops a disallowed picture instead of failing the whole signup. |
 | `20260910000001_profile_payload_limits.sql` | Shape and size bounds on `games` / `featured`: known game keys only, per-field length caps, ≤ 4 cover characters, and a 16 KB ceiling — so one account cannot park a blob that every gallery visitor then downloads. Note `games` is an **array**; only `anime_lists.list` is object-shaped. |
 | `20260910000002_reserved_usernames.sql` | Blocks `admin`, `support`, `otakulist`, … from being claimed, and adds `gs_delete_my_profile()` so a user can delete their own showcase from the app. |
+
+A fourth is not hardening but privacy:
+
+| Migration | What it does |
+| :--- | :--- |
+| `20260919000000_profile_searchable.sql` | Adds `searchable boolean not null default false`. Each public profile now has its own static page (`u/<username>.html`) so links unfurl properly in Discord — and a real page is one Google can index. Profiles carry UIDs and IGNs, so indexing is opt-in from the editor; without it the page is `noindex` and stays out of `sitemap.xml`. Link previews ignore robots directives, so they work either way. Writes are covered by the existing `profiles_update_own` policy. |
+
+Until that one is applied the site still builds: `web/src/lib/profiles.mjs` notices
+the missing column, logs it, and treats every profile as not-opted-in.
 
 The client enforces the same rules in `web/public/js/showcase.js` (`safeAvatarUrl`, the field caps,
 `RESERVED_USERNAMES`). That is for error messages and for rows written before these migrations — the

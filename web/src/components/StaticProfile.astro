@@ -1,0 +1,181 @@
+---
+// The profile view, rendered at build time into the served HTML.
+//
+// web/public/js/showcase.js renders the same view client-side and replaces this
+// markup as soon as it has fetched the live row — so this copy exists for the
+// two readers that never run that script: a crawler building a link preview,
+// and a search engine deciding what the page is about.
+//
+// Everything below interpolates with {expression}, which Astro escapes.
+// `display_name`, `note`, `customName`, `ign` and `uid` are user-controlled —
+// do not reach for set:html here.
+import {
+  avatarFor,
+  bannerFor,
+  charImg,
+  charRank,
+  coverPos,
+  gameName,
+  gameRankLabel,
+  gameShort,
+  initials,
+  LOGO_GAMES,
+  profileAvatarUrl,
+  REGIONS,
+  sanitizeGames,
+  splitChars,
+  uidRegion,
+} from '../lib/showcase-meta.mjs';
+
+const { profile, roster = {}, base } = Astro.props;
+
+const uname = profile.username || '';
+const name = profile.display_name || '@' + uname;
+const inits = initials(profile.display_name || uname);
+const games = sanitizeGames(profile.games);
+const avatar = profileAvatarUrl(profile, roster);
+const bannerBg = bannerFor(uname);
+const avatarBg = avatarFor(uname);
+
+const charCount = games.reduce((n, g) => n + splitChars(g.chars).length, 0);
+const fiveCount = games.reduce(
+  (n, g) => n + splitChars(g.chars).filter((cn) => charRank(roster, g.game, cn) >= 5).length,
+  0
+);
+const bio = games.map((g) => g.note).filter(Boolean)[0] || '';
+const likes = profile.likes_count || 0;
+
+const stats = [
+  [String(games.length), 'Games'],
+  [String(fiveCount), '5★ owned'],
+  [String(charCount), 'Characters'],
+  ['@' + uname, 'Handle'],
+];
+
+const showcaseUrl = base + 'showcase.html';
+const reportUrl =
+  'https://github.com/ShabanMughal/OtakuList/issues/new?labels=report&title=' +
+  encodeURIComponent('Report: showcase @' + uname) +
+  '&body=' +
+  encodeURIComponent('Profile: ' + base + 'u/' + uname + '.html\n\nWhat’s wrong with it:\n');
+
+// Per-game view model, so the template stays readable.
+const sections = games.map((g) => {
+  const region = uidRegion(g.game, g.uid);
+  return {
+    key: g.game,
+    label: gameName(g),
+    short: gameShort(g),
+    rankLabel: gameRankLabel(g),
+    rank: g.rank || '',
+    ign: g.ign || '',
+    uid: g.uid || '',
+    region: region ? REGIONS[region] : '',
+    logo: LOGO_GAMES[g.game] ? base + 'assets/games/' + g.game + '.png' : '',
+    chars: splitChars(g.chars).map((cn) => ({
+      name: cn,
+      img: charImg(roster, g.game, cn),
+      gold: charRank(roster, g.game, cn) >= 5,
+      pos: coverPos(g.game),
+    })),
+  };
+});
+---
+
+<section style="position:relative;border-bottom:1px solid rgba(255,255,255,.075)">
+  <div style={`height:230px;background:${bannerBg};position:relative`}>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,10,22,.25),rgba(11,10,22,.95))"></div>
+    <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:60px 60px"></div>
+    <div style="position:relative;max-width:1320px;margin:0 auto;padding:20px 28px">
+      <a href={showcaseUrl} style="display:inline-block;font-family:var(--font-heading);font-size:13px;font-weight:700;background:rgba(11,10,22,.6);border:1px solid rgba(255,255,255,.12);border-radius:999px;color:var(--color-text);padding:9px 16px;text-decoration:none;backdrop-filter:blur(8px)">← All profiles</a>
+    </div>
+  </div>
+
+  <div style="max-width:1320px;margin:0 auto;padding:0 28px 34px">
+    <div style="position:relative;z-index:1;display:flex;gap:22px;align-items:flex-end;margin-top:-58px;flex-wrap:wrap">
+      {avatar ? (
+        <img
+          src={avatar}
+          alt={inits}
+          referrerpolicy="no-referrer"
+          style={`width:118px;height:118px;flex:none;border-radius:50%;border:3px solid rgba(11,10,22,.9);object-fit:cover;background:${avatarBg}`}
+        />
+      ) : (
+        <div style={`width:118px;height:118px;flex:none;border-radius:50%;border:3px solid rgba(11,10,22,.9);background:${avatarBg};display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:38px;color:#fff`}>{inits}</div>
+      )}
+      <div style="flex:1;min-width:260px;padding-bottom:6px">
+        <h1 style="font-family:var(--font-heading);font-weight:800;font-size:clamp(28px,3.4vw,40px);letter-spacing:-.035em;margin:0 0 8px">{name}</h1>
+        <p style="margin:0;font-size:15px;color:rgba(244,242,248,.62);max-width:60ch">{bio || '@' + uname}</p>
+      </div>
+      <div style="display:flex;gap:10px;padding-bottom:8px">
+        <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-heading);font-weight:800;font-size:14px;padding:11px 20px;border-radius:999px;border:1px solid var(--color-divider);color:rgba(244,242,248,.7)"><span style="font-size:15px">❤</span>{likes} {likes === 1 ? 'like' : 'likes'}</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:34px;margin-top:26px;padding-top:20px;border-top:1px solid rgba(255,255,255,.075);flex-wrap:wrap">
+      {stats.map(([value, label]) => (
+        <div>
+          <div style="font-family:var(--font-heading);font-weight:800;font-size:24px">{value}</div>
+          <div style="font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:rgba(244,242,248,.5)">{label}</div>
+        </div>
+      ))}
+      <div style="margin-left:auto;align-self:flex-end;display:flex;gap:14px;align-items:center">
+        <a href={reportUrl} target="_blank" rel="noopener nofollow" style="font-size:12px;color:rgba(244,242,248,.45);text-decoration:none">⚑ Report this profile</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div style="max-width:1320px;margin:0 auto;padding:10px 28px 80px">
+  {sections.length === 0 && (
+    <div style="padding:60px 0;text-align:center;color:rgba(244,242,248,.5)">This showcase is empty.</div>
+  )}
+  {sections.map((s) => (
+    <section style="padding:44px 0;border-bottom:1px solid rgba(255,255,255,.075)">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:26px">
+        {s.logo ? (
+          <img src={s.logo} alt="" style="width:60px;height:60px;object-fit:contain;border-radius:16px;flex:none" />
+        ) : (
+          <div class="gs-gamebadge-fb">{s.short}</div>
+        )}
+        <div>
+          <h2 style="font-family:var(--font-heading);font-weight:800;font-size:25px;letter-spacing:-.025em;margin:0">{s.label}</h2>
+          {(s.uid || s.ign) && (
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12.5px;color:rgba(244,242,248,.55);margin-top:6px">
+              {s.uid && (
+                <span style="display:inline-flex;align-items:center;gap:7px">UID <b style="color:var(--color-text);font-weight:600">{s.uid}</b>
+                  {s.region && (
+                    <span title="Server region, derived from the UID — co-op only works within a region" style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid rgba(110,231,183,.45);background:rgba(110,231,183,.12);color:#6ee7b7">{s.region}</span>
+                  )}
+                </span>
+              )}
+              {s.ign && <span>{s.ign}</span>}
+            </div>
+          )}
+        </div>
+        {s.rank && (
+          <div style="margin-left:auto"><span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px 13px;border-radius:999px;border:1px solid rgba(125,92,245,.5);background:rgba(125,92,245,.14);color:#b9a8ff">{s.rank}</span></div>
+        )}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px">
+        {s.chars.length === 0 && (
+          <div style="color:rgba(244,242,248,.4);font-size:13px">No characters listed.</div>
+        )}
+        {s.chars.map((c) => (
+          <div style={`background:rgba(255,255,255,.045);border-radius:20px;overflow:hidden;border:1px solid ${c.gold ? 'rgba(251,191,36,.45)' : 'rgba(167,139,250,.35)'}`}>
+            <div style="position:relative;aspect-ratio:3/4;overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(160deg,#2a2444,#171226)">
+              {c.img ? (
+                <img src={c.img} alt={c.name} loading="lazy" referrerpolicy="no-referrer" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${c.pos}`} />
+              ) : (
+                <span style="position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:22px;color:rgba(244,242,248,.75)">{initials(c.name)}</span>
+              )}
+              <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(11,10,22,.9))"></div>
+              <span style={`position:absolute;top:8px;left:9px;font-size:11px;letter-spacing:1px;color:${c.gold ? '#fbbf24' : '#b9a8ff'};text-shadow:0 0 10px currentColor`}>{c.gold ? '★★★★★' : '★★★★'}</span>
+              <span style="position:relative;margin-top:auto;width:100%;font-family:var(--font-heading);font-weight:800;font-size:15px;letter-spacing:-.02em;line-height:1.15;padding:10px;color:#fff">{c.name}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  ))}
+</div>

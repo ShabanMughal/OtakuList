@@ -15,40 +15,19 @@
 // Without them the function no-ops and you get the generic card back — which is
 // exactly the current behaviour, never an error page.
 
+// The preview strings themselves live in src/lib/showcase-meta.mjs, shared with
+// the Astro route that generates one static page per profile for GitHub Pages
+// (src/pages/u/[username].astro). Both hosts must unfurl a profile identically,
+// so neither owns the format.
+import { buildMeta } from "../src/lib/showcase-meta.mjs";
+
 const SHOWCASE_PATHS = ["/OtakuList/showcase.html", "/showcase.html"];
-const MAX_DESC = 200;
 
 const esc = (s) =>
   String(s == null ? "" : s).replace(
     /[&<>"']/g,
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
   );
-
-const GAME_NAMES = {
-  genshin: "Genshin Impact",
-  hsr: "Honkai: Star Rail",
-  zzz: "Zenless Zone Zero",
-  wuwa: "Wuthering Waves",
-  pgr: "Punishing: Gray Raven",
-};
-
-const splitChars = (s) =>
-  String(s || "")
-    .split(",")
-    .map((x) => x.trim())
-    .filter(Boolean);
-
-// Only ever render an image URL from a host we control or already trust —
-// the same rule the page itself applies to avatars.
-function safeImage(url) {
-  try {
-    const u = new URL(String(url || ""));
-    if (u.protocol !== "https:") return "";
-    return u.href;
-  } catch (_) {
-    return "";
-  }
-}
 
 async function fetchProfile(env, username) {
   const base = String(env.PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
@@ -80,46 +59,6 @@ async function fetchRoster(origin, basePath) {
   } catch (_) {
     return {};
   }
-}
-
-function buildMeta(profile, roster, pageUrl, fallbackImage) {
-  const uname = profile.username || "";
-  const name = profile.display_name || `@${uname}`;
-  const games = Array.isArray(profile.games) ? profile.games : [];
-  const featured = Array.isArray(profile.featured) ? profile.featured : [];
-
-  const gameLabels = games
-    .map((g) => (g.game === "custom" ? g.customName || "Custom" : GAME_NAMES[g.game]))
-    .filter(Boolean);
-
-  const charCount = games.reduce((n, g) => n + splitChars(g.chars).length, 0);
-
-  // "Genshin Impact · Honkai: Star Rail — 42 characters · 7 likes"
-  const bits = [];
-  if (gameLabels.length) bits.push(gameLabels.join(" · "));
-  const tail = [];
-  if (charCount) tail.push(`${charCount} character${charCount === 1 ? "" : "s"}`);
-  if (profile.likes_count) tail.push(`${profile.likes_count} like${profile.likes_count === 1 ? "" : "s"}`);
-  if (tail.length) bits.push(tail.join(" · "));
-  const description = (bits.join(" — ") || "A gacha showcase on OtakuList.").slice(0, MAX_DESC);
-
-  // Preview image: the first cover character's portrait, else the site card.
-  let image = "";
-  const pick = featured[0];
-  if (pick && roster[pick.game]) {
-    const hit = roster[pick.game].find(
-      (c) => String(c.name).toLowerCase() === String(pick.name).toLowerCase()
-    );
-    if (hit) image = safeImage(hit.img);
-  }
-  if (!image) image = fallbackImage;
-
-  return {
-    title: `${name} — Gacha Showcase`,
-    description,
-    image,
-    url: pageUrl,
-  };
 }
 
 export async function onRequest(context) {
