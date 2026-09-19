@@ -109,10 +109,22 @@ Logging in is **never required** — the extension works exactly the same withou
 | What happens | When |
 | :--- | :--- |
 | **Merge** — your local list and your cloud list are combined; if the same anime is in both, the one you touched most recently wins | You log in, the browser starts, or you open the popup |
-| **Upload** — your list is saved to the server (deletions included) | ~1.5 s after any change: a save, an episode bump, an edit, a delete |
+| **Upload** — your list is saved to the server | ~1.5 s after any change: a save, an episode bump, an edit, a delete |
 | **Nothing** | Whenever you're logged out — including after **Log out**, which keeps your list on this device |
 
 If your connection drops, the popup shows *Sync paused* and picks up again on the next change or the next time you open it.
+
+### How a delete sticks
+
+Merging is a **union** of both sides, so it has no way to express "this entry is gone" — a device that hadn't synced yet would merge its surviving copy back in and resurrect the entry everywhere.
+
+So deleting doesn't remove the entry. It replaces it with a **tombstone**: `{ id, deleted: true, updatedAt }`. A tombstone is just another entry, which means the existing last-write-wins rule does all the work — when the tombstone is the newer of the two, the delete wins, and when you re-add the same anime afterwards your new entry is newer still and wins back.
+
+Every screen that shows you your list filters tombstones out, so you never see one. Exports drop them too: a backup is the list, not its sync bookkeeping.
+
+Tombstones are swept once they're older than **`TOMBSTONE_TTL_MS` — 90 days** ([`src/cloud.js`](src/cloud.js)), on the device and in the merged copy that gets pushed back, so the row can't grow forever.
+
+**The consequence, stated plainly:** a device that stays offline for longer than 90 days can resurrect an entry you deleted, because by the time it syncs the tombstone it needed to see is gone and all it has is its own surviving copy. That's the deliberate trade for not keeping deletion records forever, and 90 days is far beyond any normal gap between syncs — but it is a real edge, not a bug.
 
 > **What syncing actually uploads.** Each entry stores the address of the page you last watched that anime on — that's what the **Resume** button opens, and it includes the site's domain. So turning on sync does upload which sites you watch on, to your own private row. Given who uses this, that's worth saying plainly rather than burying: if you'd rather that never leaves your machine, stay logged out. Everything else works identically.
 
