@@ -361,7 +361,17 @@ const authForm = $("#authForm");
 const authAccount = $("#authAccount");
 const cloudBtn = $("#cloudBtn");
 let authMode = "login";
-let cloud = { configured: false, status: { state: "signed-out" } };
+
+// `configured` is null until the service worker has answered — see the note on
+// the first paint at the bottom of this file. Only the worker can tell us for
+// certain, because the answer depends on values baked into cloud-config.js,
+// which is a module this classic script cannot import.
+let cloud = { configured: null, status: { state: "signed-out" } };
+
+// Mirrors STATUS_KEY in src/cloud.js. Copied rather than imported for the same
+// reason as TOMBSTONE_TTL_MS above: cloud.js is a module owned by the service
+// worker and popup.js is a classic script.
+const STATUS_KEY = "otakuSyncStatus";
 
 const sendCloud = (msg) =>
   new Promise((resolve) =>
@@ -387,8 +397,13 @@ function renderCloud() {
   // The ☁ button stays visible even when sync isn't configured — a button that
   // silently isn't there just looks broken. The panel explains what's missing.
   cloudBtn.hidden = false;
-  $("#authSetup").hidden = configured;
-  if (!configured) {
+  // While `configured` is still unknown, assume it is. "Cloud sync isn't set
+  // up" is the rare case, and flashing it at someone who *is* signed in reads
+  // as their account having been dropped — much worse than a beat of the
+  // ordinary login form before the real answer lands.
+  const known = configured !== null;
+  $("#authSetup").hidden = !known || configured;
+  if (known && !configured) {
     authForm.hidden = true;
     authAccount.hidden = true;
     cloudBtn.classList.remove("on", "warn");
@@ -482,22 +497,50 @@ chrome.storage.onChanged.addListener((changes, area) => {
     state = changes[KEY].newValue || {};
     render();
   }
-  if (changes.otakuSyncStatus) {
-    cloud.status = changes.otakuSyncStatus.newValue || { state: "signed-out" };
+  if (changes[STATUS_KEY]) {
+    cloud.status = changes[STATUS_KEY].newValue || { state: "signed-out" };
     renderCloud();
   }
 });
 
 // init
+//
+// Nothing here may wait on the service worker. MV3 shuts that worker down when
+// it goes idle, so on most popup opens Chrome has to cold-start it — load
+// background.js as a module, pull in cloud.js, fetch the config file — before
+// any reply comes back. The ☁ button used to sit hidden for all of that, which
+// is long enough that clicking it straight after opening the popup did nothing.
+//
+// So the first paint is drawn from what is already local:
+//
+//   the button  — drawn synchronously, before a single await;
+//   the status  — the worker writes it to chrome.storage.local (STATUS_KEY in
+//                 cloud.js), so reading it back is the same kind of trip as the
+//                 list itself, with no worker involved.
+//
+// The worker is still asked, and its answer still wins. It just no longer gates
+// anything being drawn.
+renderCloud();
+
+chrome.storage.local.get(STATUS_KEY).then((data) => {
+  // If the worker got there first, it has the authoritative answer — leave it.
+  if (cloud.configured !== null) return;
+  const cached = data[STATUS_KEY];
+  if (!cached) return;
+  cloud.status = cached;
+  renderCloud();
+});
+
 sendCloud({ type: "cloudState" }).then((res) => {
   if (res.error) {
     // The background worker didn't answer — say so rather than looking dead.
+    cloud.configured = false;
     $("#authSetupMsg").textContent = `Sync unavailable: ${res.error}`;
     return renderCloud();
   }
-  if (!res.configured) return renderCloud();
   cloud = res;
   renderCloud();
+  if (!res.configured) return;
   // Opening the popup is a good moment to pick up edits made on the website or
   // in another browser.
   if (cloud.status.state !== "signed-out") sendCloud({ type: "cloudSync", mode: "merge" });
