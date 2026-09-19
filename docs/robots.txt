@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://shabanmughal.github.io/OtakuList/sitemap.xml

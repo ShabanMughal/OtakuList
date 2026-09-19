@@ -20,8 +20,9 @@ supabase db push
 2. **Authentication → URL Configuration**: add your site + local test URLs to the redirect allowlist, e.g.
    - `https://shabanmughal.github.io/OtakuList/showcase.html`
    - `http://localhost:8000/showcase.html`
-3. **Project Settings → API**: copy the **Project URL** and **anon public key** into
-   `docs/supabase-config.js`.
+3. **Project Settings → API**: copy the **Project URL** and **anon public key** into `web/.env`
+   (see [Anime List cloud sync](#anime-list-cloud-sync) below for the variable names). The website
+   reads them at build time; there is no `supabase-config.js` any more.
 
 ### Anime List cloud sync
 
