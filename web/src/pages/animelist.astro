@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/Footer.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const site = import.meta.env.SITE.replace(/\/$/, '');
 const REPO = 'https://github.com/ShabanMughal/OtakuList';
 const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
@@ -19,7 +20,7 @@ const theme =
 <BaseLayout
   title="Anime List, your watchlist in the browser"
   description="A web version of your OtakuList anime watchlist — track episodes, ratings and status. Stored in your browser and syncable with the extension via Export/Import."
-  canonical="https://shabanmughal.github.io/OtakuList/animelist.html"
+  canonical={`${site}${base}animelist.html`}
   page="animelist"
   chrome={false}
 >

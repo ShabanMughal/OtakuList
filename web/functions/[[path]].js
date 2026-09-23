@@ -15,13 +15,23 @@
 // Without them the function no-ops and you get the generic card back — which is
 // exactly the current behaviour, never an error page.
 
+// It only runs for the paths listed in public/_routes.json — every other request
+// is served straight from static assets without invoking a Function at all.
+//
 // The preview strings themselves live in src/lib/showcase-meta.mjs, shared with
-// the Astro route that generates one static page per profile for GitHub Pages
+// the Astro route that generates one static page per profile
 // (src/pages/u/[username].astro). Both hosts must unfurl a profile identically,
 // so neither owns the format.
 import { buildMeta } from "../src/lib/showcase-meta.mjs";
 
-const SHOWCASE_PATHS = ["/OtakuList/showcase.html", "/showcase.html"];
+// Cloudflare Pages serves `showcase.html` at `/showcase` and 308s the `.html`
+// form there, so the query-string link reaches us as `/showcase?u=name`.
+const SHOWCASE_PATHS = ["/showcase.html", "/showcase"];
+
+// The site used to live at shabanmughal.github.io/OtakuList/. The GitHub Pages
+// stub forwards old links here with the prefix stripped, but anything that
+// still arrives with it (a hand-edited link, a cached redirect) is sent on too.
+const LEGACY_BASE = "/OtakuList";
 
 const esc = (s) =>
   String(s == null ? "" : s).replace(
@@ -49,9 +59,9 @@ async function fetchProfile(env, username) {
 
 // The character roster ships with the site, so we can resolve a portrait for
 // the featured character and use it as the preview image.
-async function fetchRoster(origin, basePath) {
+async function fetchRoster(origin) {
   try {
-    const res = await fetch(`${origin}${basePath}data/characters.json`, {
+    const res = await fetch(`${origin}/data/characters.json`, {
       cf: { cacheTtl: 3600, cacheEverything: true },
     });
     if (!res.ok) return {};
@@ -64,6 +74,11 @@ async function fetchRoster(origin, basePath) {
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
+
+  if (url.pathname === LEGACY_BASE || url.pathname.startsWith(LEGACY_BASE + "/")) {
+    const path = url.pathname.slice(LEGACY_BASE.length) || "/";
+    return Response.redirect(`${url.origin}${path}${url.search}`, 301);
+  }
 
   // Fast path: everything that isn't a profile link stays static.
   if (!SHOWCASE_PATHS.includes(url.pathname)) return next();
@@ -82,9 +97,8 @@ export async function onRequest(context) {
   }
   if (!profile) return response;
 
-  const basePath = url.pathname.startsWith("/OtakuList/") ? "/OtakuList/" : "/";
-  const roster = await fetchRoster(url.origin, basePath);
-  const meta = buildMeta(profile, roster, url.href, `${url.origin}${basePath}assets/og-image.png`);
+  const roster = await fetchRoster(url.origin);
+  const meta = buildMeta(profile, roster, url.href, `${url.origin}/assets/og-image.png`);
 
   // Rewrite the tags in place. Anything we don't recognise passes through.
   const replace = {

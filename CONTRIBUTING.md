@@ -93,7 +93,7 @@ are shown in the page.
 ```bash
 cd web
 npm install
-npm run dev      # local preview at /OtakuList/
+npm run dev      # local preview at http://localhost:4321/
 npm run build    # production build into dist/
 ```
 

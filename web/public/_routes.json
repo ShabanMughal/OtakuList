@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "include": ["/showcase", "/showcase.html", "/OtakuList", "/OtakuList/*"],
+  "exclude": []
+}

@@ -17,7 +17,7 @@ const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
     window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
-  // The site root ("/OtakuList/"). Profile pages live one directory deeper than
+  // The site root ("/"). Profile pages live one directory deeper than
   // showcase.html, so the script cannot derive it from location.pathname.
   window.GS_BASE = base;
   window.GS_PROFILE_USER = profileUser || null;

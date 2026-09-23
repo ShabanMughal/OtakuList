@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  The website moved from shabanmughal.github.io/OtakuList to Cloudflare Pages.
+  GitHub Pages can't send real redirects, so this page (published as both
+  index.html and 404.html, which GitHub serves for every unknown path) forwards
+  each old link to the same page on the new site: /OtakuList/u/name.html →
+  /u/name.html, showcase.html?u=name keeps its query, and so on.
+  Deployed by .github/workflows/pages-redirect.yml.
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+  <title>OtakuList has moved</title>
+  <link rel="canonical" href="https://otakulist.pages.dev/">
+  <script>
+    (function () {
+      var NEW_ORIGIN = "https://otakulist.pages.dev";
+      var path = location.pathname.replace(/^\/OtakuList(?=\/|$)/, "") || "/";
+      location.replace(NEW_ORIGIN + path + location.search + location.hash);
+    })();
+  </script>
+  <!-- no-JS fallback: at least land on the new home page -->
+  <noscript><meta http-equiv="refresh" content="0; url=https://otakulist.pages.dev/"></noscript>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #17141f; color: #f4f2ff;
+           display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 16px; text-align: center; }
+    a { color: #a78bfa; }
+  </style>
+</head>
+<body>
+  <p>OtakuList has moved to <a href="https://otakulist.pages.dev/">otakulist.pages.dev</a>. Redirecting…</p>
+</body>
+</html>

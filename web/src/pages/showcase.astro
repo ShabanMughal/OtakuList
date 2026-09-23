@@ -9,12 +9,14 @@ import { loadRoster } from '../lib/profiles.mjs';
 // showcase.js still reads the query string and renders the profile client-side.
 // New links point at u/<name>.html instead (see publicUrl in showcase.js).
 const roster = loadRoster();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const site = import.meta.env.SITE.replace(/\/$/, '');
 ---
 
 <BaseLayout
   title="Gacha Profiles, show off the games you play"
   description="Browse and build shareable showcases of the gacha games people play, Wuthering Waves, Honkai: Star Rail, Zenless Zone Zero, Genshin and more."
-  canonical="https://shabanmughal.github.io/OtakuList/showcase.html"
+  canonical={`${site}${base}showcase.html`}
   page="showcase"
   chrome={false}
 >

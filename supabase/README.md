@@ -18,7 +18,7 @@ supabase db push
 ## After the migration
 1. **Authentication → Providers → Email**: make sure it's enabled (magic link is on by default).
 2. **Authentication → URL Configuration**: add your site + local test URLs to the redirect allowlist, e.g.
-   - `https://shabanmughal.github.io/OtakuList/showcase.html`
+   - `https://otakulist.pages.dev/**` (and set **Site URL** to `https://otakulist.pages.dev`)
    - `http://localhost:8000/showcase.html`
 3. **Project Settings → API**: copy the **Project URL** and **anon public key** into `web/.env`
    (see [Anime List cloud sync](#anime-list-cloud-sync) below for the variable names). The website

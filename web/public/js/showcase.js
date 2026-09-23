@@ -301,7 +301,7 @@
   // loadProfile() below: those links were shared before these pages existed.
   // Only newly produced links use the new shape.
   //
-  // GS_BASE is the site root ("/OtakuList/"), injected by the page. A profile
+  // GS_BASE is the site root ("/"), injected by the page. A profile
   // page sits one directory deeper than showcase.html, so neither URL can be
   // derived from location.pathname.
   // Set on a generated per-profile page, null on showcase.html. Also the signal

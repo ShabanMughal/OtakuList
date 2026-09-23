@@ -848,7 +848,7 @@
   // can ask the extension for your list.
   (function otakulistBridge() {
     const h = location.hostname;
-    const allowed = h === "shabanmughal.github.io" || h === "localhost" || h === "127.0.0.1";
+    const allowed = h === "otakulist.pages.dev" || h === "localhost" || h === "127.0.0.1";
     if (!allowed) return;
 
     async function sendList() {

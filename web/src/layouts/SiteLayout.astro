@@ -12,7 +12,7 @@ const {
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
-const site = 'https://shabanmughal.github.io';
+const site = import.meta.env.SITE.replace(/\/$/, '');
 const ogImageUrl = ogImage ? site + base + ogImage : undefined;
 ---
 

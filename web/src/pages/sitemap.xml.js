@@ -15,7 +15,7 @@
 // "just the static pages" rather than failing the build.
 import { fetchProfiles } from '../lib/profiles.mjs';
 
-const SITE = 'https://shabanmughal.github.io';
+const SITE = import.meta.env.SITE.replace(/\/$/, '');
 
 // The pages that exist regardless of what is in the database. `loc` is relative
 // to the site base; `lastmod` for these is the build date, which is honest —

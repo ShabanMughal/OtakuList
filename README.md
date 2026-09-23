@@ -4,19 +4,19 @@
 
 **Your anime watchlist, kept safe locally — even when a site gets blocked.**
 
-[![Platform](https://img.shields.io/badge/Platform-Chrome%20%7C%20Edge%20%7C%20Brave-8b5cf6?style=for-the-badge&logo=googlechrome&logoColor=white)](https://shabanmughal.github.io/OtakuList/)
+[![Platform](https://img.shields.io/badge/Platform-Chrome%20%7C%20Edge%20%7C%20Brave-8b5cf6?style=for-the-badge&logo=googlechrome&logoColor=white)](https://otakulist.pages.dev/)
 [![Manifest V3](https://img.shields.io/badge/Manifest-v3-8b5cf6?style=for-the-badge&logo=codefactor&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
-[![License](https://img.shields.io/badge/Price-Free-8b5cf6?style=for-the-badge)](https://shabanmughal.github.io/OtakuList/)
+[![License](https://img.shields.io/badge/Price-Free-8b5cf6?style=for-the-badge)](https://otakulist.pages.dev/)
 [![Privacy](https://img.shields.io/badge/Watchlist-100%25%20Local-8b5cf6?style=for-the-badge&logo=shield&logoColor=white)](#️-cloud-sync-optional)
 
 <p align="center">
-  <a href="https://shabanmughal.github.io/OtakuList/"><b>Website</b></a> ·
+  <a href="https://otakulist.pages.dev/"><b>Website</b></a> ·
   <a href="#-install"><b>Install</b></a> ·
   <a href="#%EF%B8%8F-how-to-use-it"><b>How it works</b></a> ·
   <a href="#-gacha-showcase-companion-web-app"><b>Gacha Showcase</b></a>
 </p>
 
-<a href="https://shabanmughal.github.io/OtakuList/">
+<a href="https://otakulist.pages.dev/">
   <img src="screenshots/landing-hero.png" width="880" alt="OtakuList — your anime list, sealed forever" />
 </a>
 
@@ -104,7 +104,7 @@ Chrome loads the files exactly as they sit on disk — there's no build step, so
 
 Logging in is **never required** — the extension works exactly the same without an account, and nothing is uploaded while you're logged out.
 
-**To use it:** right after install a welcome tab opens with **Continue with Google** — or, any time later, click the log-in button in the popup header, which opens the same page with **Continue with Google**. Once you're signed in, that button turns into a ☁ that shows your sync status and **Log out**. It's the same account as the website, so the list you sync here shows up on the [Create list](https://shabanmughal.github.io/OtakuList/animelist.html) page too.
+**To use it:** right after install a welcome tab opens with **Continue with Google** — or, any time later, click the log-in button in the popup header, which opens the same page with **Continue with Google**. Once you're signed in, that button turns into a ☁ that shows your sync status and **Log out**. It's the same account as the website, so the list you sync here shows up on the [Create list](https://otakulist.pages.dev/animelist.html) page too.
 
 | What happens | When |
 | :--- | :--- |

@@ -3,18 +3,17 @@
 //
 // Why this exists: a showcase link is meant to be pasted into Discord, and a
 // crawler builds its embed from the bytes it is served — it never runs the
-// page's JavaScript. On GitHub Pages every `showcase.html?u=name` is the same
+// page's JavaScript. On a static host every `showcase.html?u=name` is the same
 // file, so every profile unfurled as the same generic OtakuList card. Giving
 // each profile its own file is what makes the tags, and the content, correct
 // before any script runs.
 //
-// With `build: { format: 'file' }` and `base: '/OtakuList'` in astro.config.mjs
-// this route emits `dist/u/<name>.html`, served at
-// `https://shabanmughal.github.io/OtakuList/u/<name>.html`.
+// With `build: { format: 'file' }` in astro.config.mjs this route emits
+// `dist/u/<name>.html`, served at `<site>/u/<name>.html`.
 //
-// functions/[[path]].js solves the same problem at the edge and stays as the
-// upgrade path for a custom domain on Cloudflare; both import their preview
-// strings from src/lib/showcase-meta.mjs so a profile cannot unfurl two ways.
+// functions/[[path]].js solves the same problem at the edge for the older
+// `showcase.html?u=name` links; both import their preview strings from
+// src/lib/showcase-meta.mjs so a profile cannot unfurl two ways.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ShowcaseApp from '../../components/ShowcaseApp.astro';
 import ShowcaseScripts from '../../components/ShowcaseScripts.astro';
@@ -32,7 +31,7 @@ export async function getStaticPaths() {
 const { profile } = Astro.props;
 const roster = loadRoster();
 
-const site = 'https://shabanmughal.github.io';
+const site = import.meta.env.SITE.replace(/\/$/, '');
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 const pageUrl = `${site}${base}u/${profile.username}.html`;
 const meta = buildMeta(profile, roster, pageUrl, `${site}${base}assets/og-image.png`);

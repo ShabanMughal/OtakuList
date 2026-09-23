@@ -14,9 +14,9 @@ const {
   robots = 'index, follow',
 } = Astro.props;
 
-// base always ends with a single trailing slash, e.g. "/OtakuList/"
+// base always ends with a single trailing slash, e.g. "/"
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
-const site = 'https://shabanmughal.github.io';
+const site = import.meta.env.SITE.replace(/\/$/, '');
 // `ogImage` is a path relative to the site base, or an absolute https URL when
 // the card art comes from somewhere else (a profile's character portrait).
 const ogImageUrl = ogImage ? (/^https?:\/\//.test(ogImage) ? ogImage : site + base + ogImage) : undefined;

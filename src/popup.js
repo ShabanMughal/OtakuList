@@ -24,7 +24,7 @@ const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 // long the list gets. The rest is one click away: the website's Anime List page
 // when signed in (it holds the same synced list), or "Show all" here otherwise.
 const POPUP_LIMIT = 10;
-const FULL_LIST_URL = "https://shabanmughal.github.io/OtakuList/animelist.html";
+const FULL_LIST_URL = "https://otakulist.pages.dev/animelist.html";
 let showAll = false;
 
 // Saved covers are AniList's extraLarge poster (~460px wide, often 100–300 KB)

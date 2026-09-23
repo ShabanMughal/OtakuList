@@ -2,12 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/Footer.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const site = import.meta.env.SITE.replace(/\/$/, '');
 ---
 
 <BaseLayout
   title="Privacy Policy | OtakuList"
   description="Privacy information for OtakuList, including how we handle local watchlist data and browser storage."
-  canonical="https://shabanmughal.github.io/OtakuList/privacy-policy.html"
+  canonical={`${site}${base}privacy-policy.html`}
   page="privacy"
 >
   <main class="mx-auto max-w-4xl px-6 py-16 text-[#f4f2f8]">

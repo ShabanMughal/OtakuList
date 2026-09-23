@@ -1,0 +1,49 @@
+name: GitHub Pages redirect to Cloudflare
+
+# The website now lives on Cloudflare Pages (deploy.yml). This keeps the old
+# shabanmughal.github.io/OtakuList address alive as a stub that forwards every
+# old link — shared profiles included — to the same page on the new site.
+# It only needs to run again if github-pages-redirect/ changes.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'github-pages-redirect/**'
+      - '.github/workflows/pages-redirect.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 404.html is what GitHub Pages serves for every path that doesn't exist,
+      # which is every old page — so the same redirect handles them all.
+      - name: Assemble stub
+        run: |
+          mkdir -p _site
+          cp github-pages-redirect/index.html _site/index.html
+          cp github-pages-redirect/index.html _site/404.html
+
+      - name: Upload
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

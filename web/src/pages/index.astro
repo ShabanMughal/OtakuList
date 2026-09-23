@@ -2,6 +2,7 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Footer from '../components/Footer.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const site = import.meta.env.SITE.replace(/\/$/, '');
 const REPO = 'https://github.com/ShabanMughal/OtakuList';
 const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%94-anime-watchli/amfnmledhfgfeafdibdkhjdjdnkjcgfo';
 ---
@@ -9,7 +10,7 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
 <SiteLayout
   title="OtakuList: Anime Watchlist Tracker for Chrome"
   description="Track the anime and episode you're watching with OtakuList, a private anime watchlist tracker for Chrome. Your progress survives blocked streaming sites."
-  canonical="https://shabanmughal.github.io/OtakuList/"
+  canonical={`${site}${base}`}
   ogTitle="OtakuList: Anime Watchlist Tracker"
   ogDescription="Track anime and episodes automatically. Keep your watchlist safe locally when streaming sites are blocked."
   ogImage="assets/og-image.png"
@@ -20,7 +21,7 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
       {
         '@type': 'WebSite',
         name: 'OtakuList',
-        url: 'https://shabanmughal.github.io/OtakuList/',
+        url: `${site}${base}`,
         description: "A private anime watchlist tracker for Chrome, Edge, and Brave."
       },
       {
@@ -28,7 +29,7 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
         name: 'OtakuList',
         applicationCategory: 'ProductivityApplication',
         operatingSystem: 'Chrome, Edge, Brave',
-        url: 'https://shabanmughal.github.io/OtakuList/',
+        url: `${site}${base}`,
         description: "Automatically detects the anime and episode you are watching and saves your watchlist locally in your browser.",
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
       }

@@ -1,9 +1,16 @@
 # Deploying the website
 
-The site is a static Astro build, published to GitHub Pages by
-`.github/workflows/deploy.yml`. **Per-profile link previews work there** — see
-below. The Cloudflare Pages option further down is an alternative route to the
-same result, kept for the day this moves to a custom domain.
+The site is a static Astro build served from the root of
+**https://otakulist.pages.dev** (Cloudflare Pages), built and uploaded by
+`.github/workflows/deploy.yml`. The old `shabanmughal.github.io/OtakuList`
+address is now a redirect stub — see [Old GitHub Pages links](#old-github-pages-links).
+
+The address lives in one place: `site` in [`astro.config.mjs`](astro.config.mjs).
+Canonicals, `og:url`, `og:image` and the sitemap all read it back as
+`import.meta.env.SITE`. If the Pages project name (or a custom domain) changes,
+also update `robots.txt`, the stub in `github-pages-redirect/`, `--project-name`
+in `deploy.yml`, and the two URLs in the extension (`FULL_LIST_URL` in
+`src/popup.js`, the bridge host in `src/content.js`).
 
 ---
 
@@ -20,7 +27,7 @@ generating **one real HTML file per profile at build time**:
 
 | | |
 | :--- | :--- |
-| URL | `https://shabanmughal.github.io/OtakuList/u/<username>.html` |
+| URL | `https://otakulist.pages.dev/u/<username>` |
 | Source of truth | `profiles` in Supabase, read over the REST API with the anon key |
 | Contents | correct `<title>`, `og:*` and `twitter:*` tags, **and** the profile itself — display name, game cards, characters, likes |
 | Preview image | the profile's first cover character's portrait, falling back to the site card |
@@ -93,121 +100,94 @@ profile as not-opted-in rather than failing.
 
 ---
 
-## Option A — stay on GitHub Pages
+## Hosting — Cloudflare Pages
 
-Nothing to do. `.github/workflows/deploy.yml` already builds `web/` and
-publishes, and per-profile pages come with it.
+### 1. Create the Pages project (once)
+
+`deploy.yml` uploads with `wrangler pages deploy`, which needs the project to
+exist. Either create it as a **Direct Upload** project named `otakulist` in the
+dashboard (**Workers & Pages → Create → Pages → Upload assets**), or:
+
+```bash
+npx wrangler pages project create otakulist --production-branch=main
+```
+
+Don't connect the Git integration as well — that would build every push twice.
+Building in GitHub Actions is what keeps the hourly schedule and the Supabase
+webhook trigger above working.
+
+### 2. Secrets and variables
+
+**GitHub → Settings → Secrets and variables → Actions:**
+
+| Secret | Value |
+| :--- | :--- |
+| `CLOUDFLARE_API_TOKEN` | API token with **Account → Cloudflare Pages → Edit** |
+| `CLOUDFLARE_ACCOUNT_ID` | shown in the Cloudflare dashboard sidebar |
+| `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY` | already there — the build inlines them |
+
+**Cloudflare → the Pages project → Settings → Variables and Secrets:** add
+`PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` for Production. The build
+doesn't need these (it runs in GitHub), but the showcase Function reads them at
+request time. Without them it serves the generic card — never an error.
+
+### 3. Supabase auth URLs
+
+**Authentication → URL Configuration:**
+
+- **Site URL:** `https://otakulist.pages.dev`
+- **Redirect URLs:** add `https://otakulist.pages.dev/**`
+
+Keep the old `shabanmughal.github.io` entries until you're sure nobody is
+mid-sign-in there, then remove them.
+
+### The showcase Function
+
+[`functions/[[path]].js`](functions/%5B%5Bpath%5D%5D.js) renders previews at the
+edge for the older `showcase.html?u=name` links, which the static `u/<name>`
+pages can't cover:
+
+- it runs only for the paths in [`public/_routes.json`](public/_routes.json) —
+  `/showcase`, `/showcase.html` and `/OtakuList/*` — so the rest of the site is
+  served statically and never counts against the Functions quota;
+- Cloudflare serves `showcase.html` at `/showcase` (and 308s the `.html` form
+  there), so it matches both;
+- for a profile link it reads the row from Supabase and rewrites the `og:` and
+  `twitter:` tags with `HTMLRewriter`; if Supabase is unreachable, the env vars
+  are missing or the profile doesn't exist, it serves the page unchanged;
+- anything still arriving with the old `/OtakuList/` prefix gets a 301 to the
+  same path without it.
+
+It builds its preview strings from
+[`src/lib/showcase-meta.mjs`](src/lib/showcase-meta.mjs), the same module the
+static route uses, so a profile can't unfurl one way here and another way there.
+
+### Old GitHub Pages links
+
+GitHub Pages can't send real redirects, so
+[`.github/workflows/pages-redirect.yml`](../.github/workflows/pages-redirect.yml)
+publishes [`github-pages-redirect/index.html`](../github-pages-redirect/index.html)
+as both `index.html` and `404.html` (GitHub serves `404.html` for every unknown
+path). It strips `/OtakuList` and forwards to the same path, query and hash on
+the new site — so `…/OtakuList/showcase.html?u=name` and
+`…/OtakuList/u/name.html` both land on the right profile.
+
+Run it once after the first Cloudflare deploy (**Actions → GitHub Pages
+redirect to Cloudflare → Run workflow**). It's a client-side hop, so crawlers
+building a link preview won't follow it: an old link pasted into Discord shows
+the "moved" card, and the new `pages.dev` links unfurl properly.
 
 ### Verify
 
-After a deploy:
-
 ```bash
-curl -s "https://shabanmughal.github.io/OtakuList/u/<a-real-username>.html" | grep -i 'og:'
+curl -s "https://otakulist.pages.dev/u/<a-real-username>" | grep -i 'og:'
+curl -sL "https://otakulist.pages.dev/showcase.html?u=<a-real-username>" | grep -i 'og:'
 ```
 
 You should see that profile's name, its games and a character portrait. Then
 check a real unfurl — Discord caches aggressively, so test with a fresh link or
 use the [Facebook sharing debugger](https://developers.facebook.com/tools/debug/)
 to force a re-scrape.
-
-## Option B — Cloudflare Pages
-
-Not required for link previews any more; the static pages above cover that on
-GitHub Pages. This stays as the upgrade path if the project ever moves to a
-custom domain, where rendering previews at the edge lets `showcase.html?u=name`
-unfurl too, with no build and no staleness.
-
-[`functions/[[path]].js`](functions/%5B%5Bpath%5D%5D.js) is a Cloudflare Pages
-Function that does exactly that, and nothing else:
-
-- any request that is not `showcase.html?u=<valid-username>` returns `next()`
-  immediately — the rest of the site stays completely static;
-- for a profile link it reads the row from Supabase with the public anon key,
-  and rewrites `og:title`, `og:description`, `og:image`, `og:url` and the
-  `twitter:` equivalents via `HTMLRewriter`;
-- if Supabase is unreachable, the env vars are missing, or the profile does not
-  exist, it serves the original page unchanged. It degrades to the generic card,
-  never to an error.
-
-It builds its preview strings from
-[`src/lib/showcase-meta.mjs`](src/lib/showcase-meta.mjs), the same module the
-static route uses, so a profile cannot unfurl one way on one host and another
-way on the other. The file is ignored by the Astro build, so **it is inert until
-you deploy to Cloudflare**.
-
-### 1. Create the Pages project
-
-Connect the repo at **Cloudflare dashboard → Workers & Pages → Create → Pages**:
-
-| Setting | Value |
-| :--- | :--- |
-| Root directory | `web` |
-| Build command | `npm run build` |
-| Build output directory | `dist` |
-| Functions directory | `functions` (default; it sits at `web/functions`) |
-
-### 2. Environment variables
-
-Add both, for Production **and** Preview:
-
-```
-PUBLIC_SUPABASE_URL       = https://yourproject.supabase.co
-PUBLIC_SUPABASE_ANON_KEY  = your_anon_public_key
-```
-
-The build needs them (they're inlined into the client JS) and the Function needs
-them at request time. The anon key is public by design — RLS is what protects
-the data.
-
-### 3. Keep the `/OtakuList` base path
-
-`astro.config.mjs` sets `base: '/OtakuList'`, and **leave it that way** unless
-you are ready to deal with the fallout:
-
-- every already-shared profile link contains `/OtakuList/`;
-- the Supabase **Authentication → URL Configuration** redirect allowlist points
-  at those paths.
-
-The Function matches both `/OtakuList/showcase.html` and `/showcase.html`, so it
-keeps working either way.
-
-### 4. Update Supabase auth URLs
-
-Add the new origin to **Authentication → URL Configuration → Redirect URLs**:
-
-```
-https://<your-project>.pages.dev/OtakuList/showcase.html
-https://yourdomain.com/OtakuList/showcase.html     # if you attach a custom domain
-```
-
-Leave the existing GitHub Pages entries in place until you retire that origin —
-removing them early breaks sign-in for anyone mid-session there.
-
-### 5. Old links
-
-`shabanmughal.github.io` cannot redirect to Cloudflare by itself. Pick one:
-
-- **Keep both alive.** The GitHub Actions deploy keeps running; old links keep
-  working, just without rich previews. Simplest, and nothing breaks.
-- **Turn GitHub Pages into a redirect stub.** Replace the published site with a
-  page that `<meta http-equiv="refresh">`es to the Cloudflare origin, preserving
-  the query string. Old links then reach the new host — after a visible hop, and
-  crawler previews still won't follow it.
-- **Custom domain on Cloudflare.** The cleanest end state, but it doesn't
-  rescue links already shared under the `github.io` origin.
-
-This is a positioning decision, not a technical one — it is left to the
-maintainer deliberately.
-
-### 6. Verify
-
-After the first deploy, check that the *query-string* form unfurls too — that is
-the thing the Function adds over the static pages:
-
-```bash
-curl -s "https://<your-deploy>/OtakuList/showcase.html?u=<a-real-username>" | grep -i 'og:'
-```
 
 ---
 
