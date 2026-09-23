@@ -44,6 +44,14 @@ function schedulePush() {
 chrome.runtime.onStartup.addListener(() => cloud.syncNow("merge"));
 chrome.runtime.onInstalled.addListener(() => cloud.syncNow("merge"));
 
+// First install only (not updates or Chrome updates): open the welcome tab,
+// which offers "Continue with Google" when sync is configured.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
+    chrome.tabs.create({ url: chrome.runtime.getURL("src/welcome.html") });
+  }
+});
+
 // ---------- AniList resolver ----------
 // Give every site a canonical AniList identity (id + poster) so the same anime
 // is deduped across sites and always gets a reliable cover. Look up by id when
@@ -151,6 +159,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       status: await cloud.getStatus(),
     }),
     cloudSignIn: async () => ({ ok: true, user: await cloud.signIn(msg.email, msg.password) }),
+    cloudSignInGoogle: async () => ({ ok: true, user: await cloud.signInWithGoogle() }),
     cloudSignUp: async () => ({ ok: true, ...(await cloud.signUp(msg.email, msg.password)) }),
     cloudSignOut: async () => {
       await cloud.signOut();

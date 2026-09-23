@@ -1,0 +1,174 @@
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/poppins-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/poppins-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/poppins-700.woff2') format('woff2');
+}
+
+/* same palette as popup.css */
+:root {
+  --bg: #17141f;
+  --panel: #1e1b2e;
+  --panel-2: #2a2540;
+  --line: #3b3554;
+  --text: #f4f2ff;
+  --muted: #b0a9cf;
+  --accent: #8b5cf6;
+  --accent-2: #a78bfa;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: radial-gradient(circle at 50% 0%, #2a2145 0%, var(--bg) 60%);
+  color: var(--text);
+}
+
+.card {
+  width: 100%;
+  max-width: 440px;
+  padding: 36px 32px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logo {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--accent), #6366f1);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.lead {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #dadce0;
+  background: #fff;
+  color: #1f1f1f;
+  font: 600 15px 'Poppins', sans-serif;
+  cursor: pointer;
+}
+
+.google-btn:hover {
+  background: #f3f3f7;
+}
+
+.google-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.google-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.fine {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.error {
+  font-size: 12.5px;
+  color: #f0a4a4;
+}
+
+.ok {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+button.link {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font: 500 13px 'Poppins', sans-serif;
+  text-decoration: underline;
+  cursor: pointer;
+  align-self: center;
+}
+
+.steps {
+  margin-top: 12px;
+  padding: 16px 18px 16px 34px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  background: var(--panel-2);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.steps b {
+  color: var(--text);
+  font-weight: 600;
+}

@@ -20,6 +20,22 @@ const isTombstone = (a) => !!a && a.deleted === true;
 const liveEntries = () => Object.values(state).filter((a) => !isTombstone(a));
 const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 
+// The popup shows at most this many cards per tab, so it opens fast however
+// long the list gets. The rest is one click away: the website's Anime List page
+// when signed in (it holds the same synced list), or "Show all" here otherwise.
+const POPUP_LIMIT = 10;
+const FULL_LIST_URL = "https://shabanmughal.github.io/OtakuList/animelist.html";
+let showAll = false;
+
+// Saved covers are AniList's extraLarge poster (~460px wide, often 100–300 KB)
+// — far more than a 46px thumbnail needs, and downloading a few MB of them was
+// what made the popup slow to open. AniList serves every size at the same path
+// under a different folder, so point the thumbnail at the "small" one (100px
+// wide — still sharp for a 46px card on a 2x screen, and ~13 KB instead of
+// ~150 KB). Other hosts are left alone.
+const thumbUrl = (url) =>
+  String(url).replace(/(\/anilistcdn\/media\/anime\/cover\/)large\//, "$1small/");
+
 const $ = (sel) => document.querySelector(sel);
 const listEl = $("#list");
 const emptyEl = $("#empty");
@@ -68,11 +84,14 @@ function render() {
   });
 
   const q = query.trim().toLowerCase();
-  const items = sortItems(
+  const matches = sortItems(
     live
       .filter((a) => a.status === activeTab)
       .filter((a) => !q || a.title.toLowerCase().includes(q))
   );
+  // A search shows every match — that's how you find the one you want.
+  const capped = !showAll && !q && matches.length > POPUP_LIMIT;
+  const items = capped ? matches.slice(0, POPUP_LIMIT) : matches;
 
   const totalCount = live.length;
   $("#count").textContent = `${totalCount} title${totalCount === 1 ? "" : "s"} saved`;
@@ -95,7 +114,7 @@ function render() {
           ? `<span class="abs" title="Absolute episode number across the whole series">abs. ${escapeHtml(a.absoluteEpisode)}</span>`
           : "";
       const cover = a.cover
-        ? `<img class="cover" src="${escapeHtml(a.cover)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover',textContent:'🎬'}))">`
+        ? `<img class="cover" src="${escapeHtml(thumbUrl(a.cover))}" width="46" height="62" loading="lazy" decoding="async" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover',textContent:'🎬'}))">`
         : `<div class="cover">🎬</div>`;
       const siteLink = a.url
         ? `<a href="${escapeHtml(a.url)}" target="_blank" rel="noopener">${escapeHtml(a.site || "open")}</a>`
@@ -132,13 +151,28 @@ function render() {
         </div>
       </div>`;
     })
-    .join("");
+    .join("") + (capped ? moreRowHtml(matches.length) : "");
+}
+
+// Signed in, the full list lives on the website too; signed out it only exists
+// in this browser, so expand it here instead of sending you to an empty page.
+function moreRowHtml(total) {
+  const signedIn = cloud.status.state !== "signed-out";
+  const action = signedIn
+    ? `<a class="more-btn" href="${FULL_LIST_URL}" target="_blank" rel="noopener">See full list →</a>`
+    : `<button class="more-btn" data-act="more">Show all</button>`;
+  return `<div class="more-row"><span>Showing ${POPUP_LIMIT} of ${total}</span>${action}</div>`;
 }
 
 // event delegation for cards
 listEl.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-act]");
   if (!btn) return;
+  if (btn.dataset.act === "more") {
+    showAll = true;
+    render();
+    return;
+  }
   const card = e.target.closest(".card");
   const id = card?.dataset.id;
   if (!id || !state[id]) return;
@@ -356,11 +390,15 @@ importFile.addEventListener("change", async (e) => {
 // Logging in is never required: the list works exactly as before without an
 // account. All the real work (auth, merge, upload) happens in the background
 // worker — the popup only shows its state and forwards button presses.
+//
+// Signed out, the header button is a log-in icon that opens the login page in
+// a tab (a popup can't host Google's sign-in window — it closes the moment that
+// window takes focus). Signed in, it turns into the sync cloud and opens the
+// account panel here.
 const authPanel = $("#authPanel");
-const authForm = $("#authForm");
 const authAccount = $("#authAccount");
 const cloudBtn = $("#cloudBtn");
-let authMode = "login";
+const LOGIN_PAGE = "src/welcome.html#login";
 
 // `configured` is null until the service worker has answered — see the note on
 // the first paint at the bottom of this file. Only the worker can tell us for
@@ -386,97 +424,61 @@ const SYNC_LABELS = {
   error: "Sync paused",
 };
 
-function setAuthError(message) {
-  const el = $("#authError");
-  el.textContent = message || "";
-  el.hidden = !message;
-}
-
 function renderCloud() {
   const { configured, status } = cloud;
-  // The ☁ button stays visible even when sync isn't configured — a button that
-  // silently isn't there just looks broken. The panel explains what's missing.
+  // The header button stays visible even when sync isn't configured — a button
+  // that silently isn't there just looks broken. The panel explains what's missing.
   cloudBtn.hidden = false;
   // While `configured` is still unknown, assume it is. "Cloud sync isn't set
   // up" is the rare case, and flashing it at someone who *is* signed in reads
   // as their account having been dropped — much worse than a beat of the
-  // ordinary login form before the real answer lands.
+  // ordinary log-in icon before the real answer lands.
   const known = configured !== null;
   $("#authSetup").hidden = !known || configured;
   if (known && !configured) {
-    authForm.hidden = true;
     authAccount.hidden = true;
-    cloudBtn.classList.remove("on", "warn");
+    cloudBtn.classList.remove("on", "warn", "signed-in");
     cloudBtn.title = "Cloud sync isn't set up";
     return;
   }
   const signedIn = status.state !== "signed-out";
   const label = SYNC_LABELS[status.state] || "";
 
-  authForm.hidden = signedIn;
   authAccount.hidden = !signedIn;
+  // Signing out elsewhere (or the session expiring) closes a stale account panel.
+  if (!signedIn) authPanel.hidden = true;
+  cloudBtn.classList.toggle("signed-in", signedIn);
   cloudBtn.classList.toggle("on", signedIn && status.state !== "error");
   cloudBtn.classList.toggle("warn", status.state === "error");
   cloudBtn.title = signedIn ? `${status.email || "Signed in"} — ${label}` : "Log in to sync";
 
+  // e.g. the refresh token expired while the popup was closed
   $("#subtitle").textContent = signedIn
     ? `${label}${status.email ? ` · ${status.email}` : ""}`
-    : "Your anime watchlist, kept safe";
+    : status.message || "Your anime watchlist, kept safe";
+
+  // The "Showing 10 of N" row offers a different action signed in vs out.
+  if (listEl.querySelector(".more-row")) render();
 
   if (signedIn) {
     $("#authEmailLabel").textContent = status.email || "Signed in";
     $("#authStatus").textContent =
       status.state === "error" ? status.message || "Sync paused" : label;
-  } else if (status.message) {
-    // e.g. the refresh token expired while the popup was closed
-    setAuthError(status.message);
   }
 }
 
 cloudBtn.addEventListener("click", () => {
+  const signedIn = cloud.status.state !== "signed-out";
+  // Signed out with sync available (or not known yet — see renderCloud): go
+  // straight to the login page. Otherwise toggle the panel, which shows either
+  // the account or why sync isn't set up.
+  if (!signedIn && cloud.configured !== false) {
+    chrome.tabs.create({ url: chrome.runtime.getURL(LOGIN_PAGE) });
+    window.close();
+    return;
+  }
   authPanel.hidden = !authPanel.hidden;
-  if (!authPanel.hidden) {
-    addForm.hidden = true;
-    if (!authForm.hidden) $("#authEmail").focus();
-  }
-});
-
-$("#authToggle").addEventListener("click", () => {
-  authMode = authMode === "login" ? "signup" : "login";
-  const login = authMode === "login";
-  $("#authTitle").textContent = login ? "Log in to sync" : "Create an account";
-  $("#authSubmit").textContent = login ? "Log in" : "Create account";
-  $("#authToggle").textContent = login ? "Create an account" : "I already have one";
-  $("#authPass").autocomplete = login ? "current-password" : "new-password";
-  setAuthError("");
-});
-
-authForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = $("#authEmail").value.trim();
-  const password = $("#authPass").value;
-  const submit = $("#authSubmit");
-  submit.disabled = true;
-  setAuthError("");
-
-  const res =
-    authMode === "login"
-      ? await sendCloud({ type: "cloudSignIn", email, password })
-      : await sendCloud({ type: "cloudSignUp", email, password });
-
-  submit.disabled = false;
-  if (res.error) {
-    setAuthError(res.error);
-    return;
-  }
-  authForm.reset();
-  if (res.confirmationRequired) {
-    setAuthError("");
-    showToast("Check your email to confirm, then log in.");
-    return;
-  }
-  authPanel.hidden = true;
-  showToast("Logged in — your list is syncing ✓");
+  if (!authPanel.hidden) addForm.hidden = true;
 });
 
 $("#signOutBtn").addEventListener("click", async () => {
@@ -508,7 +510,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // Nothing here may wait on the service worker. MV3 shuts that worker down when
 // it goes idle, so on most popup opens Chrome has to cold-start it — load
 // background.js as a module, pull in cloud.js, fetch the config file — before
-// any reply comes back. The ☁ button used to sit hidden for all of that, which
+// any reply comes back. The header button used to sit hidden for all of that, which
 // is long enough that clicking it straight after opening the popup did nothing.
 //
 // So the first paint is drawn from what is already local:

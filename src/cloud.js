@@ -131,6 +131,57 @@ export async function signIn(email, password) {
   return session.user;
 }
 
+// "Continue with Google" via Supabase's OAuth provider. launchWebAuthFlow opens
+// Google in its own window and hands back the final redirect, which Chrome
+// intercepts at https://<extension-id>.chromiumapp.org/ — so that URL must be in
+// the Supabase project's allowed redirect URLs. With no PKCE challenge Supabase
+// uses the implicit flow and puts the tokens in the URL fragment.
+export async function signInWithGoogle() {
+  await assertConfigured();
+  const { url, key } = await loadConfig();
+  const redirectTo = chrome.identity.getRedirectURL();
+  const authUrl =
+    `${apiBase(url)}/auth/v1/authorize?provider=google` +
+    `&redirect_to=${encodeURIComponent(redirectTo)}`;
+
+  let finalUrl;
+  try {
+    finalUrl = await chrome.identity.launchWebAuthFlow({ url: authUrl, interactive: true });
+  } catch (err) {
+    // Closing the window is not an error worth shouting about.
+    if (/did not approve|canceled|cancelled|closed/i.test(String(err?.message))) {
+      throw new Error("Sign-in cancelled.");
+    }
+    throw err;
+  }
+
+  const back = new URL(finalUrl);
+  const params = new URLSearchParams(back.hash.slice(1));
+  // Supabase reports failures in the query on some paths, the fragment on others.
+  const failure =
+    params.get("error_description") || back.searchParams.get("error_description") ||
+    params.get("error") || back.searchParams.get("error");
+  if (failure) throw new Error(failure.replace(/\+/g, " "));
+
+  const token = params.get("access_token");
+  if (!token) throw new Error("Sign-in failed — no session returned.");
+  const userRes = await fetch(`${apiBase(url)}/auth/v1/user`, {
+    headers: { apikey: key, Authorization: `Bearer ${token}` },
+  });
+  const user = await userRes.json().catch(() => ({}));
+  if (!userRes.ok || !user?.id) throw new Error("Sign-in failed — couldn't read your account.");
+
+  const session = sessionFrom({
+    access_token: token,
+    refresh_token: params.get("refresh_token"),
+    expires_in: params.get("expires_in"),
+    user,
+  });
+  await chrome.storage.local.set({ [SESSION_KEY]: session });
+  await syncNow("merge");
+  return session.user;
+}
+
 // A project with "Confirm email" on returns a user but no session — the list
 // starts syncing only once they have clicked the link and signed in.
 export async function signUp(email, password) {

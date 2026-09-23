@@ -157,6 +157,16 @@ header h1 {
   color: #f0a4a4;
 }
 
+/* one icon at a time: log-in while signed out, the cloud once signed in */
+.cloud-btn .icon-cloud,
+.cloud-btn.signed-in .icon-login {
+  display: none;
+}
+
+.cloud-btn.signed-in .icon-cloud {
+  display: block;
+}
+
 /* account / sync panel */
 .auth-panel {
   margin: 8px 12px 4px;
@@ -166,7 +176,6 @@ header h1 {
   border-radius: 12px;
 }
 
-.auth-form,
 .auth-account {
   display: flex;
   flex-direction: column;
@@ -188,28 +197,6 @@ header h1 {
   font-size: 11px;
   color: var(--muted);
   line-height: 1.4;
-}
-
-.auth-panel input {
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-  width: 100%;
-}
-
-.auth-panel input:focus {
-  border-color: var(--accent);
-}
-
-.auth-error {
-  font-size: 11px;
-  line-height: 1.4;
-  color: #f0a4a4;
 }
 
 .auth-setup code {
@@ -627,6 +614,35 @@ button.ghost {
 .empty small {
   font-size: 12px;
   line-height: 1.5;
+}
+
+/* "Showing 10 of 22" — the cap at the end of a long tab */
+.more-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.more-btn {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--accent-2);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.more-btn:hover {
+  border-color: var(--accent);
+  color: #fff;
 }
 
 /* footer */

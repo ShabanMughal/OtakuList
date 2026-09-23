@@ -5,7 +5,8 @@
   "description": "Track the anime and episode you're watching. Save your watchlist locally so your progress survives blocked streaming sites.",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "identity"
   ],
   "host_permissions": ["https://graphql.anilist.co/", "https://*.supabase.co/*"],
   "action": {

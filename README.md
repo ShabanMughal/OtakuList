@@ -104,7 +104,7 @@ Chrome loads the files exactly as they sit on disk — there's no build step, so
 
 Logging in is **never required** — the extension works exactly the same without an account, and nothing is uploaded while you're logged out.
 
-**To use it:** click the ☁ button in the popup header → **Log in** (or **Create an account**). It's the same account as the website, so the list you sync here shows up on the [Create list](https://shabanmughal.github.io/OtakuList/animelist.html) page too.
+**To use it:** right after install a welcome tab opens with **Continue with Google** — or, any time later, click the log-in button in the popup header, which opens the same page with **Continue with Google**. Once you're signed in, that button turns into a ☁ that shows your sync status and **Log out**. It's the same account as the website, so the list you sync here shows up on the [Create list](https://shabanmughal.github.io/OtakuList/animelist.html) page too.
 
 | What happens | When |
 | :--- | :--- |
@@ -140,7 +140,9 @@ node scripts/sync-ext-config.mjs --clear        # back to local-only
 
 That writes `cloud-config.local.json` next to the manifest, which **`.gitignore` keeps out of the repo** — so your project's values never get pushed. The extension reads it at runtime (with `fetch`, so a missing file just means "not set up" rather than a broken service worker) and falls back to [`src/cloud-config.js`](src/cloud-config.js), which stays empty in git. Reload at `chrome://extensions` after either changes.
 
-Chrome loads the extension's files exactly as they sit on disk, so no `.env` can be substituted at runtime — that's what the script is for. Keep `cloud-config.local.json` when you zip a build for the Web Store; drop it and the extension runs local-only, with the ☁ button explaining that sync isn't set up.
+Chrome loads the extension's files exactly as they sit on disk, so no `.env` can be substituted at runtime — that's what the script is for. Keep `cloud-config.local.json` when you zip a build for the Web Store; drop it and the extension runs local-only, with the popup's log-in button explaining that sync isn't set up.
+
+**Google sign-in from the extension.** The website's Google provider is reused, so the only extra step is allowing the extension's redirect. The extension signs in with `chrome.identity.launchWebAuthFlow`, and Chrome intercepts the final redirect at `https://<extension-id>.chromiumapp.org/`. Add that URL under **Supabase → Authentication → URL Configuration → Redirect URLs**. The ID must stay stable: use the Web Store ID for published builds, and for an unpacked dev build either add that ID as well or pin one with a `"key"` in `manifest.json`. (If Google isn't enabled in the project yet: create a *Web application* OAuth client in Google Cloud with redirect URI `https://<project>.supabase.co/auth/v1/callback`, then paste its ID and secret into **Authentication → Providers → Google**.)
 
 Worth knowing: the anon key isn't a secret in either file. It already ships in the website's JavaScript and inside any packaged build, so anyone can read it. Your list is protected by row-level security, not by hiding the key.
 
