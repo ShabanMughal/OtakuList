@@ -7,16 +7,11 @@
 // profile without changing the old link format.
 const { profileUser = '' } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
-const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 ---
 
-<script is:inline src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script is:inline define:vars={{ SUPABASE_URL, SUPABASE_ANON_KEY, base, profileUser }}>
-  window.sb =
-    window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : null;
+<script is:inline define:vars={{ base, profileUser }}>
+  // window.sb (the Supabase client) is created by AuthBootstrap in the layout.
+
   // The site root ("/"). Profile pages live one directory deeper than
   // showcase.html, so the script cannot derive it from location.pathname.
   window.GS_BASE = base;

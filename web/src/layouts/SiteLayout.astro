@@ -1,6 +1,7 @@
 ---
 import '../styles/redesign.css';
 import '../styles/tailwind.css';
+import AuthBootstrap from '../components/AuthBootstrap.astro';
 
 const {
   title,
@@ -49,6 +50,7 @@ const ogImageUrl = ogImage ? site + base + ogImage : undefined;
 
 <body>
   <slot />
+  <AuthBootstrap />
   <slot name="scripts" />
 </body>
 

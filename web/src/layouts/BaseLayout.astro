@@ -1,6 +1,9 @@
 ---
 import '../styles/tailwind.css';
 import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import Footer from '../components/Footer.astro';
+import AuthBootstrap from '../components/AuthBootstrap.astro';
 
 const {
   title,
@@ -9,8 +12,12 @@ const {
   ogTitle,
   ogDescription,
   ogImage,
-  page = 'default',
+  // which nav link SiteHeader highlights (on pages with chrome)
+  active = '',
   chrome = true,
+  // the shared Supabase client + header account menu; only ext-connect.html
+  // turns it off (see that page for why)
+  auth = true,
   robots = 'index, follow',
 } = Astro.props;
 
@@ -55,7 +62,7 @@ const ogImageUrl = ogImage ? (/^https?:\/\//.test(ogImage) ? ogImage : site + ba
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Archivo:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
   <slot name="head" />
@@ -71,67 +78,16 @@ const ogImageUrl = ogImage ? (/^https?:\/\//.test(ogImage) ? ogImage : site + ba
   </div>
   <div class="grain" aria-hidden="true"></div>
 
-  <!-- shared nav -->
-  <header class="nav" id="nav">
-    <a class="brand" href={base}>
-      <img src={`${base}assets/icon128.png`} alt="" class="brand-logo" />
-      <span>OtakuList</span>
-    </a>
-    <nav class="nav-links">
-      <a href={`${base}#features`}>Features</a>
-      <a href={`${base}animelist.html`}>Create list</a>
-      <a href={`${base}import.html`}>Import tool</a>
-      <a href={`${base}showcase.html`}>Showcase</a>
-      <a href={`${base}#faq`}>FAQ</a>
-      <a href={`${base}privacy-policy.html`}>Privacy</a>
-      <a href={`${base}contact.html`}>Contact</a>
-    </nav>
-    <div class="nav-actions">
-      {page === 'showcase' ? (
-        <>
-          <button id="nav-login" class="btn btn-primary btn-sm" type="button" hidden>Log in</button>
-          <span id="nav-account" class="nav-account" hidden>
-            <a id="nav-mylink" class="nav-username" href="#">@you</a>
-            <button id="nav-logout" class="btn btn-github btn-sm" type="button">Log out</button>
-          </span>
-        </>
-      ) : (
-        <>
-          <a
-            href="https://github.com/ShabanMughal/OtakuList"
-            target="_blank"
-            rel="noopener"
-            class="btn btn-github btn-sm"
-            aria-label="Star OtakuList on GitHub"
-          >
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
-              <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z" />
-            </svg>
-            Star
-          </a>
-          <a href={`${base}#install`} class="btn btn-primary btn-sm">Add to Chrome</a>
-        </>
-      )}
-    </div>
-  </header>
+  <SiteHeader active={active} />
   </>
   )}
 
   <slot />
 
-  {chrome && (
-  <!-- shared footer -->
-  <footer class="footer">
-    <div class="foot-brand">
-      <img src={`${base}assets/icon128.png`} alt="" />
-      <span>OtakuList</span>
-    </div>
-    <p>Made for anime &amp; gacha fans. Your list, kept safe.</p>
-    <p class="foot-fine">Not affiliated with any anime studio or streaming site. Character art for personal use.</p>
-  </footer>
-  )}
+  {chrome && <Footer />}
 
   {chrome && <script is:inline src={`${base}js/script.js`}></script>}
+  {auth && <AuthBootstrap />}
   <slot name="scripts" />
 </body>
 

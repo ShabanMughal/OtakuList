@@ -1,0 +1,115 @@
+---
+// The one site header. Every page renders this, so the nav can't drift apart
+// again. `active` highlights the current section; page-specific buttons (the
+// Anime List's Export/Import/Add) go in the `actions` slot, and pages without
+// any get the Star + Add to Chrome pair.
+//
+// The account area on the right is filled in by public/js/auth.js: a Google
+// "Log in" button while signed out, the account's avatar + menu once signed in.
+const { active = '' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const REPO = 'https://github.com/ShabanMughal/OtakuList';
+const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%94-anime-watchli/amfnmledhfgfeafdibdkhjdjdnkjcgfo';
+
+const links = [
+  { id: 'features', href: `${base}#features`, label: 'Features' },
+  { id: 'how', href: `${base}#how`, label: 'How it works' },
+  { id: 'animelist', href: `${base}animelist.html`, label: 'Create list' },
+  { id: 'import', href: `${base}import.html`, label: 'Import' },
+  { id: 'showcase', href: `${base}showcase.html`, label: 'Gacha Profiles' },
+];
+
+const pill =
+  'inline-flex cursor-pointer items-center gap-2 rounded-full border border-solid border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8] no-underline hover:border-white/30';
+const hasActions = Astro.slots.has('actions');
+---
+
+<header id="nav" class="sticky top-0 z-[60] border-0 border-b border-solid border-white/[.075] backdrop-blur-lg" style="background:rgba(11,10,22,.85)">
+  <div class="mx-auto flex max-w-[1320px] flex-wrap items-center gap-x-[26px] gap-y-2.5 px-4 py-3 sm:px-7">
+    <a href={base} class="flex items-center gap-2.5 text-[#f4f2f8] no-underline">
+      <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-full border border-solid border-white/[.14] bg-[#191531]"><img src={`${base}assets/gojo.png`} alt="OtakuList" class="block h-[30px] w-[30px] rounded-full object-cover" /></span>
+      <span class="font-heading text-[19px] font-extrabold tracking-[-.02em]">OtakuList</span>
+    </a>
+
+    <nav class="order-last flex w-full gap-[22px] overflow-x-auto whitespace-nowrap text-[13.5px] font-semibold text-[#f4f2f8]/[.68] lg:order-none lg:w-auto">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          aria-current={l.id === active ? 'page' : undefined}
+          class={l.id === active
+            ? 'border-0 border-b-2 border-solid border-iris pb-0.5 text-iris-2 no-underline'
+            : 'text-inherit no-underline hover:text-iris-2'}
+        >{l.label}</a>
+      ))}
+    </nav>
+
+    <div class="ml-auto flex flex-wrap items-center gap-2.5">
+      {hasActions ? (
+        <slot name="actions" />
+      ) : (
+        <>
+          <a href={REPO} target="_blank" rel="noopener" class={`${pill} max-sm:hidden`}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+            Star
+          </a>
+          <a href={CHROME_STORE} target="_blank" rel="noopener" class="rounded-full border-0 bg-iris px-5 py-2.5 font-heading text-sm font-extrabold text-white no-underline max-sm:hidden">Add to Chrome</a>
+        </>
+      )}
+
+      <!-- account: driven by public/js/auth.js -->
+      <div id="ol-account" class="relative">
+        <button id="ol-login" type="button" hidden class={pill}>
+          <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.5l-6.6-5.6C29.7 34.6 27 35.5 24 35.5c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.4 36 44 30.5 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+          Log in
+        </button>
+
+        <button id="ol-avatar-btn" type="button" hidden aria-haspopup="menu" aria-expanded="false" aria-controls="ol-menu"
+          class="grid h-10 w-10 cursor-pointer place-items-center overflow-hidden rounded-full border-2 border-solid border-iris/60 bg-[#191531] p-0 font-heading text-base font-extrabold text-[#f4f2f8] hover:border-iris-2">
+          <img id="ol-avatar" alt="" referrerpolicy="no-referrer" hidden class="block h-full w-full object-cover" />
+          <span id="ol-initial" aria-hidden="true">?</span>
+        </button>
+
+        <div id="ol-menu" role="menu" hidden
+          class="absolute right-0 top-[calc(100%+10px)] z-[70] w-[250px] rounded-2xl border border-solid border-white/[.12] bg-[#17142a] p-2 shadow-[0_18px_50px_rgba(0,0,0,.55)]">
+          <div class="border-0 border-b border-solid border-white/[.08] px-3 pb-2.5 pt-1.5">
+            <div id="ol-name" class="truncate text-sm font-semibold text-[#f4f2f8]"></div>
+            <div id="ol-email" class="truncate text-xs text-[#f4f2f8]/50"></div>
+            <div id="ol-ext" hidden class="mt-1.5 text-[11.5px] text-iris-2"></div>
+          </div>
+          <a role="menuitem" href={`${base}animelist.html`} class="ol-mi">My anime list</a>
+          <a role="menuitem" href={`${base}showcase.html`} class="ol-mi">My gacha profile</a>
+          <button role="menuitem" id="ol-connect" type="button" hidden class="ol-mi">Connect the extension</button>
+          <button role="menuitem" id="ol-logout" type="button" class="ol-mi">Log out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style is:global>
+  /* the home page doesn't load global.css, whose [hidden] rule the display
+     utilities above would otherwise override */
+  #nav [hidden] {
+    display: none !important;
+  }
+  .ol-mi {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(244, 242, 248, 0.82);
+    font: 500 13.5px/1.3 'Poppins', system-ui, sans-serif;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .ol-mi:hover,
+  .ol-mi:focus-visible {
+    background: rgba(125, 92, 245, 0.16);
+    color: #f4f2f8;
+    outline: none;
+  }
+</style>

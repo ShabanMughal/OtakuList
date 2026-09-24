@@ -1,0 +1,22 @@
+---
+// Creates the one Supabase client every page shares (window.sb) and loads
+// public/js/auth.js, which runs the header's account menu. Page scripts
+// (showcase.js, animelist.js) load after this and use the same client — a
+// second createClient() on the same storage key would fight this one over the
+// session.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+---
+
+{SUPABASE_URL && SUPABASE_ANON_KEY && (
+  <script is:inline src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+)}
+<script is:inline define:vars={{ SUPABASE_URL, SUPABASE_ANON_KEY, base }}>
+  window.sb =
+    window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+  window.OL_AUTH_CONFIG = { base, supabaseUrl: SUPABASE_URL };
+</script>
+<script is:inline src={`${base}js/auth.js`}></script>

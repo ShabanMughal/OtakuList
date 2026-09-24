@@ -500,7 +500,7 @@
   }
 
   $("hero-create").addEventListener("click", () => {
-    if (!user) return openAuth("login");
+    if (!user) return login();
     if (!username) {
       setupDismissed = false;
       $("gs-setupname").hidden = false;
@@ -550,7 +550,7 @@
     const likeEl = e.target.closest("[data-like]");
     if (likeEl) {
       if (!CLOUD) return;
-      if (!user) return openAuth("login");
+      if (!user) return login();
       const pid = likeEl.getAttribute("data-like");
       const wasLiked = likeEl.getAttribute("data-liked") === "1";
       likeEl.style.pointerEvents = "none";
@@ -587,30 +587,6 @@
       setTimeout(() => { cp.innerHTML = old; }, 1400);
     }
   });
-
-  function updateNav() {
-    if (!CLOUD) {
-      $("nav-login").hidden = true;
-      $("nav-account").hidden = true;
-      return;
-    }
-    const loggedIn = !!user;
-    $("nav-login").hidden = loggedIn;
-    $("nav-account").hidden = !loggedIn;
-    if (loggedIn) {
-      const label = username ? "@" + username : user.email;
-      $("nav-mylink").textContent = label;
-      $("nav-mylink").href = username ? publicUrl(username) : "#";
-      const av = $("nav-avatar");
-      const url = profileAvatarUrl({ avatar_url: profile.avatar, games: profile.games, featured: profile.featured });
-      if (url) {
-        av.src = url;
-        av.hidden = false;
-      } else {
-        av.hidden = true;
-      }
-    }
-  }
 
   // ═══════════════════════════ persist (games) ═══════════════════════════
   let saveTimer = null;
@@ -859,7 +835,6 @@
     }
     profile.avatar = next;
     photoStatus(on ? "Using your account photo ✓" : "Using your cover character ✓");
-    updateNav();
   }
 
   function syncPhotoUi() {
@@ -973,143 +948,12 @@
     el.classList.toggle("ok", !!ok);
   }
 
-  // ═══════════════════════════ AUTH MODAL ═══════════════════════════
-  let authMode = "login"; // "login" | "signup"
-  const modal = $("auth-modal");
-
-  function openAuth(m) {
-    modal.hidden = false;
-    setAuthMode(m || "login");
-    $("am-email").focus();
+  // Signing in is Google-only and owned by the site header (js/auth.js); the
+  // session comes back through onAuthStateChange below like any other.
+  function login() {
+    if (!window.OtakuAuth) return;
+    OtakuAuth.login().catch((err) => authMsg("Couldn't start sign-in: " + err.message));
   }
-  function closeAuth() {
-    modal.hidden = true;
-    $("am-err").hidden = true;
-  }
-  function setAuthMode(m) {
-    authMode = m;
-    const signup = m === "signup";
-    $("am-title").textContent = signup ? "Create your account" : "Welcome back!";
-    $("am-uwrap").hidden = !signup;
-    $("am-username").required = signup;
-    $("am-loginrow").hidden = signup;
-    $("am-pass").autocomplete = signup ? "new-password" : "current-password";
-    $("am-submit").textContent = signup ? "Create account" : "Login";
-    $("am-switch-text").textContent = signup ? "Already have an account?" : "Don't have an account?";
-    $("am-toggle").textContent = signup ? "Log in" : "Register";
-    $("am-err").hidden = true;
-    $("am-ustatus").hidden = true;
-  }
-  function authErr(msg, ok) {
-    const el = $("am-err");
-    if (!msg) return (el.hidden = true);
-    el.hidden = false;
-    el.textContent = msg;
-    el.classList.toggle("ok", !!ok);
-  }
-
-  $("nav-login").addEventListener("click", () => openAuth("login"));
-  $("am-close").addEventListener("click", closeAuth);
-  $("am-toggle").addEventListener("click", () => setAuthMode(authMode === "signup" ? "login" : "signup"));
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeAuth();
-  });
-
-  // forgot password → email a reset link
-  $("am-forgot").addEventListener("click", async () => {
-    const email = $("am-email").value.trim();
-    if (!email) return authErr("Enter your email above, then click Forgot password.");
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: homeUrl(),
-    });
-    authErr(error ? error.message : "✉️ Password reset link sent, check your email.", !error);
-  });
-
-  // live username availability (signup)
-  let uCheck = null;
-  $("am-username").addEventListener("input", (e) => {
-    const v = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
-    e.target.value = v;
-    const status = $("am-ustatus");
-    clearTimeout(uCheck);
-    if (!v) return (status.hidden = true);
-    if (!/^[a-z0-9_]{3,20}$/.test(v)) {
-      status.hidden = false;
-      status.className = "gs-uname-status dim";
-      status.textContent = "3–20 chars: a–z, 0–9, _";
-      return;
-    }
-    if (RESERVED_USERNAMES.has(v)) {
-      status.hidden = false;
-      status.className = "gs-uname-status taken";
-      status.textContent = "✗ Reserved, pick another";
-      return;
-    }
-    status.hidden = false;
-    status.className = "gs-uname-status dim";
-    status.textContent = "Checking…";
-    uCheck = setTimeout(async () => {
-      const { data } = await sb.from("profiles").select("username").eq("username", v).maybeSingle();
-      if ($("am-username").value.trim().toLowerCase() !== v) return;
-      status.hidden = false;
-      status.className = data ? "gs-uname-status taken" : "gs-uname-status ok";
-      status.textContent = data ? "✗ Taken, try another" : "✓ Available";
-    }, 400);
-  });
-
-  $("auth-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = $("am-email").value.trim();
-    const pass = $("am-pass").value;
-    $("am-submit").disabled = true;
-    try {
-      if (authMode === "login") {
-        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-        if (error) return authErr(error.message);
-        closeAuth();
-      } else {
-        const uname = $("am-username").value.trim().toLowerCase();
-        if (pass.length < 6) return authErr("Password must be at least 6 characters.");
-        if (!/^[a-z0-9_]{3,20}$/.test(uname))
-          return authErr("Username: 3–20 chars, lowercase letters, numbers or underscore.");
-        if (RESERVED_USERNAMES.has(uname)) return authErr("That username is reserved, try another.");
-        // pre-check availability for a friendly error
-        const { data: taken } = await sb.from("profiles").select("username").eq("username", uname).maybeSingle();
-        if (taken) return authErr("That username is taken, try another.");
-
-        const { data, error } = await sb.auth.signUp({
-          email,
-          password: pass,
-          options: { data: { username: uname }, emailRedirectTo: homeUrl() },
-        });
-        if (error) return authErr(error.message);
-        if (data.session) {
-          closeAuth(); // email confirmation is OFF → logged in immediately
-        } else {
-          // email confirmation is ON → must verify before logging in
-          authErr("");
-          closeAuth();
-          authMsg("✉️ Account created, check your email to confirm, then log in.", true);
-        }
-      }
-    } finally {
-      $("am-submit").disabled = false;
-    }
-  });
-
-  // Continue with Google → OAuth redirect; the session is picked up on return.
-  $("am-google").addEventListener("click", async () => {
-    authErr("");
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: homeUrl() },
-    });
-    if (error) authErr(error.message);
-  });
-
-  $("nav-logout").addEventListener("click", async () => {
-    await sb.auth.signOut();
-  });
 
   // ═══════════════════════════ claim username (logged in, none yet) ═══════════════════════════
   function setupStatus(text, cls) {
@@ -1167,7 +1011,6 @@
       $("gs-setup-uname").value = "";
       // The row exists now, so the search-indexing toggle can be offered.
       await loadSearchable();
-      updateNav();
       renderView();
       syncSearchUi();
       authMsg("Username set ✓, build your showcase below.", true);
@@ -1244,7 +1087,6 @@
     // after loadOwnProfile, which replaces `profile` wholesale
     await loadSearchable();
     authMsg("");
-    updateNav();
     syncPhotoUi();
     syncSearchUi();
     if (!username) suggestUsername(); // pre-fill a friendly username to claim
@@ -1268,7 +1110,6 @@
     profile = { name: "", games: [], featured: [], avatar: "", searchable: false };
     searchSupported = false;
     $("gs-name").value = "";
-    updateNav();
     syncPhotoUi();
     syncSearchUi();
     if (mode === "home") renderView();
@@ -1277,10 +1118,8 @@
   async function initAuth() {
     if (!CLOUD) {
       $("auth-noconfig").hidden = false;
-      updateNav();
       return;
     }
-    updateNav();
     const { data } = await sb.auth.getSession();
     if (data.session) await onSignedIn(data.session.user);
     sb.auth.onAuthStateChange((event, session) => {

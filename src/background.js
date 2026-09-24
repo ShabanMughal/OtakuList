@@ -45,7 +45,7 @@ chrome.runtime.onStartup.addListener(() => cloud.syncNow("merge"));
 chrome.runtime.onInstalled.addListener(() => cloud.syncNow("merge"));
 
 // First install only (not updates or Chrome updates): open the welcome tab,
-// which offers "Continue with Google" when sync is configured.
+// which offers to log in (on the website) when sync is configured.
 chrome.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
     chrome.tabs.create({ url: chrome.runtime.getURL("src/welcome.html") });
@@ -138,7 +138,20 @@ async function searchAnime(query) {
   return results;
 }
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+// Only the website's ext-connect page may hand us a session — relayed by our
+// own content script, which applies the same check before forwarding.
+const SITE_HOSTS = new Set(["otakulist.pages.dev", "localhost", "127.0.0.1"]);
+function fromConnectPage(sender) {
+  if (sender.id !== chrome.runtime.id || !sender.url) return false;
+  try {
+    const u = new URL(sender.url);
+    return SITE_HOSTS.has(u.hostname) && /\/ext-connect(\.html)?$/.test(u.pathname);
+  } catch {
+    return false;
+  }
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type === "anilistResolve" && (msg.id || msg.title)) {
     resolveAnime({ id: msg.id, title: msg.title })
       .then((result) => sendResponse({ result }))
@@ -157,10 +170,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     cloudState: async () => ({
       configured: await cloud.isConfigured(),
       status: await cloud.getStatus(),
+      siteUrl: await cloud.getSiteUrl(),
+      supabaseUrl: await cloud.getSupabaseUrl(),
     }),
-    cloudSignIn: async () => ({ ok: true, user: await cloud.signIn(msg.email, msg.password) }),
-    cloudSignInGoogle: async () => ({ ok: true, user: await cloud.signInWithGoogle() }),
-    cloudSignUp: async () => ({ ok: true, ...(await cloud.signUp(msg.email, msg.password)) }),
+    cloudAdoptSession: async () => {
+      if (!fromConnectPage(sender)) throw new Error("Not allowed.");
+      return { ok: true, user: await cloud.adoptSession(msg.session) };
+    },
     cloudSignOut: async () => {
       await cloud.signOut();
       return { ok: true };

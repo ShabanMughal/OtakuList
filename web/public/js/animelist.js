@@ -80,34 +80,18 @@
     render();
   }
 
-  function setAuthUi(signedIn) {
-    $("#al-login").hidden = !CLOUD || signedIn;
-    $("#al-logout").hidden = !CLOUD || !signedIn;
-    if (!CLOUD) cloudStatus("");
-  }
-
-  function openAuth() {
-    $("#al-auth-modal").hidden = false;
-    $("#al-auth-error").hidden = true;
-    $("#al-auth-email").focus();
-  }
-
   async function initCloud() {
-    setAuthUi(false);
     if (!CLOUD) return;
     const { data } = await sb.auth.getSession();
     if (data.session) {
-      setAuthUi(true);
       await loadCloud(data.session.user);
     }
     sb.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        setAuthUi(true);
         await loadCloud(session.user);
       } else if (event === "SIGNED_OUT") {
         cloudUser = null;
         cloudReady = false;
-        setAuthUi(false);
         cloudStatus("");
       }
     });
@@ -435,43 +419,6 @@
     else if (d.type === "list") onExtList(d.list);
   });
   $("#al-extload").addEventListener("click", mergeExt);
-
-  // ── optional Supabase cloud sync ────────────────────────────────────
-  let authMode = "login";
-  $("#al-login").addEventListener("click", openAuth);
-  $("#al-logout").addEventListener("click", () => sb.auth.signOut());
-  $("#al-auth-close").addEventListener("click", () => { $("#al-auth-modal").hidden = true; });
-  $("#al-auth-modal").addEventListener("click", (e) => {
-    if (e.target === $("#al-auth-modal")) $("#al-auth-modal").hidden = true;
-  });
-  $("#al-auth-toggle").addEventListener("click", () => {
-    authMode = authMode === "login" ? "signup" : "login";
-    $("#al-auth-title").textContent = authMode === "login" ? "Log in to sync" : "Create an account";
-    $("#al-auth-submit").textContent = authMode === "login" ? "Log in" : "Create account";
-    $("#al-auth-toggle").textContent = authMode === "login" ? "Create an account" : "Already have an account";
-    $("#al-auth-password").autocomplete = authMode === "login" ? "current-password" : "new-password";
-    $("#al-auth-error").hidden = true;
-  });
-  $("#al-auth-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = $("#al-auth-email").value.trim();
-    const password = $("#al-auth-password").value;
-    const errorEl = $("#al-auth-error");
-    const submit = $("#al-auth-submit");
-    submit.disabled = true;
-    errorEl.hidden = true;
-    const result = authMode === "login"
-      ? await sb.auth.signInWithPassword({ email, password })
-      : await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.href } });
-    submit.disabled = false;
-    if (result.error) {
-      errorEl.textContent = result.error.message;
-      errorEl.hidden = false;
-      return;
-    }
-    $("#al-auth-modal").hidden = true;
-    if (authMode === "signup" && !result.data.session) toast("Check your email to confirm your account.");
-  });
 
   // ── init ─────────────────────────────────────────────────────────────
   document.querySelectorAll(".al-vbtn").forEach((x) => x.classList.toggle("on", x.dataset.view === view));

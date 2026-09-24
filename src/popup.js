@@ -391,14 +391,16 @@ importFile.addEventListener("change", async (e) => {
 // account. All the real work (auth, merge, upload) happens in the background
 // worker — the popup only shows its state and forwards button presses.
 //
-// Signed out, the header button is a log-in icon that opens the login page in
-// a tab (a popup can't host Google's sign-in window — it closes the moment that
-// window takes focus). Signed in, it turns into the sync cloud and opens the
-// account panel here.
+// Signed out, the header button is a log-in icon that opens the website's
+// login page in a normal tab — you sign in with Google there, and the site
+// hands this extension its session (see adoptSession in cloud.js). Signed in,
+// it shows your Google photo and opens the account panel here.
 const authPanel = $("#authPanel");
 const authAccount = $("#authAccount");
 const cloudBtn = $("#cloudBtn");
-const LOGIN_PAGE = "src/welcome.html#login";
+// Replaced by the worker's answer (cloud-config.local.json can override it).
+let siteUrl = "https://otakulist.pages.dev";
+const loginUrl = () => `${siteUrl}/login.html?from=ext`;
 
 // `configured` is null until the service worker has answered — see the note on
 // the first paint at the bottom of this file. Only the worker can tell us for
@@ -438,6 +440,7 @@ function renderCloud() {
   if (known && !configured) {
     authAccount.hidden = true;
     cloudBtn.classList.remove("on", "warn", "signed-in");
+    renderAvatar(null);
     cloudBtn.title = "Cloud sync isn't set up";
     return;
   }
@@ -451,6 +454,7 @@ function renderCloud() {
   cloudBtn.classList.toggle("on", signedIn && status.state !== "error");
   cloudBtn.classList.toggle("warn", status.state === "error");
   cloudBtn.title = signedIn ? `${status.email || "Signed in"} — ${label}` : "Log in to sync";
+  renderAvatar(signedIn ? status : null);
 
   // e.g. the refresh token expired while the popup was closed
   $("#subtitle").textContent = signedIn
@@ -467,13 +471,39 @@ function renderCloud() {
   }
 }
 
+// Your Google photo in the header button once signed in (the first letter of
+// your name when there isn't one), like any other site's account button.
+function renderAvatar(status) {
+  const img = $("#cloudAvatar");
+  const initial = $("#cloudInitial");
+  if (!status) {
+    img.hidden = true;
+    initial.hidden = true;
+    return;
+  }
+  const name = status.name || status.email || "?";
+  initial.textContent = name.trim().charAt(0).toUpperCase() || "?";
+  if (status.avatar) {
+    if (img.getAttribute("src") !== status.avatar) img.src = status.avatar;
+    img.hidden = false;
+    initial.hidden = true;
+  } else {
+    img.hidden = true;
+    initial.hidden = false;
+  }
+}
+$("#cloudAvatar").addEventListener("error", () => {
+  $("#cloudAvatar").hidden = true;
+  $("#cloudInitial").hidden = false;
+});
+
 cloudBtn.addEventListener("click", () => {
   const signedIn = cloud.status.state !== "signed-out";
   // Signed out with sync available (or not known yet — see renderCloud): go
   // straight to the login page. Otherwise toggle the panel, which shows either
   // the account or why sync isn't set up.
   if (!signedIn && cloud.configured !== false) {
-    chrome.tabs.create({ url: chrome.runtime.getURL(LOGIN_PAGE) });
+    chrome.tabs.create({ url: loginUrl() });
     window.close();
     return;
   }
@@ -541,6 +571,7 @@ sendCloud({ type: "cloudState" }).then((res) => {
     return renderCloud();
   }
   cloud = res;
+  if (res.siteUrl) siteUrl = res.siteUrl;
   renderCloud();
   if (!res.configured) return;
   // Opening the popup is a good moment to pick up edits made on the website or

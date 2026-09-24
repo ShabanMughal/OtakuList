@@ -843,13 +843,55 @@
   scheduleDetect(); // first pass on load
 
   // ── website bridge ─────────────────────────────────────────────────────
-  // Lets the OtakuList web app (Create list page) read the list saved by this
-  // extension. Gated strictly to the official site + localhost so no other page
-  // can ask the extension for your list.
+  // Lets the OtakuList website read the list saved by this extension, see
+  // whether the extension is signed in, and — on its ext-connect page only —
+  // hand it a session after you log in there (see adoptSession in cloud.js).
+  // Gated strictly to the official site + localhost so no other page can ask
+  // the extension for your list.
   (function otakulistBridge() {
     const h = location.hostname;
     const allowed = h === "otakulist.pages.dev" || h === "localhost" || h === "127.0.0.1";
     if (!allowed) return;
+    const post = (msg) => window.postMessage({ source: "otakulist-ext", ...msg }, location.origin);
+    // Mirrors STATUS_KEY in src/cloud.js.
+    const STATUS_KEY = "otakuSyncStatus";
+
+    const ask = (msg) =>
+      new Promise((resolve) => {
+        try {
+          chrome.runtime.sendMessage(msg, (res) =>
+            resolve(chrome.runtime.lastError ? { error: chrome.runtime.lastError.message } : res || {})
+          );
+        } catch (err) {
+          // the extension was reloaded under this still-open tab
+          resolve({ error: String(err?.message || err) });
+        }
+      });
+
+    // Signed in or not, and against which Supabase project — the site only
+    // offers to connect the extension when both use the same one.
+    async function sendAuth() {
+      const res = await ask({ type: "cloudState" });
+      if (res.error) return;
+      const status = res.status || {};
+      post({
+        type: "auth",
+        configured: !!res.configured,
+        signedIn: !!status.state && status.state !== "signed-out",
+        email: status.email || "",
+        supabaseUrl: res.supabaseUrl || "",
+      });
+    }
+
+    async function adoptSession(session) {
+      const res = await ask({ type: "cloudAdoptSession", session });
+      post({
+        type: "ext-session-result",
+        ok: !res.error,
+        email: res.user?.email || "",
+        error: res.error || "",
+      });
+    }
 
     async function sendList() {
       const store = await chrome.storage.local.get(KEY);
@@ -864,14 +906,22 @@
     window.addEventListener("message", (e) => {
       if (e.source !== window || e.origin !== location.origin) return;
       const d = e.data;
-      if (d && d.source === "otakulist-web" && d.type === "request-list") sendList();
+      if (!d || d.source !== "otakulist-web") return;
+      if (d.type === "request-list") sendList();
+      else if (d.type === "request-auth") sendAuth();
+      else if (d.type === "ext-session" && /\/ext-connect(\.html)?$/.test(location.pathname)) {
+        adoptSession(d.session);
+      }
     });
 
     // announce we're here so the page can request immediately
-    window.postMessage({ source: "otakulist-ext", type: "hello" }, location.origin);
-    // reflect live edits (e.g. an episode auto-bumped while the tab is open)
+    post({ type: "hello" });
+    // reflect live edits (e.g. an episode auto-bumped while the tab is open),
+    // and sign-ins/outs so the site's account menu stays current
     chrome.storage.onChanged.addListener((ch, area) => {
-      if (area === "local" && ch[KEY]) sendList();
+      if (area !== "local") return;
+      if (ch[KEY]) sendList();
+      if (ch[STATUS_KEY]) sendAuth();
     });
   })();
 })();

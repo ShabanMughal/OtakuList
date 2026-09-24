@@ -26,11 +26,9 @@
           <path d="M10 17l5-5-5-5" />
           <path d="M15 12H3" />
         </svg>
-        <!-- signed in: the sync cloud, which opens the account panel -->
-        <svg class="icon-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M7 18a4 4 0 0 1 .4-8 5.5 5.5 0 0 1 10.5 1.6A3.3 3.3 0 0 1 17.5 18z" />
-        </svg>
+        <!-- signed in: your Google photo (or initial), which opens the account panel -->
+        <img id="cloudAvatar" class="avatar" alt="" referrerpolicy="no-referrer" hidden>
+        <span id="cloudInitial" class="avatar-initial" hidden></span>
       </button>
       <button id="addBtn" title="Add anime manually">＋</button>
     </div>

@@ -1,4 +1,5 @@
 ---
+import SiteHeader from './SiteHeader.astro';
 // The whole Gacha Showcase UI — gallery, editor, profile view and auth modal.
 //
 // Shared by showcase.html and the generated per-profile pages (u/<name>.html)
@@ -17,7 +18,6 @@ import StaticProfile from './StaticProfile.astro';
 
 const { profile = null, roster = {} } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
-const REPO = 'https://github.com/ShabanMughal/OtakuList';
 const isProfilePage = !!profile;
 
 // modernist theme tokens, scoped to this page's wrapper
@@ -33,33 +33,7 @@ const theme =
 
 <div style={theme}>
   <!-- ═══════════ header ═══════════ -->
-  <header class="sticky top-0 z-[60] border-b border-white/[.075] backdrop-blur-lg" style="background:rgba(11,10,22,.85)">
-    <div class="mx-auto flex max-w-[1320px] flex-wrap items-center gap-[26px] px-7 py-3">
-      <a href={base} class="flex items-center gap-2.5 text-[#f4f2f8]">
-        <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-full border border-white/[.14] bg-[#191531]"><img src={`${base}assets/gojo.png`} alt="OtakuList" class="block h-[30px] w-[30px] rounded-full object-cover" /></span>
-        <span class="font-heading text-[19px] font-extrabold tracking-[-.02em]">OtakuList</span>
-      </a>
-      <nav class="flex gap-[22px] text-[13.5px] font-semibold text-[#f4f2f8]/[.68]">
-        <a href={`${base}#features`} class="text-inherit hover:text-iris-2">Features</a>
-        <a href={`${base}#how`} class="text-inherit hover:text-iris-2">How it works</a>
-        <a href={`${base}animelist.html`} class="text-inherit hover:text-iris-2">Create list</a>
-        <a href={`${base}import.html`} class="text-inherit hover:text-iris-2">Import</a>
-        <a href={`${base}showcase.html`} class="border-b-2 border-iris pb-0.5 text-iris-2">Gacha Profiles</a>
-      </nav>
-      <div class="ml-auto flex items-center gap-2.5">
-        <a href={REPO} target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-full border border-white/[.12] px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
-          Star
-        </a>
-        <button id="nav-login" type="button" hidden class="cursor-pointer rounded-full border border-accent bg-accent px-5 py-2.5 font-heading text-sm font-extrabold text-white">Log in</button>
-        <span id="nav-account" hidden class="flex items-center gap-3">
-          <img id="nav-avatar" hidden alt="" referrerpolicy="no-referrer" class="h-8 w-8 rounded-full border border-white/20 object-cover" />
-          <a id="nav-mylink" href="#" class="text-[13.5px] font-semibold text-iris-2">@you</a>
-          <button id="nav-logout" type="button" class="cursor-pointer rounded-full border border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">Log out</button>
-        </span>
-      </div>
-    </div>
-  </header>
+  <SiteHeader active="showcase" />
 
   <div id="auth-msg" class="gs-auth-msg mx-auto mt-3.5 max-w-[1320px] px-7" hidden></div>
 
@@ -233,49 +207,4 @@ const theme =
   </div>
 
   <Footer />
-
-  <!-- ═══════════ AUTH MODAL ═══════════ -->
-  <div id="auth-modal" class="am-overlay" hidden>
-    <div class="am-card">
-      <button class="am-x" id="am-close" type="button" aria-label="Close">✕</button>
-      <h2 class="am-title" id="am-title">Welcome back!</h2>
-
-      <button id="am-google" type="button"
-        class="mb-4 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border border-white/[.16] bg-white px-3.5 py-3 font-heading text-[14.5px] font-bold text-[#1f1f1f] transition hover:bg-white/90">
-        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.5l-6.6-5.6C29.7 34.6 27 35.5 24 35.5c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.4 36 44 30.5 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
-        Continue with Google
-      </button>
-
-      <div id="am-or" class="mb-3.5 flex items-center gap-3 text-xs text-[#f4f2f8]/40" style="display:none">
-        <span class="h-px flex-1 bg-white/[.12]"></span>or with email<span class="h-px flex-1 bg-white/[.12]"></span>
-      </div>
-
-      <form id="auth-form" class="am-form" style="display:none">
-        <div id="am-uwrap" hidden>
-          <label class="am-label" for="am-username">Username</label>
-          <input id="am-username" class="am-in" type="text" placeholder="yourname" maxlength="20" autocomplete="off" />
-          <div id="am-ustatus" class="gs-uname-status" hidden></div>
-        </div>
-
-        <label class="am-label" for="am-email">Email address</label>
-        <input id="am-email" class="am-in" type="email" placeholder="name@email.com" autocomplete="email" required />
-
-        <label class="am-label" for="am-pass">Password</label>
-        <input id="am-pass" class="am-in" type="password" placeholder="Password" autocomplete="current-password" required />
-
-        <div class="am-row" id="am-loginrow">
-          <label class="am-remember"><input type="checkbox" id="am-remember" checked /> Remember me</label>
-          <button type="button" class="am-forgot" id="am-forgot">Forgot password?</button>
-        </div>
-
-        <div id="am-err" class="am-err" hidden></div>
-        <button type="submit" id="am-submit" class="am-submit">Login</button>
-      </form>
-
-      <p class="am-switch" style="display:none">
-        <span id="am-switch-text">Don't have an account?</span>
-        <button type="button" class="am-link" id="am-toggle">Register</button>
-      </p>
-    </div>
-  </div>
 </div>

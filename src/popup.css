@@ -148,23 +148,39 @@ header h1 {
   color: #fff;
 }
 
-/* signed in and synced — the cloud lights up */
-.cloud-btn.on {
-  color: var(--accent-2);
+/* signed in: a round account button with your photo, its ring showing the
+   sync state (accent when synced, red when sync is paused) */
+.cloud-btn.signed-in {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--line);
 }
 
-.cloud-btn.warn {
-  color: #f0a4a4;
+.cloud-btn.signed-in.on {
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
-/* one icon at a time: log-in while signed out, the cloud once signed in */
-.cloud-btn .icon-cloud,
+.cloud-btn.signed-in.warn {
+  box-shadow: 0 0 0 2px #f0a4a4;
+}
+
 .cloud-btn.signed-in .icon-login {
   display: none;
 }
 
-.cloud-btn.signed-in .icon-cloud {
+.cloud-btn .avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
+}
+
+.cloud-btn .avatar-initial {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
 }
 
 /* account / sync panel */

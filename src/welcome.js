@@ -1,14 +1,16 @@
-// OtakuList welcome / login page.
-//   src/welcome.html        — opened once on first install (see background.js)
-//   src/welcome.html#login  — opened by the popup's log-in button
-// Like the popup, it only forwards the button press — the service worker does
-// the Google sign-in and writes the result to storage.
+// OtakuList welcome page, opened once on first install (see background.js).
+//
+// "Continue with Google" doesn't sign in here: it takes this same tab to the
+// website's login page, and once you're signed in there the site hands the
+// extension its session (see adoptSession in cloud.js). The storage listener
+// below notices and flips this page to "signed in" if you come back to it.
 
 // Mirrors STATUS_KEY in src/cloud.js (this is a classic script, not a module).
 const STATUS_KEY = "otakuSyncStatus";
 
 const $ = (sel) => document.querySelector(sel);
-const loginMode = location.hash === "#login";
+// Replaced by the worker's answer (cloud-config.local.json can override it).
+let siteUrl = "https://otakulist.pages.dev";
 
 const sendCloud = (msg) =>
   new Promise((resolve) =>
@@ -16,14 +18,6 @@ const sendCloud = (msg) =>
       resolve(chrome.runtime.lastError ? { error: chrome.runtime.lastError.message } : res || {})
     )
   );
-
-if (loginMode) {
-  document.title = "Log in · OtakuList";
-  $("#heading").textContent = "Log in to OtakuList";
-  $("#lead").textContent = "Sync your watchlist across browsers and the website.";
-  $("#steps").hidden = true;
-  $("#skipBtn").hidden = true;
-}
 
 function show(id) {
   for (const s of ["signIn", "done", "local"]) $(`#${s}`).hidden = s !== id;
@@ -43,14 +37,8 @@ function setError(message) {
   $("#error").hidden = !message;
 }
 
-$("#googleBtn").addEventListener("click", async () => {
-  const btn = $("#googleBtn");
-  btn.disabled = true;
-  setError("");
-  const res = await sendCloud({ type: "cloudSignInGoogle" });
-  btn.disabled = false;
-  if (res.error) setError(res.error);
-  // Success is picked up by the storage listener below.
+$("#googleBtn").addEventListener("click", () => {
+  location.href = `${siteUrl}/login.html?from=ext`;
 });
 
 $("#skipBtn").addEventListener("click", () => show("local"));
@@ -61,6 +49,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 sendCloud({ type: "cloudState" }).then((res) => {
   if (res.error || !res.configured) return show("local");
+  if (res.siteUrl) siteUrl = res.siteUrl;
   if (showStatus(res.status)) return;
   show("signIn");
   // e.g. "Session expired — sign in again to resume syncing."

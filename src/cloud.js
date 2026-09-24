@@ -28,6 +28,11 @@ const REFRESH_MARGIN_MS = 60000;
 // "not configured", instead of an import error that stops the whole service
 // worker (and with it the badge and the AniList lookups).
 const LOCAL_CONFIG_FILE = "cloud-config.local.json";
+// Where logging in happens. The extension never opens a sign-in window of its
+// own: the popup opens the website's login page in a normal tab, and the site
+// hands the extension a session through the content script (see adoptSession).
+// cloud-config.local.json can point this at a dev server with "siteUrl".
+const DEFAULT_SITE_URL = "https://otakulist.pages.dev";
 let configPromise = null;
 
 function loadConfig() {
@@ -39,12 +44,17 @@ function loadConfig() {
           const json = await res.json();
           const url = String(json.url || "").trim();
           const key = String(json.anonKey || "").trim();
-          if (url && key) return { url, key };
+          const site = String(json.siteUrl || "").trim() || DEFAULT_SITE_URL;
+          if (url && key) return { url, key, site };
         }
       } catch {
         // no local file — fall back to whatever is baked into cloud-config.js
       }
-      return { url: String(BUILT_IN_URL || "").trim(), key: String(BUILT_IN_KEY || "").trim() };
+      return {
+        url: String(BUILT_IN_URL || "").trim(),
+        key: String(BUILT_IN_KEY || "").trim(),
+        site: DEFAULT_SITE_URL,
+      };
     })();
   }
   return configPromise;
@@ -57,18 +67,28 @@ export async function isConfigured() {
 
 const apiBase = (url) => url.replace(/\/+$/, "");
 
+export const getSupabaseUrl = async () => apiBase((await loadConfig()).url);
+export const getSiteUrl = async () => apiBase((await loadConfig()).site);
+
 // ---------- local state ----------
 const getStored = async (key) => (await chrome.storage.local.get(key))[key];
 
 export const getSession = () => getStored(SESSION_KEY);
 export const getList = async () => (await getStored(LIST_KEY)) || {};
 export const getStatus = async () =>
-  (await getStored(STATUS_KEY)) || { state: "signed-out", message: "", email: "" };
+  (await getStored(STATUS_KEY)) || { state: "signed-out", message: "", email: "", name: "", avatar: "" };
 
 async function setStatus(state, message = "") {
-  const session = await getSession();
+  const user = (await getSession())?.user;
   await chrome.storage.local.set({
-    [STATUS_KEY]: { state, message, email: session?.user?.email || "", at: Date.now() },
+    [STATUS_KEY]: {
+      state,
+      message,
+      email: user?.email || "",
+      name: user?.name || "",
+      avatar: user?.avatar || "",
+      at: Date.now(),
+    },
   });
 }
 
@@ -103,8 +123,20 @@ async function authRequest(path, body, token) {
   return data;
 }
 
+// The Google account photo, for the popup's account button. Only Google's
+// photo CDN — the same allowlist the website applies.
+function avatarFrom(meta) {
+  try {
+    const url = new URL(String(meta?.avatar_url || meta?.picture || ""));
+    return url.protocol === "https:" && /(^|\.)googleusercontent\.com$/.test(url.hostname) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 function sessionFrom(data, fallbackUser) {
   if (!data?.access_token) return null;
+  const meta = data.user?.user_metadata;
   return {
     access_token: data.access_token,
     refresh_token: data.refresh_token,
@@ -112,6 +144,8 @@ function sessionFrom(data, fallbackUser) {
     user: {
       id: data.user?.id || fallbackUser?.id,
       email: data.user?.email || fallbackUser?.email || "",
+      name: String(meta?.full_name || meta?.name || fallbackUser?.name || ""),
+      avatar: avatarFrom(meta) || fallbackUser?.avatar || "",
     },
   };
 }
@@ -122,75 +156,34 @@ async function assertConfigured() {
   }
 }
 
-export async function signIn(email, password) {
+// Take the session the website got for us: Google sign-in on its login page,
+// then a second authorize hop so this is a session of our own rather than a
+// copy of the site's (see public/js/auth.js on the website for why). The
+// content script relays it, and the token is checked with Supabase before
+// anything is stored, so a forged message can't plant a bogus session.
+export async function adoptSession({ access_token, refresh_token, expires_in } = {}) {
   await assertConfigured();
-  const session = sessionFrom(await authRequest("token?grant_type=password", { email, password }));
-  if (!session?.user?.id) throw new Error("Sign-in failed — no session returned.");
-  await chrome.storage.local.set({ [SESSION_KEY]: session });
-  await syncNow("merge");
-  return session.user;
-}
-
-// "Continue with Google" via Supabase's OAuth provider. launchWebAuthFlow opens
-// Google in its own window and hands back the final redirect, which Chrome
-// intercepts at https://<extension-id>.chromiumapp.org/ — so that URL must be in
-// the Supabase project's allowed redirect URLs. With no PKCE challenge Supabase
-// uses the implicit flow and puts the tokens in the URL fragment.
-export async function signInWithGoogle() {
-  await assertConfigured();
+  if (typeof access_token !== "string" || typeof refresh_token !== "string" || !access_token || !refresh_token) {
+    throw new Error("Sign-in failed — no session received.");
+  }
   const { url, key } = await loadConfig();
-  const redirectTo = chrome.identity.getRedirectURL();
-  const authUrl =
-    `${apiBase(url)}/auth/v1/authorize?provider=google` +
-    `&redirect_to=${encodeURIComponent(redirectTo)}`;
+  const res = await fetch(`${apiBase(url)}/auth/v1/user`, {
+    headers: { apikey: key, Authorization: `Bearer ${access_token}` },
+  });
+  const user = await res.json().catch(() => ({}));
+  if (!res.ok || !user?.id) throw new Error("Sign-in failed — couldn't read your account.");
 
-  let finalUrl;
-  try {
-    finalUrl = await chrome.identity.launchWebAuthFlow({ url: authUrl, interactive: true });
-  } catch (err) {
-    // Closing the window is not an error worth shouting about.
-    if (/did not approve|canceled|cancelled|closed/i.test(String(err?.message))) {
-      throw new Error("Sign-in cancelled.");
-    }
-    throw err;
+  // Never silently swap accounts: the local list would be merged into the
+  // other account's row.
+  const current = await getSession();
+  if (current?.user?.id && current.user.id !== user.id) {
+    throw new Error(`The extension is signed in as ${current.user.email || "another account"} — log out there first.`);
   }
 
-  const back = new URL(finalUrl);
-  const params = new URLSearchParams(back.hash.slice(1));
-  // Supabase reports failures in the query on some paths, the fragment on others.
-  const failure =
-    params.get("error_description") || back.searchParams.get("error_description") ||
-    params.get("error") || back.searchParams.get("error");
-  if (failure) throw new Error(failure.replace(/\+/g, " "));
-
-  const token = params.get("access_token");
-  if (!token) throw new Error("Sign-in failed — no session returned.");
-  const userRes = await fetch(`${apiBase(url)}/auth/v1/user`, {
-    headers: { apikey: key, Authorization: `Bearer ${token}` },
-  });
-  const user = await userRes.json().catch(() => ({}));
-  if (!userRes.ok || !user?.id) throw new Error("Sign-in failed — couldn't read your account.");
-
-  const session = sessionFrom({
-    access_token: token,
-    refresh_token: params.get("refresh_token"),
-    expires_in: params.get("expires_in"),
-    user,
-  });
+  const session = sessionFrom({ access_token, refresh_token, expires_in, user });
   await chrome.storage.local.set({ [SESSION_KEY]: session });
   await syncNow("merge");
   return session.user;
-}
-
-// A project with "Confirm email" on returns a user but no session — the list
-// starts syncing only once they have clicked the link and signed in.
-export async function signUp(email, password) {
-  await assertConfigured();
-  const session = sessionFrom(await authRequest("signup", { email, password }));
-  if (!session?.user?.id) return { confirmationRequired: true };
-  await chrome.storage.local.set({ [SESSION_KEY]: session });
-  await syncNow("merge");
-  return { confirmationRequired: false, user: session.user };
 }
 
 export async function signOut() {

@@ -1,0 +1,96 @@
+---
+// Where Google sends the tab back when the website hands a session to the
+// extension (see "The extension handoff" in public/js/auth.js).
+//
+// The tokens in this page's URL fragment are the extension's own session,
+// separate from the website's. That is why this page runs without the shared
+// Supabase client (auth={false}): supabase-js would spot the tokens in the URL
+// and adopt them as the website's session, leaving both clients on one
+// refresh token — exactly what the extra hop exists to avoid.
+import BaseLayout from '../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+---
+
+<BaseLayout
+  title="Connecting the extension | OtakuList"
+  chrome={false}
+  auth={false}
+  robots="noindex, nofollow"
+>
+  <main class="grid min-h-screen place-items-center bg-[#0b0a16] px-4 text-center text-[#f4f2f8]">
+    <div class="w-full max-w-[440px] rounded-3xl border border-solid border-white/10 bg-[#17142a] px-7 pb-8 pt-9">
+      <span class="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-full border border-solid border-white/[.14] bg-[#191531]">
+        <img src={`${base}assets/gojo.png`} alt="" class="block h-14 w-14 rounded-full object-cover" />
+      </span>
+      <h1 id="xc-title" class="m-0 mb-2.5 font-heading text-2xl font-extrabold tracking-[-.03em]">Connecting the extension…</h1>
+      <p id="xc-text" class="m-0 text-[15px] leading-relaxed text-[#f4f2f8]/65" aria-live="polite">One moment.</p>
+      <a id="xc-next" hidden href={`${base}animelist.html`}
+        class="mt-6 inline-flex rounded-full bg-[#7d5cf5] px-5 py-2.5 font-heading text-sm font-extrabold text-white no-underline">Continue</a>
+    </div>
+  </main>
+
+  <script is:inline slot="scripts" define:vars={{ base }}>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const hash = new URLSearchParams(location.hash.slice(1));
+      const query = new URLSearchParams(location.search);
+      // Get the tokens out of the address bar and history straight away.
+      history.replaceState(null, '', location.pathname);
+
+      let next = '';
+      try {
+        next = sessionStorage.getItem('otakulist-ext-next') || '';
+        sessionStorage.removeItem('otakulist-ext-next');
+      } catch (_) {}
+      // same-origin paths only
+      if (!/^\/(?!\/)/.test(next)) next = base + 'animelist.html';
+      $('xc-next').href = next;
+
+      function finish(title, text, ok) {
+        $('xc-title').textContent = title;
+        $('xc-text').textContent = text;
+        $('xc-next').hidden = false;
+        if (ok) setTimeout(() => location.replace(next), 1500);
+      }
+
+      const failure =
+        hash.get('error_description') || query.get('error_description') || hash.get('error') || query.get('error');
+      const session = {
+        access_token: hash.get('access_token') || '',
+        refresh_token: hash.get('refresh_token') || '',
+        expires_in: Number(hash.get('expires_in')) || 3600,
+      };
+      if (failure || !session.access_token || !session.refresh_token) {
+        return finish(
+          "Couldn't connect the extension",
+          failure ? failure.replace(/\+/g, ' ') : 'Google sign-in did not complete. You are still logged in on the website.'
+        );
+      }
+
+      // The extension's content script answers "hello" once it has loaded,
+      // which can be after this runs — so send now and again on hello.
+      let done = false;
+      const send = () =>
+        window.postMessage({ source: 'otakulist-web', type: 'ext-session', session }, location.origin);
+
+      window.addEventListener('message', (e) => {
+        if (e.source !== window || e.origin !== location.origin) return;
+        const d = e.data;
+        if (!d || d.source !== 'otakulist-ext' || done) return;
+        if (d.type === 'hello') send();
+        else if (d.type === 'ext-session-result') {
+          done = true;
+          if (d.ok) finish('Extension connected ✓', `The extension is now logged in${d.email ? ' as ' + d.email : ''} and syncing your list.`, true);
+          else finish("Couldn't connect the extension", d.error || 'The extension rejected the sign-in.');
+        }
+      });
+      send();
+
+      setTimeout(() => {
+        if (done) return;
+        done = true;
+        finish("Couldn't reach the extension", "Make sure OtakuList is installed and enabled in this browser. You're still logged in on the website.");
+      }, 8000);
+    })();
+  </script>
+</BaseLayout>

@@ -1,0 +1,113 @@
+---
+// Log in with Google. The extension's log-in button opens this page as
+// login.html?from=ext, so signing in here also signs the extension in (the
+// handoff itself lives in public/js/auth.js). Opened from the site, it's just
+// a login page.
+import BaseLayout from '../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
+const site = import.meta.env.SITE.replace(/\/$/, '');
+const btn =
+  'inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-solid border-white/[.12] bg-transparent px-5 py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8] no-underline hover:border-white/30';
+---
+
+<BaseLayout
+  title="Log in | OtakuList"
+  description="Log in to OtakuList with Google to sync your anime watchlist between the extension, the website and all your browsers."
+  canonical={`${site}${base}login.html`}
+  robots="noindex, follow"
+>
+  <main class="mx-auto box-border max-w-[480px] px-4 pb-24 pt-16 text-center text-[#f4f2f8] sm:pt-24">
+    <div class="rounded-3xl border border-solid border-white/10 bg-[#17142a]/80 px-6 pb-8 pt-9 shadow-[0_26px_60px_rgba(0,0,0,.5)] sm:px-9">
+      <span class="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-full border border-solid border-white/[.14] bg-[#191531]">
+        <img src={`${base}assets/gojo.png`} alt="" class="block h-14 w-14 rounded-full object-cover" />
+      </span>
+      <h1 id="lg-title" class="m-0 mb-2.5 font-heading text-[28px] font-extrabold tracking-[-.03em]">Log in to OtakuList</h1>
+      <p id="lg-lead" class="m-0 mb-7 text-[15px] leading-relaxed text-[#f4f2f8]/[.62]">
+        Sync your watchlist between the extension, this website and every browser you use.
+      </p>
+
+      <button id="lg-google" type="button" hidden
+        class="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border-0 bg-white px-4 py-3.5 font-heading text-[15px] font-bold text-[#1f1f1f] transition hover:bg-white/90 disabled:cursor-wait disabled:opacity-70">
+        <svg width="19" height="19" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.5l-6.6-5.6C29.7 34.6 27 35.5 24 35.5c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.4 36 44 30.5 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+
+      <p id="lg-status" class="m-0 text-[15px] text-[#f4f2f8]/80" aria-live="polite">Checking your account…</p>
+      <p id="lg-error" hidden class="mb-0 mt-4 text-sm text-[#f0a4a4]" role="alert"></p>
+
+      <div id="lg-links" hidden class="mt-6 flex flex-wrap justify-center gap-2.5">
+        <a href={`${base}animelist.html`} class={btn}>My anime list</a>
+        <a href={`${base}showcase.html`} class={btn}>My gacha profile</a>
+      </div>
+
+      <p class="mb-0 mt-7 text-xs leading-relaxed text-[#f4f2f8]/40">
+        Google is only used to sign you in. Your list still works without an account; logging in just keeps it in sync.
+      </p>
+    </div>
+  </main>
+
+  <script is:inline slot="scripts" define:vars={{ base }}>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const fromExt = new URLSearchParams(location.search).get('from') === 'ext';
+      const status = (text) => { $('lg-status').textContent = text; };
+      const error = (text) => { $('lg-error').textContent = text || ''; $('lg-error').hidden = !text; };
+
+      if (fromExt) $('lg-lead').textContent = 'Log in once here and the OtakuList extension is logged in too.';
+
+      $('lg-google').addEventListener('click', () => {
+        $('lg-google').disabled = true;
+        error('');
+        OtakuAuth.login({ redirectTo: location.href.split('#')[0] }).catch((err) => {
+          $('lg-google').disabled = false;
+          error("Couldn't start Google sign-in: " + err.message);
+        });
+      });
+
+      // Extension installed but never answered → say so instead of spinning.
+      let extTimer = null;
+
+      OtakuAuth.onChange((s) => {
+        if (!s.configured) {
+          $('lg-google').hidden = true;
+          return status("Accounts aren't set up on this site yet.");
+        }
+        if (!s.user) {
+          $('lg-google').hidden = false;
+          return status('');
+        }
+
+        const who = s.user.email || 'your Google account';
+        $('lg-google').hidden = true;
+        $('lg-title').textContent = "You're logged in";
+        $('lg-links').hidden = false;
+        if (!fromExt) return status('Signed in as ' + who + '.');
+
+        const ext = s.ext;
+        if (ext && ext.signedIn) {
+          clearTimeout(extTimer);
+          return status(
+            ext.email && ext.email !== s.user.email
+              ? 'The extension is already signed in as ' + ext.email + '. Log out there first to switch accounts.'
+              : '✓ Logged in on the website and in the extension as ' + who + '. You can close this tab.'
+          );
+        }
+        if (OtakuAuth.canConnectExtension()) {
+          clearTimeout(extTimer);
+          status('Connecting the extension…');
+          return OtakuAuth.connectExtension(base + 'animelist.html');
+        }
+        if (ext && !ext.configured) return status("Signed in as " + who + ". This build of the extension doesn't have cloud sync set up.");
+        if (ext) return status('Signed in as ' + who + ", but the extension is set up for a different server, so it can't be connected.");
+
+        status('Signed in as ' + who + '. Looking for the extension…');
+        clearTimeout(extTimer);
+        extTimer = setTimeout(() => {
+          if (!OtakuAuth.state.ext) {
+            status('Signed in as ' + who + ". Couldn't reach the OtakuList extension — check it's installed and enabled in this browser, then reload this page.");
+          }
+        }, 5000);
+      });
+    })();
+  </script>
+</BaseLayout>
