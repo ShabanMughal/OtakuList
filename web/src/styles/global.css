@@ -2536,6 +2536,60 @@ img {
   cursor: pointer;
   outline: none;
 }
+/* quick add (see "quick add" in public/js/animelist.js) */
+/* the backdrop scrolls, not the card — keeps the ✕ (which sits outside the
+   card's corner) visible on short phone screens */
+#al-quick { overflow-y: auto; place-items: start center; padding: 32px 16px; }
+@media (max-width: 520px) {
+  .aq-card { padding: 30px 18px 20px; }
+  .aq-card .am-x { right: -8px; }
+}
+.aq-paste { resize: vertical; min-height: 64px; font-size: 14px; }
+.aq-types { display: flex; gap: 6px; margin: -4px 0 16px; }
+.aq-type {
+  flex: 1;
+  padding: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: transparent;
+  color: rgba(244, 242, 248, .7);
+  font: 700 13px var(--font-heading, sans-serif);
+  cursor: pointer;
+}
+.aq-type.on { background: #7d5cf5; border-color: #7d5cf5; color: #fff; }
+.aq-results { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; margin-bottom: 16px; }
+.aq-hint { padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, .04); color: rgba(244, 242, 248, .55); font-size: 13px; }
+.aq-hit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(255, 255, 255, .04);
+  color: #f4f2f8;
+  text-align: left;
+  cursor: pointer;
+}
+.aq-hit.on { border-color: #7d5cf5; background: rgba(125, 92, 245, .18); box-shadow: 0 0 0 2px rgba(125, 92, 245, .35); }
+.aq-hit img, .aq-ph { width: 36px; height: 50px; border-radius: 7px; object-fit: cover; flex: none; background: #17142a; display: grid; place-items: center; }
+.aq-hit span { display: flex; flex-direction: column; min-width: 0; }
+.aq-hit b { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aq-hit small { font-size: 11.5px; color: rgba(244, 242, 248, .5); }
+.aq-actions { display: flex; gap: 10px; }
+.aq-btn {
+  flex: 1;
+  padding: 13px 10px;
+  border-radius: 12px;
+  border: 0;
+  background: #7d5cf5;
+  color: #fff;
+  font: 800 14px var(--font-heading, sans-serif);
+  cursor: pointer;
+}
+.aq-ghost { background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .14); color: #e7e2ff; }
+
 /* themed dropdowns (see "themed dropdowns" in public/js/animelist.js) */
 .al-dd-native {
   position: absolute !important;

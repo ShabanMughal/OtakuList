@@ -42,6 +42,13 @@ const ogImageUrl = ogImage ? site + base + ogImage : undefined;
   {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
 
   <link rel="icon" href={`${base}assets/gojo.png`} />
+  <!-- installable app (PWA) — same as BaseLayout -->
+  <link rel="manifest" href={`${base}manifest.webmanifest`} />
+  <link rel="apple-touch-icon" href={`${base}icons/apple-touch-icon.png`} />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="OtakuList" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -51,6 +58,7 @@ const ogImageUrl = ogImage ? site + base + ogImage : undefined;
 <body>
   <slot />
   <AuthBootstrap />
+  <script is:inline src={`${base}js/pwa.js`} defer></script>
   <slot name="scripts" />
 </body>
 

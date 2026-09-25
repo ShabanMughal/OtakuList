@@ -59,6 +59,13 @@ const ogImageUrl = ogImage ? (/^https?:\/\//.test(ogImage) ? ogImage : site + ba
   {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
 
   <link rel="icon" href={`${base}assets/icon128.png`} />
+  <!-- installable app (PWA): manifest + service worker in public/, tip in js/pwa.js -->
+  <link rel="manifest" href={`${base}manifest.webmanifest`} />
+  <link rel="apple-touch-icon" href={`${base}icons/apple-touch-icon.png`} />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="OtakuList" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -88,6 +95,7 @@ const ogImageUrl = ogImage ? (/^https?:\/\//.test(ogImage) ? ogImage : site + ba
 
   {chrome && <script is:inline src={`${base}js/script.js`}></script>}
   {auth && <AuthBootstrap />}
+  <script is:inline src={`${base}js/pwa.js`} defer></script>
   <slot name="scripts" />
 </body>
 

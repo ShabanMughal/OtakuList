@@ -66,6 +66,23 @@
     if (el) el.textContent = text || "";
   }
 
+  // Which account this browser's list was last synced with. Signing in as the
+  // same account (or with a list that never belonged to one) merges; a
+  // different account's list is replaced, never merged into theirs.
+  const OWNERKEY = "otakulist-animelist-owner";
+
+  // Union of both; where a title exists in each, the later edit wins —
+  // tombstones included, so deletes stick. Same rule as the extension.
+  function mergeLists(local, remote) {
+    const merged = { ...remote };
+    for (const [k, item] of Object.entries(local)) {
+      if (!item || typeof item !== "object") continue;
+      const rival = merged[k];
+      if (!rival || (item.updatedAt || 0) > (rival.updatedAt || 0)) merged[k] = item;
+    }
+    return merged;
+  }
+
   async function saveCloud() {
     if (!cloudUser || !cloudReady) return;
     cloudStatus("Saving…");
@@ -80,17 +97,20 @@
       cloudStatus("Cloud sync unavailable");
       return;
     }
-    if (data && data.list && typeof data.list === "object" && !Array.isArray(data.list)) {
-      state = data.list;
-      localStorage.setItem(KEY, JSON.stringify(state));
-      cloudReady = true;
-      // The extension's copy may be newer than the cloud row (e.g. it was
-      // offline); fold it back in so a cloud load can't hide those edits.
-      mergeExt();
-    } else if (Object.values(state).some((a) => !isTombstone(a))) {
-      await saveCloud();
-    }
+    const remote = data && data.list && typeof data.list === "object" && !Array.isArray(data.list) ? data.list : {};
+    const owner = localStorage.getItem(OWNERKEY);
+    // Anything added before the cloud answered (e.g. straight from the share
+    // sheet) must survive the load.
+    const next = !owner || owner === user.id ? mergeLists(state, remote) : remote;
+    const needsPush = JSON.stringify(next) !== JSON.stringify(remote);
+    state = next;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    localStorage.setItem(OWNERKEY, user.id);
     cloudReady = true;
+    if (needsPush) await saveCloud();
+    // The extension's copy may be newer than the cloud row (e.g. it was
+    // offline); fold it back in so a cloud load can't hide those edits.
+    mergeExt();
     cloudStatus("Synced");
     render();
   }
@@ -390,6 +410,306 @@
     }
     importFile.value = "";
   });
+
+  // ── quick add: paste a link (and Android's "Share to OtakuList") ─────────
+  // Phones can't run the extension, so this is its stand-in: paste the link of
+  // the episode/chapter you're on — or share it to the installed app, which
+  // opens this page with ?title=&text=&url= (manifest share_target) — and it
+  // works out anime vs manga, the title and the episode/chapter, then offers
+  // AniList matches to pick from. The parsing mirrors src/content.js.
+  const Q = {
+    type: "anime",
+    progress: null,
+    url: "",
+    site: "",
+    hits: [],
+    pick: null, // index into hits, or null to save the typed title as-is
+    timer: 0,
+    seq: 0,
+  };
+
+  const findUrl = (s) => (String(s || "").match(/https?:\/\/\S+/i) || [""])[0].replace(/[)\].,;'"]+$/, "");
+
+  function extractEpisode(str) {
+    if (!str) return null;
+    let v = String(str);
+    try {
+      const u = new URL(v);
+      for (const n of ["ep", "episode", "epi"]) {
+        const p = u.searchParams.get(n);
+        if (p && /^\d{1,4}$/.test(p)) return parseInt(p, 10);
+      }
+      v = `${u.pathname} ${u.search}`;
+    } catch (_) {}
+    const m = v.match(/(?:episode|episodio|ep|epi|\be)[\s._:/-]*=?\s*(\d{1,4})\b/i);
+    return m ? parseInt(m[1], 10) : null;
+  }
+  function extractChapter(str) {
+    if (!str) return null;
+    let v = String(str);
+    try {
+      const u = new URL(v);
+      for (const n of ["chapter", "chap", "ch"]) {
+        const p = u.searchParams.get(n);
+        if (p && /^\d{1,5}(\.\d{1,2})?$/.test(p)) return parseFloat(p);
+      }
+      v = `${u.pathname} ${u.search}`;
+    } catch (_) {}
+    const m = v.match(/(?:chapter|chapitre|capitulo|chap|\bch)[\s._:/-]*=?\s*(\d{1,5}(?:\.\d{1,2})?)(?!\d)/i);
+    return m ? parseFloat(m[1]) : null;
+  }
+  function looksManga(url, text) {
+    let path = "";
+    try {
+      path = new URL(url).pathname.toLowerCase();
+    } catch (_) {}
+    let host = "";
+    try {
+      host = new URL(url).hostname;
+    } catch (_) {}
+    return (
+      /(chapter|chapitre|capitulo|\/ch[-_]?\d|\/read(er)?\/)/.test(path) ||
+      /\/(manga|manhwa|manhua|webtoons?|comics?)[\/-]/.test(path + "/") ||
+      /(manga|manhwa|manhua|webtoon|comic|scans?\b)/.test(host) ||
+      /\b(chapter|ch\.\s*\d|manga|manhwa|manhua|webtoon)\b/i.test(text)
+    );
+  }
+  function cleanTitle(raw, type) {
+    let t = String(raw || "").trim();
+    t = t.replace(/\s*[|»·–—]\s*[^|»·–—]{0,40}$/, "");
+    if (type === "manga") {
+      t = t.replace(/\b(chapter|chapitre|capitulo|chap|ch|vol|volume)\b.*$/i, "");
+      t = t.replace(/\b(read|reading|online|free|full|english|raw|scans?|manga|manhwa|manhua|webtoon|comic|colou?red|latest)\b/gi, "");
+    } else {
+      t = t.replace(/\b(episode|episodio|ep|epi)\b.*$/i, "");
+      t = t.replace(/\b(watch|online|streaming|free|full|hd|4k|1080p|720p|480p|english|sub(bed)?|dub(bed)?|subtitle[sd]?)\b/gi, "");
+    }
+    return t.replace(/[\s._-]{2,}/g, " ").replace(/[\s:|»·–—-]+$/g, "").replace(/^[\s:|»·–—-]+/g, "").trim();
+  }
+  function titleFromUrl(url) {
+    let path = "";
+    try {
+      path = new URL(url).pathname;
+    } catch (_) {
+      return "";
+    }
+    const ignore = /^(anime|manga|manhwa|manhua|webtoons?|comics?|read|reader|watch|stream|play|series|title|video|episodes?|chapters?|ep|embed|player)$/i;
+    const seg = path
+      .split("/")
+      .filter(Boolean)
+      .reverse()
+      .find((p) => /[a-z]/i.test(p) && !/^\d+$/.test(p) && !/^(chapter|chap|ch|c|episode|ep)[-_]?\d/i.test(p) && !ignore.test(p) && !/^[0-9a-f-]{20,}$/i.test(p));
+    if (!seg) return "";
+    return seg
+      .replace(/\.(html?|php)$/i, "")
+      .replace(/[-_]+/g, " ")
+      // a trailing "episode 5" / "chapter 12" glued into the slug
+      .replace(/\s+(episode|ep|chapter|ch)\s*\d+(\.\d+)?$/i, "")
+      .replace(/\s+\d+$/, "")
+      .trim()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  // → { type, title, progress, url, site }
+  function parseShared({ title = "", text = "", url = "" }) {
+    const link = url || findUrl(text) || findUrl(title);
+    const words = [title, String(text).replace(link, "")].map((s) => s.trim()).filter(Boolean).join(" ");
+    const type = looksManga(link, words) ? "manga" : "anime";
+    const unit = type === "manga" ? extractChapter : extractEpisode;
+    const progress = unit(link) ?? unit(words);
+    let name = cleanTitle(words, type);
+    if (!name || name.length < 2 || /^https?:/i.test(name)) name = titleFromUrl(link);
+    let site = "";
+    try {
+      site = new URL(link).hostname.replace(/^www\./, "");
+    } catch (_) {}
+    return { type, title: name, progress, url: link, site };
+  }
+
+  // AniList lookups, straight from the page (its API allows CORS).
+  const FIELDS =
+    "id title{romaji english} coverImage{extraLarge large} format episodes chapters countryOfOrigin seasonYear startDate{year}";
+  const readingFormat = (m) =>
+    m.format === "NOVEL" ? "Light Novel" : m.format === "ONE_SHOT" ? "One-shot" : { KR: "Manhwa", CN: "Manhua", TW: "Manhua" }[m.countryOfOrigin] || "Manga";
+  async function searchAniList(q, type) {
+    const res = await fetch("https://graphql.anilist.co/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        query: `query($s:String){Page(perPage:6){media(search:$s,type:${type === "manga" ? "MANGA" : "ANIME"}){${FIELDS}}}}`,
+        variables: { s: q },
+      }),
+    });
+    if (!res.ok) throw new Error(`AniList ${res.status}`);
+    const data = await res.json();
+    return (data?.data?.Page?.media || []).map((m) => ({
+      id: m.id,
+      name: m.title?.english || m.title?.romaji || "Untitled",
+      cover: m.coverImage?.extraLarge || m.coverImage?.large || null,
+      total: (type === "manga" ? m.chapters : m.episodes) || null,
+      format: type === "manga" ? readingFormat(m) : m.format || null,
+      year: m.seasonYear || m.startDate?.year || null,
+    }));
+  }
+
+  const qm = $("#al-quick");
+  const normT = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+  function quickRenderType() {
+    const manga = Q.type === "manga";
+    document.querySelectorAll(".aq-type").forEach((b) => b.classList.toggle("on", b.dataset.type === Q.type));
+    $("#aq-unit").textContent = manga ? "Chapter" : "Episode";
+    $("#aq-save").textContent = manga ? "📖 Reading" : "▶ Watching";
+    $("#aq-plan").textContent = manga ? "＋ Plan to read" : "＋ Plan to watch";
+  }
+  function quickRenderHits(msg) {
+    const box = $("#aq-results");
+    if (msg) {
+      box.innerHTML = `<div class="aq-hint">${esc(msg)}</div>`;
+      return;
+    }
+    box.innerHTML = Q.hits
+      .map((h, i) => {
+        const sub = [h.format, h.year, h.total ? `${h.total} ${Q.type === "manga" ? "ch" : "eps"}` : ""].filter(Boolean).join(" · ");
+        const thumb = h.cover ? `<img src="${esc(h.cover)}" alt="" loading="lazy">` : `<span class="aq-ph">${Q.type === "manga" ? "📖" : "🎬"}</span>`;
+        return `<button type="button" class="aq-hit${Q.pick === i ? " on" : ""}" data-i="${i}">${thumb}<span><b>${esc(h.name)}</b><small>${esc(sub)}</small></span></button>`;
+      })
+      .join("");
+  }
+  function quickSearch() {
+    clearTimeout(Q.timer);
+    const q = $("#aq-title").value.trim();
+    Q.hits = [];
+    Q.pick = null;
+    if (!q) return quickRenderHits("Type a title to find it on AniList.");
+    quickRenderHits("Searching AniList…");
+    const seq = ++Q.seq;
+    Q.timer = setTimeout(async () => {
+      let hits = [];
+      try {
+        hits = await searchAniList(q, Q.type);
+      } catch (_) {
+        if (seq === Q.seq) quickRenderHits("Couldn't reach AniList — you can still save it as typed.");
+        return;
+      }
+      if (seq !== Q.seq) return; // a newer search is on its way
+      Q.hits = hits;
+      Q.pick = hits.length ? 0 : null; // best match preselected
+      quickRenderHits(hits.length ? "" : "No matches — it will be saved as typed.");
+    }, 350);
+  }
+  function quickFill(input) {
+    const p = parseShared(input);
+    Q.type = p.type;
+    Q.url = p.url;
+    Q.site = p.site;
+    $("#aq-title").value = p.title;
+    $("#aq-progress").value = p.progress ?? "";
+    quickRenderType();
+    quickSearch();
+  }
+
+  function openQuick(prefill) {
+    qm.hidden = false;
+    $("#aq-paste").value = prefill ? [prefill.title, prefill.text, prefill.url].filter(Boolean).join(" ") : "";
+    if (prefill) quickFill(prefill);
+    else {
+      Q.type = activeType;
+      Q.url = Q.site = "";
+      $("#aq-title").value = "";
+      $("#aq-progress").value = "";
+      quickRenderType();
+      quickRenderHits("Paste a link above, or type a title.");
+      $("#aq-paste").focus();
+    }
+  }
+  const closeQuick = () => {
+    qm.hidden = true;
+  };
+
+  function quickSave(status) {
+    const hit = Q.pick != null ? Q.hits[Q.pick] : null;
+    const title = (hit ? hit.name : $("#aq-title").value).trim();
+    if (!title) return $("#aq-title").focus();
+    const manga = Q.type === "manga";
+    const progVal = $("#aq-progress").value;
+    const progress = progVal === "" ? null : parseFloat(progVal);
+    // Same entry if AniList says so, or the title matches — never across kinds.
+    const existingId = Object.keys(state).find((k) => {
+      const a = state[k];
+      if (!a || isTombstone(a) || typeOf(a) !== Q.type) return false;
+      if (hit && a.anilistId && String(a.anilistId) === String(hit.id)) return true;
+      return normT(a.title) === normT(title);
+    });
+    const id = existingId || (manga ? "manga-" : "") + (slug(title) || String(Date.now()));
+    const prev = existingId ? state[id] : null;
+    const now = Date.now();
+    state[id] = {
+      ...(prev || {}),
+      id,
+      ...(manga ? { type: "manga", format: hit?.format || prev?.format || "Manga" } : {}),
+      title: prev?.title || title,
+      status,
+      currentEpisode: progress ?? prev?.currentEpisode ?? 0,
+      totalEpisodes: hit?.total ?? prev?.totalEpisodes ?? null,
+      anilistId: hit ? String(hit.id) : prev?.anilistId || null,
+      cover: hit?.cover || prev?.cover || null,
+      site: Q.site || prev?.site || "manual entry",
+      url: Q.url || prev?.url || "",
+      rating: prev?.rating || 0,
+      note: prev?.note || "",
+      addedAt: prev?.addedAt || now,
+      updatedAt: now,
+      deleted: false,
+    };
+    save();
+    closeQuick();
+    if (Q.type === activeType) {
+      activeTab = status;
+      render();
+      toast(`${prev ? "Updated" : "Saved"} “${state[id].title}” ✓`);
+    } else {
+      render(); // the kind counts change
+      toast(`${prev ? "Updated" : "Saved"} “${state[id].title}” in your ${manga ? "Manga" : "Anime"} list ✓`);
+    }
+  }
+
+  $("#al-quickbtn").addEventListener("click", () => openQuick(null));
+  $("#aq-close").addEventListener("click", closeQuick);
+  qm.addEventListener("click", (e) => {
+    if (e.target === qm) closeQuick();
+  });
+  $("#aq-paste").addEventListener("input", (e) => {
+    const v = e.target.value.trim();
+    if (v) quickFill({ text: v });
+  });
+  $("#aq-title").addEventListener("input", quickSearch);
+  document.querySelectorAll(".aq-type").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (Q.type === b.dataset.type) return;
+      Q.type = b.dataset.type;
+      quickRenderType();
+      quickSearch();
+    })
+  );
+  $("#aq-results").addEventListener("click", (e) => {
+    const b = e.target.closest(".aq-hit");
+    if (!b) return;
+    const i = +b.dataset.i;
+    Q.pick = Q.pick === i ? null : i; // tap again to save as typed instead
+    quickRenderHits("");
+  });
+  $("#aq-save").addEventListener("click", () => quickSave("watching"));
+  $("#aq-plan").addEventListener("click", () => quickSave("plan"));
+
+  // Arrived from Android's share sheet?
+  (function fromShareSheet() {
+    const p = new URLSearchParams(location.search);
+    const shared = { title: p.get("title") || "", text: p.get("text") || "", url: p.get("url") || "" };
+    if (!shared.title && !shared.text && !shared.url) return;
+    // Drop the params so a refresh doesn't reopen it.
+    history.replaceState(null, "", location.pathname);
+    openQuick(shared);
+  })();
 
   // ── themed dropdowns ─────────────────────────────────────────────────
   // The browser draws a native <select>'s option list itself — white, with

@@ -120,7 +120,7 @@
       // Not a valid URL, fall through to plain-text matching.
     }
 
-    const m = value.match(/(?:episode|episodio|ep|epi|\be)[\s._:-]*=?\s*(\d{1,4})\b/i);
+    const m = value.match(/(?:episode|episodio|ep|epi|\be)[\s._:/-]*=?\s*(\d{1,4})\b/i);
     return m ? parseInt(m[1], 10) : null;
   }
 
@@ -140,7 +140,7 @@
       // Not a valid URL, fall through to plain-text matching.
     }
 
-    const m = value.match(/(?:chapter|chapitre|capitulo|chap|\bch)[\s._:-]*=?\s*(\d{1,5}(?:\.\d{1,2})?)(?!\d)/i);
+    const m = value.match(/(?:chapter|chapitre|capitulo|chap|\bch)[\s._:/-]*=?\s*(\d{1,5}(?:\.\d{1,2})?)(?!\d)/i);
     return m ? parseFloat(m[1]) : null;
   }
 
