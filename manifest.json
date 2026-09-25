@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "OtakuList: Anime Watchlist Tracker",
-  "version": "1.4.0",
-  "description": "Track the anime and episode you're watching. Save your watchlist locally so your progress survives blocked streaming sites.",
+  "version": "1.5.0",
+  "description": "Track the anime you watch and the manga, manhwa and manhua you read. Your list is saved locally, so progress survives blocked sites.",
   "permissions": [
     "storage",
     "activeTab"
