@@ -1,5 +1,6 @@
 // OtakuList background service worker.
-// Keeps the toolbar badge showing how many anime are currently "watching", and
+// Keeps the toolbar badge showing how many titles are in progress (anime you're
+// watching + manga you're reading — both use the "watching" status), and
 // owns the optional cloud sync (it is the only writer, so the popup and the
 // content script can never race each other against Supabase).
 import * as cloud from "./cloud.js";
@@ -60,23 +61,37 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
 const anilistCache = new Map();
 
 const MEDIA_FIELDS =
-  "id title{romaji english} coverImage{extraLarge large medium} format seasonYear episodes";
+  "id title{romaji english} coverImage{extraLarge large medium} format seasonYear episodes " +
+  "chapters countryOfOrigin startDate{year}";
 
-function shapeMedia(m) {
+// Manga on AniList is all format MANGA; the country says what readers call it.
+function readingFormat(m) {
+  if (m.format === "NOVEL") return "Light Novel";
+  if (m.format === "ONE_SHOT") return "One-shot";
+  return { KR: "Manhwa", CN: "Manhua", TW: "Manhua" }[m.countryOfOrigin] || "Manga";
+}
+
+function shapeMedia(m, type = "ANIME") {
   if (!m) return null;
   const img = m.coverImage || {};
+  const manga = type === "MANGA";
   return {
     id: m.id,
     romaji: m.title?.romaji || null,
     english: m.title?.english || null,
     cover: img.extraLarge || img.large || img.medium || null,
-    episodes: m.episodes || null,
-    format: m.format || null,
-    seasonYear: m.seasonYear || null,
+    // For manga "episodes" carries the chapter count, so callers can treat
+    // progress the same way for both kinds.
+    episodes: (manga ? m.chapters : m.episodes) || null,
+    format: manga ? readingFormat(m) : m.format || null,
+    seasonYear: m.seasonYear || m.startDate?.year || null,
   };
 }
 
-async function anilistRequest(query, variables) {
+// Only these two are valid AniList media types; anything else means anime.
+const mediaType = (t) => (String(t).toLowerCase() === "manga" ? "MANGA" : "ANIME");
+
+async function anilistRequest(query, variables, type) {
   const res = await fetch("https://graphql.anilist.co/", {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -84,23 +99,26 @@ async function anilistRequest(query, variables) {
   });
   if (!res.ok) throw new Error(`AniList ${res.status}`);
   const data = await res.json();
-  return shapeMedia(data?.data?.Media);
+  return shapeMedia(data?.data?.Media, type);
 }
 
-async function resolveAnime({ id, title }) {
-  const key = id ? `id:${id}` : `q:${String(title || "").trim().toLowerCase()}`;
+async function resolveAnime({ id, title, mediaType: kind }) {
+  const type = mediaType(kind);
+  const key = `${type}:` + (id ? `id:${id}` : `q:${String(title || "").trim().toLowerCase()}`);
   if (anilistCache.has(key)) return anilistCache.get(key);
   let result = null;
   try {
     result = id
       ? await anilistRequest(
-          `query($id:Int){Media(id:$id,type:ANIME){${MEDIA_FIELDS}}}`,
-          { id: Number(id) }
+          `query($id:Int){Media(id:$id,type:${type}){${MEDIA_FIELDS}}}`,
+          { id: Number(id) },
+          type
         )
       : title
       ? await anilistRequest(
-          `query($s:String){Media(search:$s,type:ANIME){${MEDIA_FIELDS}}}`,
-          { s: title }
+          `query($s:String){Media(search:$s,type:${type}){${MEDIA_FIELDS}}}`,
+          { s: title },
+          type
         )
       : null;
   } catch {
@@ -112,10 +130,11 @@ async function resolveAnime({ id, title }) {
 
 // Return several candidates for a title so the user can correct a wrong
 // detection by picking the right show from a list (the "Wrong anime?" flow).
-async function searchAnime(query) {
+async function searchAnime(query, kind) {
   const q = String(query || "").trim();
   if (!q) return [];
-  const key = `search:${q.toLowerCase()}`;
+  const type = mediaType(kind);
+  const key = `search:${type}:${q.toLowerCase()}`;
   if (anilistCache.has(key)) return anilistCache.get(key);
   let results = [];
   try {
@@ -123,13 +142,13 @@ async function searchAnime(query) {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
-        query: `query($s:String){Page(perPage:8){media(search:$s,type:ANIME){${MEDIA_FIELDS}}}}`,
+        query: `query($s:String){Page(perPage:8){media(search:$s,type:${type}){${MEDIA_FIELDS}}}}`,
         variables: { s: q },
       }),
     });
     if (res.ok) {
       const data = await res.json();
-      results = (data?.data?.Page?.media || []).map(shapeMedia).filter(Boolean);
+      results = (data?.data?.Page?.media || []).map((m) => shapeMedia(m, type)).filter(Boolean);
     }
   } catch {
     results = [];
@@ -153,13 +172,13 @@ function fromConnectPage(sender) {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type === "anilistResolve" && (msg.id || msg.title)) {
-    resolveAnime({ id: msg.id, title: msg.title })
+    resolveAnime({ id: msg.id, title: msg.title, mediaType: msg.mediaType })
       .then((result) => sendResponse({ result }))
       .catch((err) => sendResponse({ result: null, error: String(err) }));
     return true; // keep the message channel open for the async response
   }
   if (msg?.type === "anilistSearch" && msg.query) {
-    searchAnime(msg.query)
+    searchAnime(msg.query, msg.mediaType)
       .then((results) => sendResponse({ results }))
       .catch((err) => sendResponse({ results: [], error: String(err) }));
     return true;

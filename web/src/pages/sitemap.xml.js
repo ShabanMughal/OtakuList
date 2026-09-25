@@ -23,6 +23,7 @@ const SITE = import.meta.env.SITE.replace(/\/$/, '');
 const STATIC_PAGES = [
   { loc: '', changefreq: 'monthly', priority: '1.0' },
   { loc: 'animelist.html', changefreq: 'monthly', priority: '0.7' },
+  { loc: 'mangalist.html', changefreq: 'monthly', priority: '0.7' },
   { loc: 'import.html', changefreq: 'monthly', priority: '0.7' },
   { loc: 'showcase.html', changefreq: 'daily', priority: '0.6' },
   { loc: 'privacy-policy.html', changefreq: 'yearly', priority: '0.4' },

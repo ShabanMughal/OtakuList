@@ -1,6 +1,7 @@
 // OtakuList content script.
-// Runs on every page, detects when you're watching an anime, and shows a small
-// in-page card that lets you save it to your local watchlist.
+// Runs on every page, detects when you're watching an anime or reading a manga
+// (manhwa, manhua…), and shows a small in-page card that lets you save it to
+// your local list.
 (() => {
   const KEY = "animeList";
   const HOST_ID = "otakulist-host";
@@ -37,7 +38,16 @@
   const getList = () =>
     chrome.storage.local.get(KEY).then((d) => d[KEY] || {});
 
-  const idFor = (title) =>
+  // Entries carry `type: "manga"` for anything you read (manga, manhwa, manhua,
+  // light novels); a missing type means anime, so lists saved before manga
+  // support keep working untouched. Manga reuse currentEpisode/totalEpisodes
+  // for chapters so sync, backups and sorting need no second code path.
+  const isManga = (a) => a?.type === "manga";
+
+  // Manga keys are prefixed so the One Piece anime and the One Piece manga
+  // are two entries, not one overwriting the other.
+  const idFor = (title, type) =>
+    (type === "manga" ? "manga-" : "") +
     title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -52,6 +62,7 @@
     const nk = normText(candidate.title);
     for (const [k, a] of Object.entries(list)) {
       if (!a || a.deleted) continue; // tombstone — treat as absent
+      if (isManga(a) !== isManga(candidate)) continue; // anime never matches manga
       if (candidate.anilistId && a.anilistId && String(a.anilistId) === String(candidate.anilistId))
         return k;
       if (candidate.sourceId && a.sourceId && String(a.sourceId) === String(candidate.sourceId))
@@ -63,11 +74,12 @@
 
   async function saveAnime(candidate, status) {
     const list = await getList();
-    const key = findExistingKey(list, candidate) || idFor(candidate.title);
+    const key = findExistingKey(list, candidate) || idFor(candidate.title, candidate.type);
     const now = Date.now();
     const existing = list[key];
     list[key] = {
       id: key,
+      ...(isManga(candidate) ? { type: "manga", format: candidate.format || existing?.format || "Manga" } : {}),
       // Keep the title already stored (may be user-edited); only a brand-new
       // entry takes the title as detected on this site.
       title: existing?.title || candidate.title,
@@ -112,6 +124,26 @@
     return m ? parseInt(m[1], 10) : null;
   }
 
+  // Chapters, unlike episodes, are often fractional ("Chapter 110.5" extras),
+  // so keep the decimal part.
+  function extractChapter(str) {
+    if (!str) return null;
+    let value = String(str);
+    try {
+      const url = new URL(value, location.href);
+      for (const name of ["chapter", "chap", "ch"]) {
+        const param = url.searchParams.get(name);
+        if (param && /^\d{1,5}(\.\d{1,2})?$/.test(param)) return parseFloat(param);
+      }
+      value = `${url.pathname} ${url.search}`;
+    } catch {
+      // Not a valid URL, fall through to plain-text matching.
+    }
+
+    const m = value.match(/(?:chapter|chapitre|capitulo|chap|\bch)[\s._:-]*=?\s*(\d{1,5}(?:\.\d{1,2})?)(?!\d)/i);
+    return m ? parseFloat(m[1]) : null;
+  }
+
   function titleFromPath(pathname) {
     const ignore = new Set([
       "anime",
@@ -126,12 +158,31 @@
       "video",
       "player",
       "embed",
+      "manga",
+      "manhwa",
+      "manhua",
+      "webtoon",
+      "webtoons",
+      "comic",
+      "comics",
+      "read",
+      "reader",
+      "chapter",
+      "chapters",
     ]);
+    // "chapter-12" / "ep-3" segments name the unit, not the series.
+    const unitSegment = /^(chapter|chap|ch|c|episode|ep)[-_]?\d/i;
     const segment = String(pathname)
       .split("/")
       .filter(Boolean)
       .reverse()
-      .find((part) => /[a-z]/i.test(part) && !/^\d+$/.test(part) && !ignore.has(part.toLowerCase()));
+      .find(
+        (part) =>
+          /[a-z]/i.test(part) &&
+          !/^\d+$/.test(part) &&
+          !unitSegment.test(part) &&
+          !ignore.has(part.toLowerCase())
+      );
     if (!segment) return "";
     return segment
       .replace(/[-_]+/g, " ")
@@ -145,20 +196,30 @@
     if (!t) return true;
     if (t.length < 3) return true;
     if (t === domain || t === `watch ${domain}`) return true;
-    return /^(anime|episode|episodes|watch|stream|player|video|home|miruro)$/i.test(t);
+    return /^(anime|manga|manhwa|manhua|webtoon|comic|chapter|episode|episodes|read|watch|stream|player|video|home|miruro)$/i.test(t);
   }
 
-  function cleanTitle(raw) {
+  function cleanTitle(raw, type) {
     let t = (raw || "").trim();
     // drop a trailing " - SiteName" / " | SiteName" segment (one level)
     t = t.replace(/\s*[|»·–—]\s*[^|»·–—]{0,40}$/, "");
-    // cut everything from the episode marker onward
-    t = t.replace(/\b(episode|episodio|ep|epi)\b.*$/i, "");
-    // strip common streaming junk words
-    t = t.replace(
-      /\b(watch|online|streaming|free|full|hd|4k|1080p|720p|480p|english|sub(bed)?|dub(bed)?|subtitle[sd]?|kissanime|gogoanime)\b/gi,
-      ""
-    );
+    if (type === "manga") {
+      // cut everything from the chapter / volume marker onward
+      t = t.replace(/\b(chapter|chapitre|capitulo|chap|ch|vol|volume)\b.*$/i, "");
+      // strip common reader-site junk words
+      t = t.replace(
+        /\b(read|reading|online|free|full|english|raw|scans?|manga|manhwa|manhua|webtoon|comic|colou?red|latest)\b/gi,
+        ""
+      );
+    } else {
+      // cut everything from the episode marker onward
+      t = t.replace(/\b(episode|episodio|ep|epi)\b.*$/i, "");
+      // strip common streaming junk words
+      t = t.replace(
+        /\b(watch|online|streaming|free|full|hd|4k|1080p|720p|480p|english|sub(bed)?|dub(bed)?|subtitle[sd]?|kissanime|gogoanime)\b/gi,
+        ""
+      );
+    }
     t = t.replace(/[\s._-]{2,}/g, " ").replace(/[\s:|»·–—-]+$/g, "").trim();
     return t;
   }
@@ -176,12 +237,13 @@
 
   const isHttp = (src) => !!src && /^https?:\/\//.test(src);
 
-  // URLs from anime cover CDNs (AniList / MAL / Kitsu) or explicit cover/poster
-  // paths. A strong positive signal that works even when the image is lazy-
-  // loaded or off-screen and its pixel dimensions aren't readable yet.
+  // URLs from anime/manga cover CDNs (AniList / MAL / Kitsu / MangaDex) or
+  // explicit cover/poster paths. A strong positive signal that works even when
+  // the image is lazy-loaded or off-screen and its pixel dimensions aren't
+  // readable yet.
   function looksLikeCoverUrl(src) {
     if (!isHttp(src) || looksLikeSiteImage(src)) return false;
-    return /(anilistcdn\/media\/anime\/cover|myanimelist\.net\/images\/anime|kitsu\.[a-z]+\/.*posters|\/(covers?|posters?)\/)/i.test(
+    return /(anilistcdn\/media\/(anime|manga)\/cover|myanimelist\.net\/images\/(anime|manga)|kitsu\.[a-z]+\/.*posters|uploads\.mangadex\.org\/covers|\/(covers?|posters?)\/)/i.test(
       src
     );
   }
@@ -254,7 +316,8 @@
 
   // Ask the background worker to resolve an anime on AniList — by id (Miruro,
   // whose URLs carry the AniList media id) or by title search (every other
-  // site). Returns {id, romaji, english, cover} or null on any failure.
+  // site). Pass mediaType "manga" to look it up as a manga instead.
+  // Returns {id, romaji, english, cover} or null on any failure.
   function resolveAnime(payload) {
     return new Promise((resolve) => {
       try {
@@ -270,10 +333,10 @@
 
   // Ask the background worker for several AniList matches for a free-text query,
   // used by the "Wrong anime?" corrector in the save card.
-  function searchAnimeList(query) {
+  function searchAnimeList(query, mediaType) {
     return new Promise((resolve) => {
       try {
-        chrome.runtime.sendMessage({ type: "anilistSearch", query }, (res) => {
+        chrome.runtime.sendMessage({ type: "anilistSearch", query, mediaType }, (res) => {
           if (chrome.runtime.lastError) return resolve([]);
           resolve(res?.results || []);
         });
@@ -370,7 +433,8 @@
     return match ? parseInt(match[1], 10) : null;
   }
 
-  function getCandidate() {
+  function getCandidate(type = "anime") {
+    const manga = type === "manga";
     const url = location.href;
     const domain = location.hostname.replace(/^www\./, "");
     const pathTitle = titleFromPath(location.pathname);
@@ -378,12 +442,23 @@
       (isMiruro(domain) ? document.title : null) ||
       metaContent('meta[property="og:title"]') ||
       metaContent('meta[name="title"]') ||
+      // Reader sites often skip og:title on chapter pages.
+      (manga ? document.title : null) ||
       "";
-    const cleanedTitle = cleanTitle(rawTitle);
+    const cleanedTitle = cleanTitle(rawTitle, type);
     // Episode routes contain a provider slug rather than the anime title, so
     // keep the page title for display and use Miruro's numeric id separately.
     const title = isGenericTitle(cleanedTitle, domain) && pathTitle ? pathTitle : cleanedTitle;
     if (!title || title.length < 2) return null;
+    if (manga) {
+      // `episode` holds the chapter for manga — see isManga above.
+      const episode =
+        extractChapter(url) ??
+        extractChapter(rawTitle) ??
+        extractChapter(document.title);
+      const cover = getCover(title);
+      return { type: "manga", title, episode, cover, url, domain, sourceId: null };
+    }
     const episode =
       (isMiruro(domain) ? miruroEpisode(location.pathname) : null) ??
       extractEpisode(url) ??
@@ -415,6 +490,25 @@
     return (hasVideo && watchLike) || watchLike || detailLike;
   }
 
+  // Is this a manga / manhwa / manhua reader or detail page? Checked before the
+  // anime heuristic, since "/title/" and "/read" paths would otherwise be
+  // mistaken for anime. A page with a video player is never treated as manga.
+  function looksLikeReadPage() {
+    const host = location.hostname.replace(/^www\./, "");
+    if (BLOCKED_HOSTS.test(host)) return false;
+    if (document.querySelector("video")) return false;
+
+    const path = location.pathname.toLowerCase();
+    // "…/chapter-12", "/chapter/…", "/ch-12", "/read/…", "/reader/…"
+    const chapterLike = /(chapter|chapitre|capitulo|\/ch[-_]?\d|\/read(er)?\/)/.test(path);
+    // detail pages: "/manga/…", "/manhwa/…", "/manhua/…", "/webtoon(s)/…", "/comic(s)/…"
+    const detailLike = /\/(manga|manhwa|manhua|webtoons?|comics?)[\/-]/.test(path + "/");
+    // …or the host itself says so (mangadex.org, asuracomic.net) and the path
+    // is a title page.
+    const hostLike = /(manga|manhwa|manhua|webtoon|comic|scans?\b|toon)/.test(host);
+    return chapterLike || detailLike || (hostLike && /\/(title|series)\//.test(path));
+  }
+
   // ---------- UI ----------
   function removeBanner() {
     const host = document.getElementById(HOST_ID);
@@ -422,6 +516,29 @@
   }
 
   function showBanner(candidate) {
+    const manga = isManga(candidate);
+    // Wording differs per kind; the card and its behaviour don't.
+    const t = manga
+      ? {
+          noun: "manga",
+          detected: "Detected while reading",
+          unit: "Chapter",
+          active: "📖 Reading",
+          plan: "＋ Plan to read",
+          savedActive: "✓ Saved to Reading",
+          savedPlan: "✓ Saved to Plan to Read",
+          icon: "📖",
+        }
+      : {
+          noun: "anime",
+          detected: "Detected while watching",
+          unit: "Episode",
+          active: "▶ Watching",
+          plan: "＋ Plan to watch",
+          savedActive: "✓ Saved to Watching",
+          savedPlan: "✓ Saved to Plan to Watch",
+          icon: "🎬",
+        };
     removeBanner();
     ensureFont();
     const host = document.createElement("div");
@@ -498,25 +615,25 @@
           <span class="logo">${MARK}</span>
           <div class="brand">
             <h1>OtakuList</h1>
-            <p>Detected while watching</p>
+            <p>${t.detected}</p>
           </div>
           <button class="close" title="Dismiss">×</button>
         </div>
         <div class="top">
-          ${candidate.cover ? `<img class="cover" src="${candidate.cover}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover',textContent:'🎬'}))">` : `<div class="cover">🎬</div>`}
+          ${candidate.cover ? `<img class="cover" src="${candidate.cover}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover',textContent:'${t.icon}'}))">` : `<div class="cover">${t.icon}</div>`}
           <div class="meta">
             <input class="title" value="">
-            <p class="ep">${candidate.episode ? `Episode <b>${candidate.episode}</b>` : "Episode not detected"}</p>
-            <button class="fix" type="button">Wrong anime?</button>
+            <p class="ep">${candidate.episode ? `${t.unit} <b>${candidate.episode}</b>` : `${t.unit} not detected`}</p>
+            <button class="fix" type="button">Wrong ${t.noun}?</button>
           </div>
         </div>
         <div class="search" hidden>
-          <input class="search-input" type="text" placeholder="Search the correct anime…">
+          <input class="search-input" type="text" placeholder="Search the correct ${t.noun}…">
           <div class="results"></div>
         </div>
         <div class="actions">
-          <button class="watch">▶ Watching</button>
-          <button class="plan">＋ Plan to watch</button>
+          <button class="watch">${t.active}</button>
+          <button class="plan">${t.plan}</button>
         </div>
       </div>`;
 
@@ -536,12 +653,12 @@
     root.querySelector(".watch").onclick = async () => {
       candidate.title = input.value.trim() || candidate.title;
       await saveAnime(candidate, "watching");
-      finish("✓ Saved to Watching");
+      finish(t.savedActive);
     };
     root.querySelector(".plan").onclick = async () => {
       candidate.title = input.value.trim() || candidate.title;
       await saveAnime(candidate, "plan");
-      finish("✓ Saved to Plan to Watch");
+      finish(t.savedPlan);
     };
 
     // ── "Wrong anime?" corrector ──────────────────────────────────────
@@ -565,7 +682,7 @@
         img.replaceWith(
           Object.assign(document.createElement("div"), {
             className: "cover",
-            textContent: "🎬",
+            textContent: t.icon,
           })
         );
       cur.replaceWith(img);
@@ -582,7 +699,7 @@
           const sub = [m.format, m.seasonYear].filter(Boolean).join(" · ");
           const thumb = m.cover
             ? `<img src="${escapeHtml(m.cover)}" alt="">`
-            : `<span class="ph">🎬</span>`;
+            : `<span class="ph">${t.icon}</span>`;
           return `<button class="res" type="button" data-i="${i}">${thumb}<span class="res-t"><b>${escapeHtml(
             name
           )}</b><small>${escapeHtml(sub)}</small></span></button>`;
@@ -599,7 +716,7 @@
       }
       results.innerHTML = `<div class="hint">Searching…</div>`;
       searchTimer = setTimeout(async () => {
-        const items = await searchAnimeList(q);
+        const items = await searchAnimeList(q, candidate.type);
         if (!host.isConnected) return;
         hits = items;
         renderResults(items);
@@ -629,6 +746,7 @@
       candidate.title = name;
       candidate.anilistId = String(m.id);
       candidate.sourceId = null; // the detected site id may belong to the wrong show
+      if (manga && m.format) candidate.format = m.format;
       if (m.cover) {
         candidate.cover = m.cover;
         setCover(m.cover);
@@ -654,7 +772,7 @@
           img.replaceWith(
             Object.assign(document.createElement("div"), {
               className: "cover",
-              textContent: "🎬",
+              textContent: t.icon,
             })
           );
         top.querySelector(".cover").replaceWith(img);
@@ -697,12 +815,14 @@
 
   // ---------- driver ----------
   async function detect() {
-    if (!looksLikeWatchPage()) return;
-    const candidate = getCandidate();
+    const type = looksLikeReadPage() ? "manga" : looksLikeWatchPage() ? "anime" : null;
+    if (!type) return;
+    const manga = type === "manga";
+    const candidate = getCandidate(type);
     if (!candidate) return;
     const versionAtStart = navigationVersion;
     const urlAtStart = candidate.url;
-    const id = idFor(candidate.title);
+    const id = idFor(candidate.title, type);
     const key = candidate.domain + "|" + (candidate.sourceId || "") + "|" + id + "|" + (candidate.episode ?? "");
     if (key === lastKey || dismissed.has(key)) return;
     lastKey = key;
@@ -713,12 +833,12 @@
     // request may resolve after Miruro has already rendered a different anime.
     // Re-read the candidate as well as checking the navigation version because
     // some transitions update the DOM without changing history immediately.
-    const current = getCandidate();
+    const current = getCandidate(type);
     if (
       versionAtStart !== navigationVersion ||
       location.href !== urlAtStart ||
       !current ||
-      idFor(current.title) !== id ||
+      idFor(current.title, type) !== id ||
       current.sourceId !== candidate.sourceId ||
       current.episode !== candidate.episode
     ) {
@@ -731,7 +851,7 @@
     const resolved = await resolveAnime(
       isMiruro(candidate.domain) && candidate.sourceId
         ? { id: candidate.sourceId }
-        : { title: candidate.title }
+        : { title: candidate.title, mediaType: type }
     );
     // A slow lookup could resolve after the user moved on; re-verify context.
     if (versionAtStart !== navigationVersion || location.href !== urlAtStart) return;
@@ -743,14 +863,21 @@
         candidate.anilistId = String(resolved.id);
         if (resolved.cover) candidate.cover = resolved.cover;
         if (resolved.episodes) candidate.totalEpisodes = resolved.episodes;
-        markAbsolute(candidate, resolved.episodes);
+        if (manga) {
+          if (resolved.format) candidate.format = resolved.format;
+        } else {
+          // Chapters are always numbered across the whole series, so the
+          // absolute-episode correction only applies to anime.
+          markAbsolute(candidate, resolved.episodes);
+        }
       }
     }
 
     const existingKey = findExistingKey(list, candidate);
     const existing = existingKey ? list[existingKey] : null;
 
-    // Already in "Watching" → advance the episode silently, no modal.
+    // Already in "Watching" / "Reading" → advance the episode or chapter
+    // silently, no modal.
     if (existing && existing.status === "watching") {
       // An absolute number (One Piece 1088) is recorded but never treated as
       // progress against a season's episode count.
@@ -776,12 +903,12 @@
           existing.cover = candidate.cover;
         existing.updatedAt = Date.now();
         await chrome.storage.local.set({ [KEY]: list });
-        showToast(`Updated to Episode <b>${candidate.episode}</b>`);
+        showToast(`Updated to ${manga ? "Chapter" : "Episode"} <b>${candidate.episode}</b>`);
       }
       return; // don't interrupt the binge
     }
 
-    // Brand-new anime, or one sitting in Plan/On Hold/Completed/Dropped
+    // Brand-new title, or one sitting in Plan/On Hold/Completed/Dropped
     // → show the modal so you can add it or move it to Watching.
     showBanner(candidate);
   }

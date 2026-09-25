@@ -2432,6 +2432,42 @@ img {
   }
 }
 /* ═══════════════════════ web Anime List page ═══════════════════════ */
+.al-kinds {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(255, 255, 255, .03);
+}
+.al-kind {
+  text-decoration: none;
+  font-family: var(--font-heading, sans-serif);
+  font-weight: 800;
+  font-size: 14px;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: rgba(244, 242, 248, .6);
+  transition: background .15s, color .15s;
+}
+.al-kind:hover { color: #efe9ff; }
+.al-kind.on { background: #7d5cf5; color: #fff; }
+.al-kind .n { font-size: 11px; opacity: .7; margin-left: 4px; }
+.al-format {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 7px;
+  font-size: 10.5px;
+  line-height: 17px;
+  border-radius: 999px;
+  background: rgba(125, 92, 245, .2);
+  color: #c9b8ff;
+  vertical-align: 2px;
+}
 .al-toolbar {
   display: flex;
   align-items: center;
@@ -2499,6 +2535,78 @@ img {
   font-size: 13.5px;
   cursor: pointer;
   outline: none;
+}
+/* themed dropdowns (see "themed dropdowns" in public/js/animelist.js) */
+.al-dd-native {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0;
+  pointer-events: none;
+}
+.al-dd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .05);
+  color: #f4f2f8;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color .15s, background .15s;
+}
+.al-dd-btn:hover { border-color: rgba(125, 92, 245, .55); background: rgba(125, 92, 245, .1); }
+.al-dd-btn:focus-visible,
+.al-dd-btn[aria-expanded="true"] { border-color: #7d5cf5; box-shadow: 0 0 0 3px rgba(125, 92, 245, .3); }
+.al-dd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.al-dd-chev { flex: none; color: rgba(244, 242, 248, .55); transition: transform .15s; }
+.al-dd-btn[aria-expanded="true"] .al-dd-chev { transform: rotate(180deg); color: #c9b8ff; }
+.al-dd-sort { height: 40px; padding: 0 14px 0 16px; border-radius: 999px; font-size: 13.5px; }
+.al-dd-status { flex: 1; height: 32px; padding: 0 10px; border-radius: 9px; font-size: 12px; }
+.al-dd-menu {
+  position: fixed;
+  z-index: 200;
+  max-width: 280px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: #1a1630;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .6);
+  animation: al-dd-in .12s ease-out;
+}
+@keyframes al-dd-in { from { opacity: 0; transform: translateY(-4px); } }
+.al-dd-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px 8px 26px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(244, 242, 248, .82);
+  font: 500 13px/1.3 'Poppins', system-ui, sans-serif;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+}
+.al-dd-opt:hover,
+.al-dd-opt:focus-visible { background: rgba(125, 92, 245, .18); color: #fff; }
+.al-dd-opt.on { color: #fff; font-weight: 600; }
+.al-dd-opt.on::before {
+  content: "✓";
+  position: absolute;
+  left: 9px;
+  color: #a78bfa;
+  font-size: 12px;
 }
 .al-view { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .1); }
 .al-vbtn {

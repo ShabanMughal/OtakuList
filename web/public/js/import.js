@@ -107,6 +107,8 @@
         totalEpisodes: a.totalEpisodes ?? null,
         rating: clamp(parseInt(a.rating, 10) || 0, 0, 5),
         cover: a.cover || null,
+        type: a.type === "manga" ? "manga" : null,
+        format: a.type === "manga" ? a.format || "Manga" : null,
       }));
     return out.length ? out : null;
   }
@@ -389,6 +391,8 @@
           totalEpisodes: a.totalEpisodes ?? null,
           rating: a.rating || 0,
           cover: a.cover || null,
+          type: a.type === "manga" ? "manga" : null,
+          format: a.type === "manga" ? a.format || "Manga" : null,
         }));
       if (!rows.length) throw new Error("empty");
       showPreview();
@@ -408,13 +412,15 @@
     const now = Date.now();
     const list = {};
     for (const r of clean) {
-      let id = slug(r.title);
-      if (!id) continue;
+      if (!slug(r.title)) continue;
+      // manga keys are prefixed, matching the extension
+      let id = (r.type === "manga" ? "manga-" : "") + slug(r.title);
       // avoid clobbering duplicate slugs
       let unique = id, n = 2;
       while (list[unique]) unique = `${id}-${n++}`;
       list[unique] = {
         id: unique,
+        ...(r.type === "manga" ? { type: "manga", format: r.format || "Manga" } : {}),
         title: r.title.trim(),
         status: r.status,
         currentEpisode: r.currentEpisode,

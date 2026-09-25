@@ -225,6 +225,67 @@ header h1 {
   color: var(--accent-2);
 }
 
+/* anime / manga switch */
+.kinds {
+  display: flex;
+  gap: 4px;
+  margin: 10px 12px 0;
+  padding: 3px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.kind {
+  flex: 1 1 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: .15s;
+}
+
+.kind:hover {
+  color: var(--text);
+}
+
+.kind.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.kind span {
+  font-size: 10px;
+  opacity: .75;
+}
+
+.tab b {
+  font-weight: inherit;
+}
+
+.format {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  font-size: 9.5px;
+  line-height: 15px;
+  font-weight: 600;
+  border-radius: 20px;
+  background: var(--panel-2);
+  color: var(--accent-2);
+  vertical-align: 1px;
+}
+
+#f-type {
+  flex: none;
+  width: 104px;
+}
+
 /* tabs */
 .tabs {
   display: flex;

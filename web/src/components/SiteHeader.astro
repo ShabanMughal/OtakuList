@@ -14,7 +14,8 @@ const CHROME_STORE = 'https://chromewebstore.google.com/detail/otakulist-%E2%80%
 const links = [
   { id: 'features', href: `${base}#features`, label: 'Features' },
   { id: 'how', href: `${base}#how`, label: 'How it works' },
-  { id: 'animelist', href: `${base}animelist.html`, label: 'Create list' },
+  { id: 'animelist', href: `${base}animelist.html`, label: 'Anime list' },
+  { id: 'mangalist', href: `${base}mangalist.html`, label: 'Manga list' },
   { id: 'import', href: `${base}import.html`, label: 'Import' },
   { id: 'showcase', href: `${base}showcase.html`, label: 'Gacha Profiles' },
 ];
@@ -77,6 +78,7 @@ const hasActions = Astro.slots.has('actions');
             <div id="ol-ext" hidden class="mt-1.5 text-[11.5px] text-iris-2"></div>
           </div>
           <a role="menuitem" href={`${base}animelist.html`} class="ol-mi">My anime list</a>
+          <a role="menuitem" href={`${base}mangalist.html`} class="ol-mi">My manga list</a>
           <a role="menuitem" href={`${base}showcase.html`} class="ol-mi">My gacha profile</a>
           <button role="menuitem" id="ol-connect" type="button" hidden class="ol-mi">Connect the extension</button>
           <button role="menuitem" id="ol-logout" type="button" class="ol-mi">Log out</button>

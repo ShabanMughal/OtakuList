@@ -1,4 +1,4 @@
-// OtakuList popup — renders and edits the locally-stored watchlist.
+// OtakuList popup — renders and edits the locally-stored anime & manga list.
 const KEY = "animeList";
 const STATUSES = {
   watching: "Watching",
@@ -6,8 +6,31 @@ const STATUSES = {
   completed: "Completed",
   onhold: "On Hold",
 };
+// Manga share the same status keys (so sync and backups stay one format) —
+// only the words change.
+const MANGA_STATUSES = {
+  watching: "Reading",
+  plan: "Plan to Read",
+  completed: "Completed",
+  onhold: "On Hold",
+};
+const statusLabels = (type) => (type === "manga" ? MANGA_STATUSES : STATUSES);
+
+// Entries without a type predate manga support, so they are anime.
+const typeOf = (a) => (a && a.type === "manga" ? "manga" : "anime");
+// The manual-add form's "Manhwa" etc. become a manga entry with that format.
+const FORMATS = { manga: "Manga", manhwa: "Manhwa", manhua: "Manhua", novel: "Light Novel" };
+const TYPE_KEY = "otakulist-popup-type";
+const readType = () => {
+  try {
+    return localStorage.getItem(TYPE_KEY) === "manga" ? "manga" : "anime";
+  } catch {
+    return "anime";
+  }
+};
 
 let state = {};
+let activeType = readType();
 let activeTab = "watching";
 let query = "";
 let sortBy = "recent";
@@ -21,10 +44,13 @@ const liveEntries = () => Object.values(state).filter((a) => !isTombstone(a));
 const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 
 // The popup shows at most this many cards per tab, so it opens fast however
-// long the list gets. The rest is one click away: the website's Anime List page
+// long the list gets. The rest is one click away: the website's Anime / Manga List page
 // when signed in (it holds the same synced list), or "Show all" here otherwise.
 const POPUP_LIMIT = 10;
-const FULL_LIST_URL = "https://otakulist.pages.dev/animelist.html";
+const FULL_LIST_URL = {
+  anime: "https://otakulist.pages.dev/animelist.html",
+  manga: "https://otakulist.pages.dev/mangalist.html",
+};
 let showAll = false;
 
 // Saved covers are AniList's extraLarge poster (~460px wide, often 100–300 KB)
@@ -32,9 +58,9 @@ let showAll = false;
 // what made the popup slow to open. AniList serves every size at the same path
 // under a different folder, so point the thumbnail at the "small" one (100px
 // wide — still sharp for a 46px card on a 2x screen, and ~13 KB instead of
-// ~150 KB). Other hosts are left alone.
+// ~150 KB). Manga covers follow the same layout. Other hosts are left alone.
 const thumbUrl = (url) =>
-  String(url).replace(/(\/anilistcdn\/media\/anime\/cover\/)large\//, "$1small/");
+  String(url).replace(/(\/anilistcdn\/media\/(?:anime|manga)\/cover\/)large\//, "$1small/");
 
 const $ = (sel) => document.querySelector(sel);
 const listEl = $("#list");
@@ -74,14 +100,29 @@ function starsHtml(rating) {
 }
 
 function render() {
-  // tab counts
-  const live = liveEntries();
+  const all = liveEntries();
+  const manga = activeType === "manga";
+  const labels = statusLabels(activeType);
+
+  // anime / manga switch counts
+  document.querySelectorAll(".kind").forEach((k) => {
+    const t = k.dataset.type;
+    k.querySelector("span").textContent = all.filter((a) => typeOf(a) === t).length;
+    k.classList.toggle("active", t === activeType);
+  });
+
+  // tab counts, for the kind being shown
+  const live = all.filter((a) => typeOf(a) === activeType);
   document.querySelectorAll(".tab").forEach((t) => {
     const s = t.dataset.status;
     const n = live.filter((a) => a.status === s).length;
     t.querySelector("span").textContent = n;
     t.classList.toggle("active", s === activeTab);
   });
+  document.querySelector('.tab[data-status="watching"] b').textContent = labels.watching;
+  $("#emptyHint").textContent = manga
+    ? "Start reading a manga, manhwa or manhua and OtakuList will offer to save it — or add one manually with ＋."
+    : "Start watching an anime and OtakuList will offer to save it — or add one manually with ＋.";
 
   const q = query.trim().toLowerCase();
   const matches = sortItems(
@@ -93,7 +134,7 @@ function render() {
   const capped = !showAll && !q && matches.length > POPUP_LIMIT;
   const items = capped ? matches.slice(0, POPUP_LIMIT) : matches;
 
-  const totalCount = live.length;
+  const totalCount = all.length;
   $("#count").textContent = `${totalCount} title${totalCount === 1 ? "" : "s"} saved`;
 
   if (!items.length) {
@@ -103,6 +144,8 @@ function render() {
   }
   emptyEl.hidden = true;
 
+  const unit = manga ? "Ch" : "Ep";
+  const icon = manga ? "📖" : "🎬";
   listEl.innerHTML = items
     .map((a) => {
       const total = a.totalEpisodes ? `<span> / ${a.totalEpisodes}</span>` : "";
@@ -114,16 +157,16 @@ function render() {
           ? `<span class="abs" title="Absolute episode number across the whole series">abs. ${escapeHtml(a.absoluteEpisode)}</span>`
           : "";
       const cover = a.cover
-        ? `<img class="cover" src="${escapeHtml(thumbUrl(a.cover))}" width="46" height="62" loading="lazy" decoding="async" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover',textContent:'🎬'}))">`
-        : `<div class="cover">🎬</div>`;
+        ? `<img class="cover" src="${escapeHtml(thumbUrl(a.cover))}" width="46" height="62" loading="lazy" decoding="async" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover',textContent:'${icon}'}))">`
+        : `<div class="cover">${icon}</div>`;
       const siteLink = a.url
         ? `<a href="${escapeHtml(a.url)}" target="_blank" rel="noopener">${escapeHtml(a.site || "open")}</a>`
         : escapeHtml(a.site || "");
-      const options = Object.entries(STATUSES)
+      const options = Object.entries(labels)
         .map(([v, label]) => `<option value="${v}" ${v === a.status ? "selected" : ""}>${label}</option>`)
         .join("");
       const resumeBtn = a.url
-        ? `<a class="resume" href="${escapeHtml(a.url)}" target="_blank" rel="noopener" title="Resume watching where you left off">▶</a>`
+        ? `<a class="resume" href="${escapeHtml(a.url)}" target="_blank" rel="noopener" title="${manga ? "Resume reading" : "Resume watching"} where you left off">▶</a>`
         : "";
       const hasNote = a.note && a.note.trim();
       const noteBlock = `<textarea class="note-input" data-act="noteedit" placeholder="Add a note…" rows="2" ${hasNote ? "" : "hidden"}>${escapeHtml(a.note || "")}</textarea>`;
@@ -131,12 +174,12 @@ function render() {
       <div class="card" data-id="${escapeHtml(a.id)}">
         ${cover}
         <div class="body">
-          <div class="name">${escapeHtml(a.title)}</div>
+          <div class="name">${escapeHtml(a.title)}${manga && a.format ? `<span class="format">${escapeHtml(a.format)}</span>` : ""}</div>
           <div class="site">${siteLink}</div>
           <div class="prog">
-            <button data-act="dec" title="Previous episode">−</button>
-            <div class="epnum">Ep <b>${cur}</b>${total}${abs}</div>
-            <button data-act="inc" title="Next episode">＋</button>
+            <button data-act="dec" title="Previous ${manga ? "chapter" : "episode"}">−</button>
+            <div class="epnum">${unit} <b>${escapeHtml(cur)}</b>${total}${abs}</div>
+            <button data-act="inc" title="Next ${manga ? "chapter" : "episode"}">＋</button>
           </div>
           ${starsHtml(a.rating || 0)}
           <div class="foot">
@@ -159,7 +202,7 @@ function render() {
 function moreRowHtml(total) {
   const signedIn = cloud.status.state !== "signed-out";
   const action = signedIn
-    ? `<a class="more-btn" href="${FULL_LIST_URL}" target="_blank" rel="noopener">See full list →</a>`
+    ? `<a class="more-btn" href="${FULL_LIST_URL[activeType]}" target="_blank" rel="noopener">See full list →</a>`
     : `<button class="more-btn" data-act="more">Show all</button>`;
   return `<div class="more-row"><span>Showing ${POPUP_LIMIT} of ${total}</span>${action}</div>`;
 }
@@ -180,8 +223,10 @@ listEl.addEventListener("click", async (e) => {
   const item = state[id];
 
   if (act === "inc" || act === "dec") {
+    // Chapters can be fractional (110.5); a step lands back on a whole number.
     const cur = item.currentEpisode ?? 0;
-    item.currentEpisode = Math.max(0, cur + (act === "inc" ? 1 : -1));
+    const next = act === "inc" ? Math.floor(cur) + 1 : Math.ceil(cur) - 1;
+    item.currentEpisode = Math.max(0, next);
     item.updatedAt = Date.now();
   } else if (act === "rate") {
     const val = parseInt(btn.dataset.val, 10);
@@ -237,6 +282,21 @@ listEl.addEventListener("change", async (e) => {
   }
 });
 
+// anime / manga switch
+$("#kinds").addEventListener("click", (e) => {
+  const kind = e.target.closest(".kind");
+  if (!kind || kind.dataset.type === activeType) return;
+  activeType = kind.dataset.type;
+  try {
+    localStorage.setItem(TYPE_KEY, activeType);
+  } catch {
+    // remembering the choice is a nicety — fine without it
+  }
+  showAll = false;
+  syncAddForm();
+  render();
+});
+
 // tabs
 $("#tabs").addEventListener("click", (e) => {
   const tab = e.target.closest(".tab");
@@ -290,24 +350,52 @@ function clearToast() {
 
 // ── manual add ──────────────────────────────────────────────────────
 const addForm = $("#addForm");
+
+// Keep the form's wording in step with the kind picked in it.
+function syncFormLabels() {
+  const manga = $("#f-type").value !== "anime";
+  const labels = statusLabels(manga ? "manga" : "anime");
+  for (const opt of $("#f-status").options) opt.textContent = labels[opt.value];
+  $("#f-ep").placeholder = manga ? "Ch" : "Ep";
+}
+// Opening the form defaults its kind to the list you're looking at.
+function syncAddForm() {
+  if (activeType === "manga") {
+    if ($("#f-type").value === "anime") $("#f-type").value = "manga";
+  } else {
+    $("#f-type").value = "anime";
+  }
+  syncFormLabels();
+}
+$("#f-type").addEventListener("change", syncFormLabels);
+
 $("#addBtn").addEventListener("click", () => {
   addForm.hidden = !addForm.hidden;
-  if (!addForm.hidden) $("#f-title").focus();
+  if (!addForm.hidden) {
+    syncAddForm();
+    $("#f-title").focus();
+  }
 });
 $("#cancelAdd").addEventListener("click", () => (addForm.hidden = true));
 addForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const title = $("#f-title").value.trim();
   if (!title) return;
-  const id = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const kind = $("#f-type").value;
+  const manga = kind !== "anime";
+  // Same key scheme as the content script, so a later detection finds this entry.
+  const id =
+    (manga ? "manga-" : "") +
+    title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   const now = Date.now();
   const epVal = $("#f-ep").value;
   const totVal = $("#f-total").value;
   state[id] = {
     id,
+    ...(manga ? { type: "manga", format: FORMATS[kind] } : {}),
     title,
     status: $("#f-status").value,
-    currentEpisode: epVal === "" ? null : parseInt(epVal, 10),
+    currentEpisode: epVal === "" ? null : parseFloat(epVal),
     totalEpisodes: totVal === "" ? null : parseInt(totVal, 10),
     rating: state[id]?.rating || 0,
     cover: state[id]?.cover || null,
@@ -320,6 +408,7 @@ addForm.addEventListener("submit", async (e) => {
   await setList(state);
   addForm.reset();
   addForm.hidden = true;
+  activeType = manga ? "manga" : "anime";
   activeTab = state[id].status;
   render();
 });
