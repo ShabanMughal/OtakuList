@@ -227,9 +227,14 @@
       $("#al-empty").hidden = false;
       $("#al-empty").innerHTML = all.length
         ? `<h3>Nothing in ${esc(labels[activeTab])}</h3><p>${q ? "No titles match your search." : "Move a title here, or add one."}</p>`
-        : activeType === "manga"
-        ? `<h3>No manga yet</h3><p>Add a manga, manhwa or manhua with ＋ Add manga, or start reading one with the extension installed.</p>`
-        : `<h3>Your list is empty</h3><p>Add a show with ＋ Add anime, or import a backup from the extension.</p>`;
+        : (activeType === "manga"
+            ? `<h3>No manga yet</h3><p>Add a manga, manhwa or manhua, paste a link to the chapter you're on, or bring your list over from the extension.</p>`
+            : `<h3>Your list is empty</h3><p>Add a show, paste a link to the episode you're on, or bring your list over from the extension.</p>`) +
+          `<div class="al-empty-acts">
+            <button type="button" class="al-act al-act-primary" data-empty="add">＋ Add ${activeType === "manga" ? "manga" : "anime"}</button>
+            <button type="button" class="al-act al-act-soft" data-empty="paste">🔗 Paste link</button>
+            <button type="button" class="al-act" data-empty="import">⬆ Import backup</button>
+          </div>`;
     } else {
       $("#al-empty").hidden = true;
       grid.innerHTML = list.map(cardHtml).join("");
@@ -366,8 +371,36 @@
     render();
   });
 
+  // ── backup menu (holds export / import) ──────────────────────────────
+  const backupBtn = $("#al-backup-btn");
+  const backupMenu = $("#al-backup-menu");
+  function setBackupMenu(open, refocus) {
+    backupMenu.hidden = !open;
+    backupBtn.setAttribute("aria-expanded", String(open));
+    if (open) backupMenu.querySelector(".al-mi").focus();
+    else if (refocus) backupBtn.focus();
+  }
+  backupBtn.addEventListener("click", () => setBackupMenu(backupMenu.hidden));
+  document.addEventListener("click", (e) => {
+    if (!backupMenu.hidden && !e.target.closest(".al-backup")) setBackupMenu(false);
+  });
+  backupMenu.addEventListener("keydown", (e) => {
+    const items = [...backupMenu.querySelectorAll(".al-mi")];
+    const i = items.indexOf(document.activeElement);
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length].focus();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setBackupMenu(false, true);
+    } else if (e.key === "Tab") {
+      setBackupMenu(false);
+    }
+  });
+
   // ── export / import (extension-compatible) ───────────────────────────
   $("#al-export").addEventListener("click", () => {
+    setBackupMenu(false);
     // Strip tombstones — a backup is the list, not its sync bookkeeping.
     const exportable = Object.fromEntries(
       Object.entries(state).filter(([, a]) => !isTombstone(a))
@@ -386,7 +419,10 @@
     toast("Backup downloaded ✓");
   });
   const importFile = $("#al-importfile");
-  $("#al-import").addEventListener("click", () => importFile.click());
+  $("#al-import").addEventListener("click", () => {
+    setBackupMenu(false);
+    importFile.click();
+  });
   importFile.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -674,6 +710,12 @@
   }
 
   $("#al-quickbtn").addEventListener("click", () => openQuick(null));
+  // the empty state's shortcuts to the hero actions
+  $("#al-empty").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-empty]");
+    if (!b) return;
+    ({ add: openModal, paste: () => openQuick(null), import: () => importFile.click() })[b.dataset.empty]();
+  });
   $("#aq-close").addEventListener("click", closeQuick);
   qm.addEventListener("click", (e) => {
     if (e.target === qm) closeQuick();

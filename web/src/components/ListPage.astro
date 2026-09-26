@@ -69,28 +69,47 @@ const theme =
 
   <div style={theme} data-list-type={type}>
     <!-- header -->
-    <SiteHeader active={page}>
-      <Fragment slot="actions">
-        <span id="al-cloud-status" class="text-xs text-[#f4f2f8]/50" aria-live="polite"></span>
-        <button id="al-export" type="button" class="cursor-pointer rounded-full border border-solid border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">Export</button>
-        <button id="al-import" type="button" class="cursor-pointer rounded-full border border-solid border-white/[.12] bg-transparent px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#f4f2f8]">Import</button>
-        <input id="al-importfile" type="file" accept="application/json,.json" hidden />
-        <button id="al-quickbtn" type="button" class="cursor-pointer rounded-full border border-solid border-iris/50 bg-iris/15 px-[18px] py-2.5 font-heading text-sm font-extrabold text-[#e7e2ff]" title="Paste a link to an episode or chapter">🔗 Paste link</button>
-        <button id="al-add" type="button" class="cursor-pointer rounded-full border-none bg-iris px-5 py-2.5 font-heading text-sm font-extrabold text-white">＋ Add {manga ? 'manga' : 'anime'}</button>
-      </Fragment>
-    </SiteHeader>
+    <SiteHeader active={page} />
 
-    <!-- hero -->
+    <!-- hero: the list's own actions live here, not in the site header -->
     <section class="border-b border-white/[.075]">
-      <div class="mx-auto max-w-[1320px] px-7 pb-[30px] pt-11">
-        <div class="mb-3 text-[11.5px] uppercase tracking-[.16em] text-iris-2">Your list</div>
-        <h1 class="m-0 mb-2.5 font-heading text-[clamp(30px,4vw,48px)] font-extrabold tracking-[-.035em]">{t.heading}</h1>
-        <p class="m-0 max-w-[64ch] text-base text-[#f4f2f8]/[.62]">{t.intro} It stays on your device, and you can move it to and from the extension any time with <b class="text-iris-2">Export / Import</b>.</p>
+      <div class="mx-auto flex max-w-[1320px] flex-wrap items-end justify-between gap-x-10 gap-y-6 px-4 pb-[30px] pt-11 sm:px-7">
+        <div class="min-w-0 flex-[1_1_420px]">
+          <div class="mb-3 text-[11.5px] uppercase tracking-[.16em] text-iris-2">Your list</div>
+          <h1 class="m-0 mb-2.5 font-heading text-[clamp(30px,4vw,48px)] font-extrabold tracking-[-.035em]">{t.heading}</h1>
+          <p class="m-0 max-w-[64ch] text-base text-[#f4f2f8]/[.62]">{t.intro} It stays on your device, and you can move it to and from the extension any time with <b class="text-iris-2">Backup</b>.</p>
+        </div>
+
+        <div class="al-actions">
+          <div class="al-actions-row">
+            <button id="al-add" type="button" class="al-act al-act-primary">＋ Add {manga ? 'manga' : 'anime'}</button>
+            <button id="al-quickbtn" type="button" class="al-act al-act-soft" title={`Paste a link to an ${t.unit} you're on`}>🔗 Paste link</button>
+            <div class="al-backup">
+              <button id="al-backup-btn" type="button" class="al-act" aria-haspopup="menu" aria-expanded="false" aria-controls="al-backup-menu">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                Backup
+                <svg class="al-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div id="al-backup-menu" class="al-menu" role="menu" hidden>
+                <button id="al-export" type="button" role="menuitem" class="al-mi">
+                  <span class="al-mi-ic" aria-hidden="true">⬇</span>
+                  <span><b>Export backup</b><small>Download your whole list as a .json file</small></span>
+                </button>
+                <button id="al-import" type="button" role="menuitem" class="al-mi">
+                  <span class="al-mi-ic" aria-hidden="true">⬆</span>
+                  <span><b>Import backup</b><small>Add titles from a .json file (web or extension)</small></span>
+                </button>
+              </div>
+            </div>
+            <input id="al-importfile" type="file" accept="application/json,.json" hidden />
+          </div>
+          <span id="al-cloud-status" class="al-cloud" aria-live="polite"></span>
+        </div>
       </div>
     </section>
 
     <!-- toolbar -->
-    <div class="mx-auto max-w-[1320px] px-7 pt-[22px]">
+    <div class="mx-auto max-w-[1320px] px-4 pt-[22px] sm:px-7">
       <!-- anime / manga: separate pages over the one list -->
       <nav id="al-kinds" class="al-kinds" aria-label="Anime or manga">
         <a class:list={['al-kind', { on: !manga }]} data-type="anime" href={`${base}animelist.html`} aria-current={manga ? undefined : 'page'}>🎬 Anime <span class="n">0</span></a>
@@ -124,7 +143,7 @@ const theme =
     </div>
 
     <!-- cards -->
-    <div class="mx-auto max-w-[1320px] px-7 pb-20 pt-5">
+    <div class="mx-auto max-w-[1320px] px-4 pb-20 pt-5 sm:px-7">
       <div id="al-grid" class="al-grid"></div>
       <div id="al-empty" class="al-empty" hidden></div>
     </div>
