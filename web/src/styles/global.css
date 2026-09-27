@@ -2856,25 +2856,62 @@ img {
   .al-cloud { text-align: center; }
 }
 
-/* toast */
+/* toast — same surface, border and pill buttons as the list's Backup menu / actions */
 #al-toast {
   position: fixed;
   left: 50%;
   bottom: 26px;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 16px 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(125, 92, 245, .35);
+  background: rgba(23, 20, 42, .92);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  color: #f4f2f8;
+  font: 500 13.5px/1.35 var(--font-body, 'Poppins', sans-serif);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .04) inset, 0 8px 30px rgba(125, 92, 245, .18);
   transform: translate(-50%, 20px);
-  background: #1e1b2e;
-  color: #f4f2ff;
-  border: 1px solid #3b3554;
-  border-radius: 12px;
-  padding: 11px 18px;
-  font-size: 13px;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, .5);
   opacity: 0;
   pointer-events: none;
   transition: opacity .2s, transform .2s;
-  z-index: 300;
+}
+#al-toast::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7d5cf5;
+  box-shadow: 0 0 10px rgba(125, 92, 245, .9);
 }
 #al-toast.show { opacity: 1; transform: translate(-50%, 0); }
+#al-toast.has-actions.show { pointer-events: auto; }
+#al-toast.has-danger { border-color: rgba(255, 90, 110, .4); box-shadow: 0 18px 50px rgba(0, 0, 0, .55), 0 8px 30px rgba(255, 90, 110, .15); }
+#al-toast.has-danger::before { background: #ff5a6e; box-shadow: 0 0 10px rgba(255, 90, 110, .9); }
+.al-toast-acts { display: flex; gap: 8px; flex: none; margin-left: 4px; }
+.al-toast-btn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .03);
+  color: #f4f2f8;
+  font: 800 12.5px var(--font-heading, sans-serif);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.al-toast-btn:hover { border-color: rgba(255, 255, 255, .3); background: rgba(255, 255, 255, .06); }
+.al-toast-btn:focus-visible { outline: 2px solid #9d86ff; outline-offset: 2px; }
+.al-toast-btn.primary { border-color: #7d5cf5; background: #7d5cf5; color: #fff; box-shadow: 0 6px 18px rgba(125, 92, 245, .35); }
+.al-toast-btn.primary:hover { border-color: #6b4be0; background: #6b4be0; }
+.al-toast-btn.danger { border-color: #ff5a6e; background: #ff5a6e; color: #fff; box-shadow: 0 6px 18px rgba(255, 90, 110, .3); }
+.al-toast-btn.danger:hover { border-color: #e84a5e; background: #e84a5e; }
 
 @media (max-width: 640px) {
   .al-toolbar { flex-direction: column; align-items: stretch; }

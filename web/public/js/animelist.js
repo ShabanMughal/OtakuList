@@ -267,9 +267,22 @@
       render();
     } else if (act === "del") {
       const id = card.dataset.id;
-      state[id] = { id, deleted: true, updatedAt: Date.now() };
-      save();
-      render();
+      toast(`Delete “${item.title}”?`, {
+        actions: [
+          { label: "Cancel" },
+          {
+            label: "Delete",
+            danger: true,
+            onClick: () => {
+              if (!state[id] || isTombstone(state[id])) return;
+              state[id] = { id, deleted: true, updatedAt: Date.now() };
+              save();
+              render();
+              toast("Removed from your list");
+            },
+          },
+        ],
+      });
     } else if (act === "notetoggle") {
       const ta = card.querySelector(".al-note");
       ta.hidden = !ta.hidden;
@@ -285,8 +298,12 @@
     item.status = el.value;
     item.updatedAt = Date.now();
     save();
-    activeTab = item.status;
+    // Stay on the current tab; the card leaves it and the toast says where it went.
     render();
+    const status = item.status;
+    toast(`Moved “${item.title}” to ${statusLabels(typeOf(item))[status]}`, {
+      actions: [{ label: "View", primary: true, onClick: () => { activeTab = status; render(); } }],
+    });
   });
   $("#al-grid").addEventListener("input", (e) => {
     const card = e.target.closest(".al-card");
@@ -861,17 +878,40 @@
 
   // ── tiny toast ───────────────────────────────────────────────────────
   let toastTimer = null;
-  function toast(msg) {
+  // opts.actions: [{ label, primary?, danger?, onClick? }] — buttons that close the toast.
+  function toast(msg, opts = {}) {
     let el = $("#al-toast");
     if (!el) {
       el = document.createElement("div");
       el.id = "al-toast";
+      el.setAttribute("role", "status");
       document.body.appendChild(el);
     }
-    el.textContent = msg;
+    const hide = () => el.classList.remove("show");
+    const actions = opts.actions || [];
+    el.replaceChildren(Object.assign(document.createElement("span"), { textContent: msg }));
+    el.classList.toggle("has-actions", actions.length > 0);
+    el.classList.toggle("has-danger", actions.some((a) => a.danger));
+    if (actions.length) {
+      const row = document.createElement("span");
+      row.className = "al-toast-acts";
+      actions.forEach((a) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "al-toast-btn" + (a.danger ? " danger" : a.primary ? " primary" : "");
+        b.textContent = a.label;
+        b.addEventListener("click", () => {
+          clearTimeout(toastTimer);
+          hide();
+          if (a.onClick) a.onClick();
+        });
+        row.appendChild(b);
+      });
+      el.appendChild(row);
+    }
     el.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove("show"), 2400);
+    toastTimer = setTimeout(hide, opts.duration || (actions.length ? 6000 : 2400));
   }
 
   // ── extension bridge ─────────────────────────────────────────────────
