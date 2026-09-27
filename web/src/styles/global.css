@@ -2779,8 +2779,8 @@ img {
 .al-empty-acts { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
 
 /* list actions in the hero (Add / Paste link / Backup menu) */
-.al-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.al-actions-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.al-hero-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.al-hero-actions-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
 .al-act {
   display: inline-flex;
   align-items: center;
@@ -2848,9 +2848,9 @@ img {
 .al-mi small { display: block; margin-top: 2px; font-size: 12px; line-height: 1.35; color: rgba(244, 242, 248, .55); }
 .al-cloud { min-height: 16px; font-size: 12px; color: rgba(244, 242, 248, .5); }
 @media (max-width: 640px) {
-  .al-actions { width: 100%; align-items: stretch; }
-  .al-actions-row { display: grid; grid-template-columns: 1fr 1fr; justify-content: stretch; }
-  .al-actions-row .al-act-primary { grid-column: 1 / -1; }
+  .al-hero-actions { width: 100%; align-items: stretch; }
+  .al-hero-actions-row { display: grid; grid-template-columns: 1fr 1fr; justify-content: stretch; }
+  .al-hero-actions-row .al-act-primary { grid-column: 1 / -1; }
   .al-backup .al-act { width: 100%; }
   .al-menu { width: min(290px, calc(100vw - 32px)); }
   .al-cloud { text-align: center; }
