@@ -586,6 +586,16 @@
       "r": 5
     },
     {
+      "name": "Vesna",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Vesna.png",
+      "r": 5
+    },
+    {
+      "name": "Vodyanitsa",
+      "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Vodyanitsa.png",
+      "r": 5
+    },
+    {
       "name": "Wanderer",
       "img": "https://gi.yatta.moe/assets/UI/UI_AvatarIcon_Wanderer.png",
       "r": 5
@@ -715,6 +725,11 @@
     {
       "name": "Aventurine",
       "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1304.png",
+      "r": 5
+    },
+    {
+      "name": "Aventurine • Waveflair",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1513.png",
       "r": 5
     },
     {
@@ -958,6 +973,11 @@
       "r": 4
     },
     {
+      "name": "Pearl",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1503.png",
+      "r": 5
+    },
+    {
       "name": "Pela",
       "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1106.png",
       "r": 4
@@ -985,6 +1005,11 @@
     {
       "name": "Robin",
       "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1309.png",
+      "r": 5
+    },
+    {
+      "name": "Robin • Summeretto",
+      "img": "https://sr.yatta.moe/hsr/assets/UI/avatar/1512.png",
       "r": 5
     },
     {
@@ -1171,7 +1196,7 @@
     },
     {
       "name": "Aria",
-      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/0/0b/Agent_Aria_Portrait.png",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/f/ff/Agent_Aria_Human_Portrait.png",
       "r": 5
     },
     {
@@ -1212,6 +1237,11 @@
     {
       "name": "Cissia",
       "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/8/83/Agent_Cissia_Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Claret Flint",
+      "img": "https://static.wikia.nocookie.net/zenless-zone-zero/images/7/7c/Agent_Claret_Flint_Portrait.png",
       "r": 5
     },
     {
@@ -1552,6 +1582,11 @@
       "r": 5
     },
     {
+      "name": "Jingran",
+      "img": "https://static.wikia.nocookie.net/wutheringwaves/images/4/44/Jingran_Card.jpg",
+      "r": 5
+    },
+    {
       "name": "Jinhsi",
       "img": "https://static.wikia.nocookie.net/wutheringwaves/images/a/a9/Jinhsi_Card.png",
       "r": 5
@@ -1731,6 +1766,11 @@
     {
       "name": "A2",
       "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/d/de/Character-A2-Portrait.png",
+      "r": 5
+    },
+    {
+      "name": "Adelyde - Anabasis",
+      "img": "https://static.wikia.nocookie.net/punishing-gray-raven/images/5/57/Adelyde_-_Anabasis.png",
       "r": 5
     },
     {
