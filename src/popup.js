@@ -228,6 +228,25 @@ listEl.addEventListener("click", async (e) => {
     const next = act === "inc" ? Math.floor(cur) + 1 : Math.ceil(cur) - 1;
     item.currentEpisode = Math.max(0, next);
     item.updatedAt = Date.now();
+    // Stepping onto the final episode/chapter finishes the title.
+    if (
+      act === "inc" &&
+      item.status === "watching" &&
+      item.totalEpisodes &&
+      item.currentEpisode >= item.totalEpisodes
+    ) {
+      item.status = "completed";
+      showToast(`${item.title} moved to Completed`, {
+        label: "Not finished?",
+        onClick: async () => {
+          if (!state[id] || state[id].deleted) return;
+          state[id].status = "watching";
+          state[id].updatedAt = Date.now();
+          await setList(state);
+          render();
+        },
+      });
+    }
   } else if (act === "rate") {
     const val = parseInt(btn.dataset.val, 10);
     // clicking the current rating again clears it
@@ -335,13 +354,21 @@ function showUndo(item) {
     render();
   });
 }
-function showToast(msg) {
+// An optional action ({ label, onClick }) adds a button, like showUndo's.
+function showToast(msg, action) {
   clearToast();
   const t = document.createElement("div");
   t.className = "toast";
-  t.innerHTML = `<span>${escapeHtml(msg)}</span>`;
+  t.innerHTML = `<span>${escapeHtml(msg)}</span>${
+    action ? `<button type="button">${escapeHtml(action.label)}</button>` : ""
+  }`;
   document.body.appendChild(t);
-  toastTimer = setTimeout(() => t.remove(), 3000);
+  toastTimer = setTimeout(() => t.remove(), action ? 6000 : 3000);
+  t.querySelector("button")?.addEventListener("click", () => {
+    clearTimeout(toastTimer);
+    t.remove();
+    action.onClick();
+  });
 }
 function clearToast() {
   clearTimeout(toastTimer);

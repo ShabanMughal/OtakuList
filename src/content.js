@@ -109,15 +109,19 @@
   function extractEpisode(str) {
     if (!str) return null;
     let value = String(str);
-    try {
-      const url = new URL(value, location.href);
-      for (const name of ["ep", "episode", "epi", "episodio"]) {
-        const param = url.searchParams.get(name);
-        if (param && /^\d{1,4}$/.test(param)) return parseInt(param, 10);
+    // Page titles are text, not URLs: resolving "Love Quest - Chapter 21" against
+    // the page would %20-encode it and hide the number.
+    if (!/\s/.test(value)) {
+      try {
+        const url = new URL(value, location.href);
+        for (const name of ["ep", "episode", "epi", "episodio"]) {
+          const param = url.searchParams.get(name);
+          if (param && /^\d{1,4}$/.test(param)) return parseInt(param, 10);
+        }
+        value = `${url.pathname} ${url.search}`;
+      } catch {
+        // Not a valid URL, fall through to plain-text matching.
       }
-      value = `${url.pathname} ${url.search}`;
-    } catch {
-      // Not a valid URL, fall through to plain-text matching.
     }
 
     const m = value.match(/(?:episode|episodio|ep|epi|\be)[\s._:/-]*=?\s*(\d{1,4})\b/i);
@@ -129,15 +133,19 @@
   function extractChapter(str) {
     if (!str) return null;
     let value = String(str);
-    try {
-      const url = new URL(value, location.href);
-      for (const name of ["chapter", "chap", "ch"]) {
-        const param = url.searchParams.get(name);
-        if (param && /^\d{1,5}(\.\d{1,2})?$/.test(param)) return parseFloat(param);
+    // Page titles are text, not URLs: resolving "Love Quest - Chapter 21" against
+    // the page would %20-encode it and hide the number.
+    if (!/\s/.test(value)) {
+      try {
+        const url = new URL(value, location.href);
+        for (const name of ["chapter", "chap", "ch"]) {
+          const param = url.searchParams.get(name);
+          if (param && /^\d{1,5}(\.\d{1,2})?$/.test(param)) return parseFloat(param);
+        }
+        value = `${url.pathname} ${url.search}`;
+      } catch {
+        // Not a valid URL, fall through to plain-text matching.
       }
-      value = `${url.pathname} ${url.search}`;
-    } catch {
-      // Not a valid URL, fall through to plain-text matching.
     }
 
     const m = value.match(/(?:chapter|chapitre|capitulo|chap|\bch)[\s._:/-]*=?\s*(\d{1,5}(?:\.\d{1,2})?)(?!\d)/i);
@@ -446,9 +454,15 @@
       (manga ? document.title : null) ||
       "";
     const cleanedTitle = cleanTitle(rawTitle, type);
+    // SPA readers (comicland.org) show a placeholder like "Manga Web" until the
+    // chapter loads. A reader title that never mentions a chapter, on a chapter
+    // URL, is that placeholder — the URL slug is the better source.
+    const placeholder =
+      manga && pathTitle && extractChapter(location.pathname) != null && extractChapter(rawTitle) == null;
     // Episode routes contain a provider slug rather than the anime title, so
     // keep the page title for display and use Miruro's numeric id separately.
-    const title = isGenericTitle(cleanedTitle, domain) && pathTitle ? pathTitle : cleanedTitle;
+    const title =
+      (placeholder || isGenericTitle(cleanedTitle, domain)) && pathTitle ? pathTitle : cleanedTitle;
     if (!title || title.length < 2) return null;
     if (manga) {
       // `episode` holds the chapter for manga — see isManga above.
@@ -783,8 +797,9 @@
     document.documentElement.appendChild(host);
   }
 
-  // A small, non-interactive confirmation pill (used for silent auto-updates).
-  function showToast(msg) {
+  // A small confirmation pill (used for silent auto-updates). An optional
+  // action ({ label, onClick }) adds a button and keeps the pill up longer.
+  function showToast(msg, action) {
     removeBanner();
     ensureFont();
     const old = document.getElementById(TOAST_ID);
@@ -804,13 +819,22 @@
           background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:8px;color:#fff;}
         .logo img{width:24px;height:24px;display:block;object-fit:contain;}
         .txt{font-size:12px;line-height:1.35;} .txt b{color:#a78bfa;font-weight:700;}
+        .act{flex:none;margin-left:4px;cursor:pointer;font-size:12px;font-weight:600;
+          color:#f4f2ff;background:#3b3554;border:1px solid #5b5280;border-radius:8px;padding:6px 10px;}
+        .act:hover{background:#4c4470;}
       </style>
       <div class="toast">
         <span class="logo">${MARK}</span>
         <div class="txt"><b>OtakuList</b><br>${msg}</div>
+        ${action ? `<button type="button" class="act">${action.label}</button>` : ""}
       </div>`;
     document.documentElement.appendChild(host);
-    setTimeout(() => host.remove(), 2600);
+    const timer = setTimeout(() => host.remove(), action ? 8000 : 2600);
+    root.querySelector(".act")?.addEventListener("click", () => {
+      clearTimeout(timer);
+      host.remove();
+      action.onClick();
+    });
   }
 
   // ---------- driver ----------
@@ -901,9 +925,33 @@
         // poster (fixes entries saved before cover detection improved).
         if (candidate.cover && (!existing.cover || looksLikeCoverUrl(candidate.cover)))
           existing.cover = candidate.cover;
+        if (candidate.totalEpisodes) existing.totalEpisodes = candidate.totalEpisodes;
+        // Reaching the final episode/chapter finishes the title.
+        const finished = existing.totalEpisodes && existing.currentEpisode >= existing.totalEpisodes;
+        if (finished) existing.status = "completed";
         existing.updatedAt = Date.now();
         await chrome.storage.local.set({ [KEY]: list });
-        showToast(`Updated to ${manga ? "Chapter" : "Episode"} <b>${candidate.episode}</b>`);
+        if (finished) {
+          // The total can be wrong (split cours, bad AniList match), so let the
+          // user put it straight back in Watching/Reading.
+          showToast(
+            `Final ${manga ? "chapter" : "episode"} <b>${candidate.episode}</b> — moved to <b>Completed</b>`,
+            {
+              label: "Not finished?",
+              onClick: async () => {
+                const fresh = await getList();
+                const entry = fresh[existingKey];
+                if (!entry || entry.deleted) return;
+                entry.status = "watching";
+                entry.updatedAt = Date.now();
+                await chrome.storage.local.set({ [KEY]: fresh });
+                showToast(`Kept in <b>${manga ? "Reading" : "Watching"}</b>`);
+              },
+            }
+          );
+        } else {
+          showToast(`Updated to ${manga ? "Chapter" : "Episode"} <b>${candidate.episode}</b>`);
+        }
       }
       return; // don't interrupt the binge
     }
