@@ -241,6 +241,8 @@ listEl.addEventListener("click", async (e) => {
         onClick: async () => {
           if (!state[id] || state[id].deleted) return;
           state[id].status = "watching";
+          // Stops the content script completing it again when this episode is reopened.
+          state[id].notFinishedEp = state[id].currentEpisode;
           state[id].updatedAt = Date.now();
           await setList(state);
           render();

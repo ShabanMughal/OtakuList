@@ -63,8 +63,12 @@
     for (const [k, a] of Object.entries(list)) {
       if (!a || a.deleted) continue; // tombstone — treat as absent
       if (isManga(a) !== isManga(candidate)) continue; // anime never matches manga
-      if (candidate.anilistId && a.anilistId && String(a.anilistId) === String(candidate.anilistId))
-        return k;
+      if (candidate.anilistId && a.anilistId) {
+        if (String(a.anilistId) === String(candidate.anilistId)) return k;
+        // AniList gives each season its own id, so two different ids are two
+        // different entries even when a site shows the same title for both.
+        continue;
+      }
       if (candidate.sourceId && a.sourceId && String(a.sourceId) === String(candidate.sourceId))
         return k;
       if (nk && a.title && normText(a.title) === nk) return k;
@@ -74,7 +78,11 @@
 
   async function saveAnime(candidate, status) {
     const list = await getList();
-    const key = findExistingKey(list, candidate) || idFor(candidate.title, candidate.type);
+    let key = findExistingKey(list, candidate) || idFor(candidate.title, candidate.type);
+    // No match, yet the key is taken: same name, different show. Don't overwrite it.
+    if (!findExistingKey(list, candidate) && list[key] && !list[key].deleted) {
+      key += `-${candidate.anilistId || Date.now()}`;
+    }
     const now = Date.now();
     const existing = list[key];
     list[key] = {
@@ -220,6 +228,11 @@
         ""
       );
     } else {
+      // "S2 E1" / "S2 Episode 1" → "Season 2" (AniList finds that wording);
+      // season 1 is just the plain title.
+      t = t.replace(/\bs(\d{1,2})[\s._-]*e(?:p(?:isode)?)?[\s._-]*\d{1,4}\b.*$/i, (_, n) =>
+        Number(n) > 1 ? `Season ${Number(n)}` : ""
+      );
       // cut everything from the episode marker onward
       t = t.replace(/\b(episode|episodio|ep|epi)\b.*$/i, "");
       // strip common streaming junk words
@@ -441,6 +454,17 @@
     return match ? parseInt(match[1], 10) : null;
   }
 
+  // Many sites keep the show's plain name in the page title and only say which
+  // season it is in the URL. Requires the word "season": a bare "/s2/" is as
+  // likely to be a streaming server. Season 1 returns null, as it's the plain title.
+  function seasonFromUrl() {
+    const m = (location.pathname + location.search).match(
+      /(?:^|[^a-z])season[-_=/ ]?(\d{1,2})(?!\d)|(?:^|[^a-z0-9])(\d{1,2})(?:st|nd|rd|th)[-_ ]season/i
+    );
+    const season = m ? parseInt(m[1] ?? m[2], 10) : 0;
+    return season > 1 ? season : null;
+  }
+
   function getCandidate(type = "anime") {
     const manga = type === "manga";
     const url = location.href;
@@ -461,9 +485,11 @@
       manga && pathTitle && extractChapter(location.pathname) != null && extractChapter(rawTitle) == null;
     // Episode routes contain a provider slug rather than the anime title, so
     // keep the page title for display and use Miruro's numeric id separately.
-    const title =
+    let title =
       (placeholder || isGenericTitle(cleanedTitle, domain)) && pathTitle ? pathTitle : cleanedTitle;
     if (!title || title.length < 2) return null;
+    const urlSeason = manga ? null : seasonFromUrl();
+    if (urlSeason && !seasonMarker(title)) title += ` Season ${urlSeason}`;
     if (manga) {
       // `episode` holds the chapter for manga — see isManga above.
       const episode =
@@ -666,7 +692,13 @@
     };
     root.querySelector(".watch").onclick = async () => {
       candidate.title = input.value.trim() || candidate.title;
-      await saveAnime(candidate, "watching");
+      const saved = await saveAnime(candidate, "watching");
+      // Added while already on the last episode: there's nothing left to watch.
+      if (reachedEnd(candidate.episode, saved.totalEpisodes)) {
+        await patchEntry(saved.id, { status: "completed" });
+        showFinishedToast(saved.id, candidate.episode, manga);
+        return;
+      }
       finish(t.savedActive);
     };
     root.querySelector(".plan").onclick = async () => {
@@ -837,6 +869,36 @@
     });
   }
 
+  // ---------- completion ----------
+  // Below total + 1 so a chapter 200.5 counts, but an episode past the end
+  // doesn't: that usually means the site numbers across seasons (episode 25 is
+  // the first of season 2), not that this entry just finished.
+  const reachedEnd = (episode, total) =>
+    episode != null && !!total && episode >= total && episode < total + 1;
+
+  // Re-reads the list, so it's safe to call long after the entry was loaded.
+  async function patchEntry(key, patch) {
+    const list = await getList();
+    const entry = list[key];
+    if (!entry || entry.deleted) return false;
+    Object.assign(entry, patch, { updatedAt: Date.now() });
+    await chrome.storage.local.set({ [KEY]: list });
+    return true;
+  }
+
+  // The total can be wrong (split cours, bad AniList match), so let the user put
+  // it straight back. notFinishedEp remembers that answer, otherwise reopening
+  // this same episode would complete the title all over again.
+  function showFinishedToast(key, episode, manga) {
+    showToast(`Final ${manga ? "chapter" : "episode"} <b>${episode}</b> — moved to <b>Completed</b>`, {
+      label: "Not finished?",
+      onClick: async () => {
+        const undone = await patchEntry(key, { status: "watching", notFinishedEp: episode });
+        if (undone) showToast(`Kept in <b>${manga ? "Reading" : "Watching"}</b>`);
+      },
+    });
+  }
+
   // ---------- driver ----------
   async function detect() {
     const type = looksLikeReadPage() ? "manga" : looksLikeWatchPage() ? "anime" : null;
@@ -871,18 +933,22 @@
 
     // Resolve a canonical AniList identity so the same anime is deduped across
     // sites and gets a reliable poster. Trust the id on Miruro (it's in the
-    // URL); elsewhere search by title and require it to actually match.
+    // URL) or one already stored on the entry; otherwise search by title and
+    // require it to actually match. The stored id matters for completion: a
+    // site's title can fail that match, which would leave the total unknown.
+    const miruroId = isMiruro(candidate.domain) && candidate.sourceId;
+    const storedId = list[findExistingKey(list, candidate)]?.anilistId;
     const resolved = await resolveAnime(
-      isMiruro(candidate.domain) && candidate.sourceId
+      miruroId
         ? { id: candidate.sourceId }
+        : storedId
+        ? { id: storedId, mediaType: type }
         : { title: candidate.title, mediaType: type }
     );
     // A slow lookup could resolve after the user moved on; re-verify context.
     if (versionAtStart !== navigationVersion || location.href !== urlAtStart) return;
     if (resolved && resolved.id) {
-      const trusted =
-        (isMiruro(candidate.domain) && candidate.sourceId) ||
-        titleMatchesResolved(candidate.title, resolved);
+      const trusted = miruroId || storedId || titleMatchesResolved(candidate.title, resolved);
       if (trusted) {
         candidate.anilistId = String(resolved.id);
         if (resolved.cover) candidate.cover = resolved.cover;
@@ -894,11 +960,32 @@
           // absolute-episode correction only applies to anime.
           markAbsolute(candidate, resolved.episodes);
         }
+        // The site shows the same name as an entry we hold, but AniList says
+        // it's a different show (usually the next season): use AniList's name
+        // so the two can be told apart in the list.
+        const sameName = list[idFor(candidate.title, type)];
+        if (sameName && !sameName.deleted && !findExistingKey(list, candidate)) {
+          candidate.title = resolved.english || resolved.romaji || candidate.title;
+        }
       }
     }
 
     const existingKey = findExistingKey(list, candidate);
     const existing = existingKey ? list[existingKey] : null;
+
+    // The lookup can fail, so also check against the total we already know —
+    // otherwise an absolute number (1088 of 24) would count as finishing it.
+    if (!manga) markAbsolute(candidate, candidate.totalEpisodes ?? existing?.totalEpisodes);
+
+    // Still on the episode that completed this title (a reload, or the SPA
+    // updating its title): don't ask to add it again.
+    if (
+      existing?.status === "completed" &&
+      candidate.episode != null &&
+      candidate.episode === existing.currentEpisode
+    ) {
+      return;
+    }
 
     // Already in "Watching" / "Reading" → advance the episode or chapter
     // silently, no modal.
@@ -927,31 +1014,29 @@
           existing.cover = candidate.cover;
         if (candidate.totalEpisodes) existing.totalEpisodes = candidate.totalEpisodes;
         // Reaching the final episode/chapter finishes the title.
-        const finished = existing.totalEpisodes && existing.currentEpisode >= existing.totalEpisodes;
+        const finished = reachedEnd(existing.currentEpisode, existing.totalEpisodes);
         if (finished) existing.status = "completed";
+        delete existing.notFinishedEp; // a new episode, so that answer no longer applies
         existing.updatedAt = Date.now();
         await chrome.storage.local.set({ [KEY]: list });
-        if (finished) {
-          // The total can be wrong (split cours, bad AniList match), so let the
-          // user put it straight back in Watching/Reading.
-          showToast(
-            `Final ${manga ? "chapter" : "episode"} <b>${candidate.episode}</b> — moved to <b>Completed</b>`,
-            {
-              label: "Not finished?",
-              onClick: async () => {
-                const fresh = await getList();
-                const entry = fresh[existingKey];
-                if (!entry || entry.deleted) return;
-                entry.status = "watching";
-                entry.updatedAt = Date.now();
-                await chrome.storage.local.set({ [KEY]: fresh });
-                showToast(`Kept in <b>${manga ? "Reading" : "Watching"}</b>`);
-              },
-            }
-          );
-        } else {
-          showToast(`Updated to ${manga ? "Chapter" : "Episode"} <b>${candidate.episode}</b>`);
+        if (finished) showFinishedToast(existingKey, candidate.episode, manga);
+        else showToast(`Updated to ${manga ? "Chapter" : "Episode"} <b>${candidate.episode}</b>`);
+      } else if (candidate.episode !== null) {
+        // Same episode as last time, but the entry may have got stuck on it: it
+        // reached the last episode before its total was known, or was added or
+        // stepped there some other way. Catch up now.
+        const totalChanged =
+          !!candidate.totalEpisodes && candidate.totalEpisodes !== existing.totalEpisodes;
+        if (totalChanged) existing.totalEpisodes = candidate.totalEpisodes;
+        const finished =
+          reachedEnd(candidate.episode, existing.totalEpisodes) &&
+          existing.notFinishedEp !== candidate.episode;
+        if (finished) existing.status = "completed";
+        if (finished || totalChanged) {
+          existing.updatedAt = Date.now();
+          await chrome.storage.local.set({ [KEY]: list });
         }
+        if (finished) showFinishedToast(existingKey, candidate.episode, manga);
       }
       return; // don't interrupt the binge
     }

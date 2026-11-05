@@ -257,8 +257,32 @@
       const cur = item.currentEpisode ?? 0;
       item.currentEpisode = Math.max(0, act === "inc" ? Math.floor(cur) + 1 : Math.ceil(cur) - 1);
       item.updatedAt = Date.now();
+      // Stepping onto the final episode/chapter finishes the title.
+      const finished =
+        act === "inc" && item.status === "watching" && item.totalEpisodes && item.currentEpisode >= item.totalEpisodes;
+      if (finished) item.status = "completed";
       save();
       render();
+      if (finished) {
+        const id = card.dataset.id;
+        toast(`“${item.title}” moved to Completed`, {
+          actions: [
+            {
+              label: "Not finished?",
+              onClick: () => {
+                const entry = state[id];
+                if (!entry || isTombstone(entry)) return;
+                entry.status = "watching";
+                // Stops the extension completing it again when this episode is reopened.
+                entry.notFinishedEp = entry.currentEpisode;
+                entry.updatedAt = Date.now();
+                save();
+                render();
+              },
+            },
+          ],
+        });
+      }
     } else if (act === "rate") {
       const val = parseInt(el.dataset.val, 10);
       item.rating = item.rating === val ? 0 : val;
